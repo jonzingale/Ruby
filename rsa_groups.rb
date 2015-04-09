@@ -5,7 +5,7 @@
 	# Todo: better auto rescaling; change n on keystroke.
 	def setup
 		background(0)
-		zahlen = 119# <-- change integer here.
+		zahlen = 121# <-- change integer here.
 		@table = color_it(rsa_group(zahlen))
 		square = [1000] * 2 ; size(*square)
 		frame_rate 1 ; colorMode(HSB,360,100,100)
