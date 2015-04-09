@@ -23,6 +23,7 @@
 		x,y = %w(sin cos).map{|s| Math.send(s, 2*PI*@i/360) }
 		# fill(@i%360,100,100) ; ellipse(r*x+@w,r*y+@h,10,10)
 
-		fill(@i%360,100,100-(@i/(3.6*5))) ; ellipse((r-@i/5.0)*x+@w,(r-@i/5.0)*y+@h,30,30)
+		fill(@i%360,100,100-(@i/(3.6*5)))
+		ellipse((r-@i/5.0)*x+@w,(r-@i/5.0)*y+@h,30,30)
 		# set((r-@i/2.0)*x+@w,(r-@i/2.0)*y+@h,color(@i%360,100,100))
 	end
