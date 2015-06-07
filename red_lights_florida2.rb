@@ -5,6 +5,8 @@ require 'byebug'
 require 'csv'
 require 'pry'
 # http://www.photoenforced.com/#{state}.html
+# geocoords?
+
   DESKTOP_PATH = File.expand_path('../../..', __FILE__).freeze
   FIRST_ACTION = 'eCriteriaSearchCriteriaActionResult.asp?count=2436&LR=1&UR=25s'.freeze
   CSV_HEADERS = %w(state city cross_street fine camera_type notes map).freeze
