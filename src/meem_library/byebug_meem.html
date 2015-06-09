@@ -1,0 +1,24 @@
+(byebug) page.at('.//a[@title="Logout"]')
+#<Nokogiri::XML::Element:0x3ff6f0885adc name="a" attributes=[#<Nokogiri::XML::Attr:0x3ff6f08858d4 name="class" value="globalAnchor">, #<Nokogiri::XML::Attr:0x3ff6f0885834 name="title" value="Logout">, #<Nokogiri::XML::Attr:0x3ff6f08857e4 name="href" value="javascript:loginIntoOrOutOfAccount('http%3A%2F%2Fstjohnsnm.ipac.dynixasp.com%2Fipac20%2Fipac.jsp%3Fsession%3D1433280RTD898.95%26profile%3Dmeem%26logout%3Dtrue%26date%3D1433280217307','')">] children=[#<Nokogiri::XML::Element:0x3ff6f0895d10 name="img" attributes=[#<Nokogiri::XML::Attr:0x3ff6f0895bf8 name="src" value="/hipres/images/logout_large.gif">, #<Nokogiri::XML::Attr:0x3ff6f0895be4 name="width" value="35">, #<Nokogiri::XML::Attr:0x3ff6f0895bd0 name="height" value="30">, #<Nokogiri::XML::Attr:0x3ff6f0895b6c name="border" value="0">, #<Nokogiri::XML::Attr:0x3ff6f0895b1c name="alt" value="Click here to logout">, #<Nokogiri::XML::Attr:0x3ff6f0895af4 name="align" value="middle">]>, #<Nokogiri::XML::Text:0x3ff6f0898e34 "Logout">]>
+(byebug) page.at('.//a[@title="Logout"]')['href']
+"javascript:loginIntoOrOutOfAccount('http%3A%2F%2Fstjohnsnm.ipac.dynixasp.com%2Fipac20%2Fipac.jsp%3Fsession%3D1433280RTD898.95%26profile%3Dmeem%26logout%3Dtrue%26date%3D1433280217307','')"
+(byebug) puts page.at('.//a[@title="Logout"]')
+<a class="globalAnchor" title="Logout" href="javascript:loginIntoOrOutOfAccount('http%3A%2F%2Fstjohnsnm.ipac.dynixasp.com%2Fipac20%2Fipac.jsp%3Fsession%3D1433280RTD898.95%26profile%3Dmeem%26logout%3Dtrue%26date%3D1433280217307','')"><img src="/hipres/images/logout_large.gif" width="35" height="30" border="0" alt="Click here to logout" align="middle">Logout</a>
+nil
+(byebug) agent.get('http%3A%2F%2Fstjohnsnm.ipac.dynixasp.com%2Fipac20%2Fipac.jsp%3Fsession%3D1433280RTD898.95%26profile%3Dmeem%26logout%3Dtrue%26date%3D1433280217307')
+RuntimeError Exception: need absolute URL
+nil
+(byebug) URI.decode('http%3A%2F%2Fstjohnsnm.ipac.dynixasp.com%2Fipac20%2Fipac.jsp%3Fsession%3D1433280RTD898.95%26profile%3Dmeem%26logout%3Dtrue%26date%3D1433280217307')
+"http://stjohnsnm.ipac.dynixasp.com/ipac20/ipac.jsp?session=1433280RTD898.95&profile=meem&logout=true&date=1433280217307"
+(byebug) agent.get(URI.decode'http%3A%2F%2Fstjohnsnm.ipac.dynixasp.com%2Fipac20%2Fipac.jsp%3Fsession%3D1433280RTD898.95%26profile%3Dmeem%26logout%3Dtrue%26date%3D1433280217307')
+#<Mechanize::Page
+
+
+
+page.at('.//a[@title="Logout"]')['href']
+agent.get(URI.decode(logout_url))
+
+
+
+
+

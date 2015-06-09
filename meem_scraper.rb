@@ -5,7 +5,7 @@ require 'mechanize'
 require 'nokogiri'
 require 'open-uri'
 require 'date'
-
+require 'net/smtp'
 # TODO: 
 # 	Hold Requests
 # 	Caching dates
@@ -26,35 +26,107 @@ BOOK_HEADERS = %w(book author library_of_congress checked_out due renewed).freez
 TITLE_SEL = './/a[@class="mediumBoldAnchor"]'.freeze
 
 SUMMARY_SEL = './/table[@class="tableBackground"]//a[@class="normalBlackFont2"]'.freeze
-SUMMARY_HEADERS = ["Checked Out", "Overdue", "Lost", 
-									 "Requested items ready for pick up", 
-									 "Requested items not yet available", 
-									 "Number of Blocks", "Current Balance"].freeze
+# SUMMARY_HEADERS = ["Checked Out", "Overdue", "Lost", 
+# 									 "Requested items ready for pick up", 
+# 									 "Requested items not yet available", 
+# 									 "Number of Blocks", "Current Balance"].freeze
 
+DATA_HEADERS = %w(CARD_EXPIRATION NEXT_DUE).freeze
 SUM_HEADERS = ["Checked Out", "Overdue", "Lost", 
 							 "Ready for pick up", "Not yet available", 
 							 "Number of Blocks", "Current Balance"].freeze
 
-SUM_SYMBOLS= [:checked_out,:overdue,:lost,:pick_up,
-							:not_available,:blocks,:balance].freeze	
+DATA_KEYS = [:expiration,:next_due]
+SUM_KEYS = [:checked_out,:overdue,:lost,:pick_up,:not_available,:blocks,:balance].freeze	
 
 DESKTOP_PATH = File.expand_path('./../src/meem_library', __FILE__).freeze
+def str_to_date(date_str) ; Date.strptime(date_str, '%m/%d/%Y') ; end
 
-## CSV MAKING
+## CSVs
 def hash_to_csv(file_name, key_values, headers)
 	file = "#{DESKTOP_PATH}/#{file_name}"
   CSV.open(file, 'w'){|csv| csv << headers.map(&:upcase) } # comment out to queue
-
-	CSV.open(file, 'a') do |csv|
-  	key_values.each{|book| csv << book.values unless book.empty?}
-  end
+	CSV.open(file, 'a') { |csv| csv << key_values.map{|book| book.values.first} }
+	read_csv(file_name,key_values.map(&:keys).flatten)
 end
 
+def read_csv(file_name, keys)# :: csv_file -> [Hash]
+	csv = CSV.read("#{DESKTOP_PATH}/#{file_name}")
+	csv.last.zip(keys).inject([]){|ary,kv| ary << {kv[1] => kv[0]} }
+end # 1/1/1900, 6/9/2015
 ### ##
 
+
 def process
-	## for scraping locally use Nokogiri.
-	page =	Nokogiri::HTML(open("#{DESKTOP_PATH}/items_out.html"))
+
+### emailing
+
+
+
+# message = <<MESSAGE_END
+# From: Private Person <jonzingale@gmail.com>
+# To: A Test User <jonzingale@gmail.com>
+# Subject: SMTP e-mail test
+
+# This is a test e-mail message.
+# MESSAGE_END
+
+# Net::SMTP.start('localhost') do |smtp|
+#   smtp.send_message message, 'jonzingale@gmail.com>', 
+#                              'jonzingale@gmail.com>'
+# end
+
+# byebug
+###
+
+
+
+
+
+	# look up data
+	# data_cache[:expiration] = '1/1/1900'
+	# data_cache[:next_due] = '6/9/2015'
+	data_cache = read_csv('data_cache.csv', DATA_KEYS)
+
+# # card expiration and renewal conditions
+# ## read csv
+# ## (plenty of time)
+# 	cond_1: if exp_date > NOW+30
+# 		do nothing
+# ## (about to expire)
+# 	cond_2: if exp_date = or < NOW+30
+# 		check date on account, replace date in data_cache if necessary
+# 		email me "Renew your SJC library card by DATE"
+# ## (expired:)
+# 	cond_3: if exp_date = or < NOW, send string
+# 		check date
+# 		email me "Your SJC library card has expired."
+# 		end program?
+
+	# case 2
+	next_expires = str_to_date(data_cache[0][:expiration])
+	if (expires_cond = next_expires <= NOW + 30)
+		page =	Nokogiri::HTML(open("#{DESKTOP_PATH}/info.html"))
+
+		expires_td = page.search('.//a[@class="normalBlackFont2"]/parent::td').detect{|a|a.text =~/expires/i}
+		next_expires = expires_td.at('.//following-sibling::td').text
+
+		data_cache[0][:expiration] = next_expires
+		data_cache = hash_to_csv('data_cache.csv', data_cache, DATA_HEADERS)
+	end
+
+
+byebug
+
+
+	### renew conditions
+	next_due = str_to_date(data_cache[0][:next_due])
+	if (renew_cond = NOW > next_due - 5)
+		# so we renewed, now save renewal_info to a file.
+	
+		## for scraping locally use Nokogiri.
+		page =	Nokogiri::HTML(open("#{DESKTOP_PATH}/items_out.html"))
+		
 		book_data = page.search(BOOK_SEL).inject([]) do |data, book| ; row = {}
 			row[:title] = /(.+)\//.match(book.at(TITLE_SEL).text)[1]
 			row[:author] = /by (.+), \d+/.match(book.search('.//a')[1].text)[1]
@@ -63,11 +135,24 @@ def process
 			row[:due] = book.search('.//a')[4].text
 			row[:renewed] = book.search('.//a')[5].text
 			data << row
-		end ; hash_to_csv('items_out.csv',book_data, BOOK_HEADERS)
+		end
+	
+		# stores book_data
+		book_data = hash_to_csv('items_out.csv',book_data, BOOK_HEADERS)
+	
+		# stores new data_cache
+		next_due = book_data.min_by{|data| str_to_date(data[:due])}[:due]
+		data_cache[0][:next_due] = next_due
+		data_cache = hash_to_csv('data_cache.csv', data_cache, headers)
+	end
+	###
 
-		# renew conditions
-		next_due = book_data.map{|data| Date.strptime(data[:due], '%m/%d/%Y')}.min
-		renew_cond = NOW > next_due - 5
+
+
+byebug
+
+
+
 
 
 byebug
@@ -87,7 +172,7 @@ byebug
 	
 	# scrapes account summary and returns csv
 	data_as = page.search(SUMMARY_SEL).select{|data| /:/.match(data.inner_text)}
-	summary_data = {} ; SUM_SYMBOLS.zip(data_as).each do |sym, data|
+	summary_data = {} ; SUM_KEYS.zip(data_as).each do |sym, data|
 		summary_data[sym] =  /: (.+)/.match(data.text)[1]
 	end ; hash_to_csv('meem_summary.csv', [summary_data], SUM_HEADERS)
 
