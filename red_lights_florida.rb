@@ -5,6 +5,7 @@ require 'byebug'
 require 'csv'
 require 'pry'
 # require 'mysql2'
+# http://www.photoenforced.com/#{state}.html
   DESKTOP_PATH = File.expand_path('../../..', __FILE__).freeze
 
   RELICAM_ROWS = './/table[@class="table3"]/tr'.freeze
