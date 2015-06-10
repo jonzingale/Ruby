@@ -44,7 +44,23 @@ SUM_KEYS = [:checked_out,:overdue,:lost,:pick_up,
 DESKTOP_PATH = File.expand_path('./../src/meem_library', __FILE__).freeze
 def str_to_date(date_str) ; Date.strptime(date_str, '%m/%d/%Y') ; end
 
-def id(object) ; object ; end # :: Object -> Object
+## Email Builder
+# def email_builder('message')
+# message = <<MESSAGE_END
+# From: meem_scraper_notification <less.secure.username@gmail.com>
+# To: jon zingale <jonzingale@gmail.com>
+# Subject: Library Update
+
+# This is a test e-mail message.
+# MESSAGE_END
+
+# Net::SMTP.start('localhost') do |smtp|
+#   smtp.send_message message, 'jonzingale@gmail.com>', # from
+#                              'jonzingale@gmail.com>'	# to
+# end
+# end
+##
+
 ## CSVs
 def hash_to_csv(file_name, key_values, headers)
 	file = "#{DESKTOP_PATH}/#{file_name}" # :: String x [Hash] x [String] -> [Hash]
@@ -65,26 +81,15 @@ puts "\n\nAre inverses? #{data_cache==next_cache}\n\n"
 
 
 def process
-
-### emailing
-
-
-
-# message = <<MESSAGE_END
-# From: Private Person <jonzingale@gmail.com>
-# To: A Test User <jonzingale@gmail.com>
-# Subject: SMTP e-mail test
-
-# This is a test e-mail message.
-# MESSAGE_END
-
-# Net::SMTP.start('localhost') do |smtp|
-#   smtp.send_message message, 'jonzingale@gmail.com>', 
-#                              'jonzingale@gmail.com>'
-# end
-
-# byebug
 ###
+
+
+# mail = Mail.new("To: jonzingale@gmail.com\r\nSubject: Hello\r\n\r\nHi there!")
+# mail.body.to_s #=> 'Hi there!'
+# mail.subject   #=> 'Hello'
+# mail.to        #=> 'mikel@test.lindsaar.net'
+
+byebug
 
 ##### HOW TO EXPIRE
 # ## read csv
@@ -107,16 +112,15 @@ def process
 	# look up data
 
 	data_cache = read_csv('data_cache.csv', DATA_KEYS)
-
-	next_cache = hash_to_csv('data_cache.csv', data_cache, DATA_HEADERS)
-byebug
-
-byebug
 # # card expiration and renewal conditions
 	# case 2
 	next_expires = str_to_date(data_cache[0][:expiration])
 	if (expires_cond = next_expires <= NOW + 30)
 		page =	Nokogiri::HTML(open("#{DESKTOP_PATH}/info.html"))
+
+		# place who agent.get logic in here Wednesday.
+
+
 
 		expires_td = page.search(EXPIRATION_COL_SEL).detect{|a|a.text =~/expires/i}
 		next_expires = expires_td.at('.//following-sibling::td').text
