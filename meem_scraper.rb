@@ -21,6 +21,7 @@ SESSION_URL =(BASE_URL+"&session=%s&menu=account").freeze
 SESSION_SEL = './/input[@name="session"]'.freeze
 ACCOUNT_OPTIONS = %w(itemsout holds blocks info).freeze
 
+EXPIRATION_COL_SEL = './/a[@class="normalBlackFont2"]/parent::td'.freeze
 BOOK_SEL = './/table[@class="tableBackgroundHighlight"]//table[@class="tableBackground"]/parent::td/parent::tr'.freeze
 BOOK_HEADERS = %w(book author library_of_congress checked_out due renewed).freeze
 TITLE_SEL = './/a[@class="mediumBoldAnchor"]'.freeze
@@ -37,23 +38,29 @@ SUM_HEADERS = ["Checked Out", "Overdue", "Lost",
 							 "Number of Blocks", "Current Balance"].freeze
 
 DATA_KEYS = [:expiration,:next_due]
-SUM_KEYS = [:checked_out,:overdue,:lost,:pick_up,:not_available,:blocks,:balance].freeze	
+SUM_KEYS = [:checked_out,:overdue,:lost,:pick_up,
+						:not_available,:blocks,:balance].freeze	
 
 DESKTOP_PATH = File.expand_path('./../src/meem_library', __FILE__).freeze
 def str_to_date(date_str) ; Date.strptime(date_str, '%m/%d/%Y') ; end
 
+def id(object) ; object ; end # :: Object -> Object
 ## CSVs
 def hash_to_csv(file_name, key_values, headers)
-	file = "#{DESKTOP_PATH}/#{file_name}"
+	file = "#{DESKTOP_PATH}/#{file_name}" # :: String x [Hash] x [String] -> [Hash]
   CSV.open(file, 'w'){|csv| csv << headers.map(&:upcase) } # comment out to queue
 	CSV.open(file, 'a') { |csv| csv << key_values.map{|book| book.values.first} }
 	read_csv(file_name,key_values.map(&:keys).flatten)
 end
 
-def read_csv(file_name, keys)# :: csv_file -> [Hash]
+def read_csv(file_name, keys)# :: String x [Symbol] -> [Hash]
 	csv = CSV.read("#{DESKTOP_PATH}/#{file_name}")
 	csv.last.zip(keys).inject([]){|ary,kv| ary << {kv[1] => kv[0]} }
 end # 1/1/1900, 6/9/2015
+
+data_cache = read_csv('data_cache.csv', DATA_KEYS)
+next_cache = hash_to_csv('data_cache.csv', data_cache, DATA_HEADERS)
+puts "\n\nAre inverses? #{data_cache==next_cache}\n\n"
 ### ##
 
 
@@ -79,16 +86,7 @@ def process
 # byebug
 ###
 
-
-
-
-
-	# look up data
-	# data_cache[:expiration] = '1/1/1900'
-	# data_cache[:next_due] = '6/9/2015'
-	data_cache = read_csv('data_cache.csv', DATA_KEYS)
-
-# # card expiration and renewal conditions
+##### HOW TO EXPIRE
 # ## read csv
 # ## (plenty of time)
 # 	cond_1: if exp_date > NOW+30
@@ -103,12 +101,24 @@ def process
 # 		email me "Your SJC library card has expired."
 # 		end program?
 
+# data_cache[:expiration] = '1/1/1900'
+# data_cache[:next_due] = '6/9/2015'
+
+	# look up data
+
+	data_cache = read_csv('data_cache.csv', DATA_KEYS)
+
+	next_cache = hash_to_csv('data_cache.csv', data_cache, DATA_HEADERS)
+byebug
+
+byebug
+# # card expiration and renewal conditions
 	# case 2
 	next_expires = str_to_date(data_cache[0][:expiration])
 	if (expires_cond = next_expires <= NOW + 30)
 		page =	Nokogiri::HTML(open("#{DESKTOP_PATH}/info.html"))
 
-		expires_td = page.search('.//a[@class="normalBlackFont2"]/parent::td').detect{|a|a.text =~/expires/i}
+		expires_td = page.search(EXPIRATION_COL_SEL).detect{|a|a.text =~/expires/i}
 		next_expires = expires_td.at('.//following-sibling::td').text
 
 		data_cache[0][:expiration] = next_expires
