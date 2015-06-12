@@ -13,7 +13,7 @@
 		NOW = Date.today.freeze
 		DATA_KEYS = [:expiration,:next_due]
 		DATA_HEADERS = %w(expiration next_due).freeze
-		DESKTOP_PATH = File.expand_path('./../src/categoria', __FILE__).freeze
+		DESKTOP_PATH = File.expand_path('./.././../src/categoria', __FILE__).freeze
 		def str_to_date(date_str) ; Date.strptime(date_str, '%m/%d/%Y') ; end
 		
 		## CSVs
