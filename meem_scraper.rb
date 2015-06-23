@@ -37,23 +37,15 @@ NOW = Date.today.freeze
 BASE_URL = 'http://stjohnsnm.ipac.dynixasp.com/ipac20/ipac.jsp?profile=meem'.freeze
 SESSION_URL =(BASE_URL+"&session=%s&menu=account").freeze
 SESSION_SEL = './/input[@name="session"]'.freeze
-ACCOUNT_OPTIONS = %w(itemsout holds blocks info).freeze
 
 EXPIRATION_COL_SEL = './/a[@class="normalBlackFont2"]/parent::td'.freeze
 BOOK_SEL = './/table[@class="tableBackgroundHighlight"]//table[@class="tableBackground"]/parent::td/parent::tr'.freeze
 BOOK_HEADERS = %w(renew_key book author library_of_congress checked_out due renewed).freeze
 TITLE_SEL = './/a[@class="mediumBoldAnchor"]'.freeze
-
-SUMMARY_SEL = './/table[@class="tableBackground"]//a[@class="normalBlackFont2"]'.freeze
-
 DATA_HEADERS = %w(CARD_EXPIRATION NEXT_DUE).freeze
-SUM_HEADERS = ["Checked Out", "Overdue", "Lost", 
-							 "Ready for pick up", "Not yet available", 
-							 "Number of Blocks", "Current Balance"].freeze
 
 DATA_KEYS = [:expiration, :next_due]
-SUM_KEYS = 	[:checked_out, :overdue, :lost, :pick_up,
-						 :not_available, :blocks, :balance].freeze	
+@message = ''
 
 # a source directory off of crude. --untracked.
 FILES_PATH = File.expand_path('./../../src/meem_library', __FILE__).freeze
@@ -71,25 +63,33 @@ end
 
 def email_builder
 	file = File.open(FILES_PATH+'/library_notification_template.txt')
-	message = '' ; file.each{|line| message << line}
+	file.each { |line| @message << line }
+
+
+byebug
+	# we want to insert in place of 'This is a test e-mail message.'
+	# what do I want here?
+	# data_csv?
+	# we renewed, ie. renew info changed.
+	# we stayed expired
+	# books out.
 
 	Net::SMTP.start('localhost') do |smtp| # from, to
 	  smtp.send_message message, INITS_HASH[:email], INITS_HASH[:email]
 	end
 end
 
-# csv handling ## DOESN'T SEEM TO BE UPDATING???
+# csv handling
 def hash_to_csv(file_name, key_values, headers)
 	file = "#{FILES_PATH}/#{file_name}" # :: String x [Hash] x [String] -> [Hash]
   CSV.open(file, 'w'){|csv| csv << headers.map(&:upcase) }
 	CSV.open(file, 'a'){|csv| key_values.map(&:values).each{|line| csv << line }}
-	# read_csv(file_name,key_values.map(&:keys).flatten)
 end
 
 def read_csv(file_name, keys)# :: String x [Symbol] -> [Hash]
 	csv = CSV.read("#{FILES_PATH}/#{file_name}")
 	keys.zip(csv.last).inject({}){|h,kv| h.merge({kv[0] => kv[1]}) }
-end # 1/1/1900, 6/9/2015
+end
 # #
 
 def expiration_path(next_expires,page,data_cache)
@@ -190,10 +190,9 @@ def process
 	email_builder
 end
 
+
+email_builder
+
 (puts "I should run") if should_i_run?
 process if should_i_run?
 # byebug ; '5'
-
-
-
-
