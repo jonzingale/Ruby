@@ -6,46 +6,24 @@ require 'nokogiri'
 require 'open-uri'
 require 'date'
 require 'net/smtp'
+require 'active_support'
 # TODO: 
-# 	Hold Requests
-# 	Caching dates
-#   Emailing
-#   Bibliography
-
-##### HOW TO EXPIRE
-# ## read csv
-# ## (plenty of time)
-# 	cond_1: if exp_date > NOW+30
-# 		do nothing
-# ## (about to expire)
-# 	cond_2: if exp_date = or < NOW+30
-# 		check date on account, replace date in data_cache if necessary
-# 		email me "Renew your SJC library card by DATE"
-# ## (expired:)
-# 	cond_3: if exp_date = or < NOW, send string
-# 		check date
-# 		email me "Your SJC library card has expired."
-# 		end program?
-
-# the idea here is to check a library account for outstanding books
-# and to renew if close. Email if failure. ran as cron task.
-
-# SINCE THIS WILL BE ON GITHUB, BE CAREFUL WITH PASSWORDS AND SHIT!!!!
-# FIGURE OUT HOW TO GET AROUND THE SUDO CALL.
+#  Bibliography
 
 NOW = Date.today.freeze
 BASE_URL = 'http://stjohnsnm.ipac.dynixasp.com/ipac20/ipac.jsp?profile=meem'.freeze
 SESSION_URL =(BASE_URL+"&session=%s&menu=account").freeze
 SESSION_SEL = './/input[@name="session"]'.freeze
 
+BOOKINFO_INIT = "\nCurrently, the following items are out:".freeze
 EXPIRATION_COL_SEL = './/a[@class="normalBlackFont2"]/parent::td'.freeze
 BOOK_SEL = './/table[@class="tableBackgroundHighlight"]//table[@class="tableBackground"]/parent::td/parent::tr'.freeze
 BOOK_HEADERS = %w(renew_key book author library_of_congress checked_out due renewed).freeze
+DATA_HEADERS = %w(CARD_EXPIRATION NEXT_DUE ADDRESSEE1 ADDRESSEE2).freeze
+DATA_KEYS = [:expiration, :next_due, :addressee1, :addressee2]
+RENEW_TEXT = "\nYour books have %sbeen renewed".freeze
 TITLE_SEL = './/a[@class="mediumBoldAnchor"]'.freeze
-DATA_HEADERS = %w(CARD_EXPIRATION NEXT_DUE).freeze
-
-DATA_KEYS = [:expiration, :next_due]
-@message = ''
+BOOKDATA_SEL = %w(book author due renewed).freeze
 
 # a source directory off of crude. --untracked.
 FILES_PATH = File.expand_path('./../../src/meem_library', __FILE__).freeze
@@ -53,29 +31,32 @@ FILES_PATH = File.expand_path('./../../src/meem_library', __FILE__).freeze
 csv = CSV.read("#{FILES_PATH}/meem_inits.csv") ; keys = [:borrower_id, :email]
 INITS_HASH = keys.zip(csv.last).inject({}){|h,kv| h.merge({kv[0] => kv[1]}) }.freeze
 
-def str_to_date(date_str) ; Date.strptime(date_str, '%m/%d/%Y') ; end
+def str_to_date(date_str) ; Date.strptime(date_str[0], '%m/%d/%Y') ; end
 
 def should_i_run?
 	data_cache = read_csv('data_cache.csv', DATA_KEYS)
-	next_expires, next_due = DATA_KEYS.map{|k|str_to_date(data_cache[k])}
+	next_expires, next_due = DATA_KEYS[0..1].map{|k|str_to_date(data_cache[k])}
 	next_expires <= NOW + 30 || NOW > next_due - 5
 end
 
 def email_builder
 	file = File.open(FILES_PATH+'/library_notification_template.txt')
-	file.each { |line| @message << line }
+	message = '' ; file.each { |line| message << line }
 
+	cache_data = read_csv('data_cache.csv', DATA_KEYS).values.flatten
+	date_info = "\nexpiration: %s    next_due: %s\n" % (cache_data[0..1])
 
-byebug
-	# we want to insert in place of 'This is a test e-mail message.'
-	# what do I want here?
-	# data_csv?
-	# we renewed, ie. renew info changed.
-	# we stayed expired
-	# books out.
+	books = read_csv('items_out.csv', BOOK_HEADERS)
+	book_data = BOOKDATA_SEL.map{|k|books[k]}.transpose.map(&:flatten)
+ 	book_info = book_data.inject(''){|s,b| s += ("\n'%s' '%s' %s %s"  % b) }
 
-	Net::SMTP.start('localhost') do |smtp| # from, to
-	  smtp.send_message message, INITS_HASH[:email], INITS_HASH[:email]
+	content = "%s%s%s" % [@renew_msg, @exp_msg, date_info]
+	books_out = BOOKINFO_INIT + book_info + "\n\n"
+
+	message = message % (content + books_out)
+
+	cache_data[2..3].each do |address| 
+		%x(echo '#{message}' | mail -s 'meem_notifier' #{address})
 	end
 end
 
@@ -88,22 +69,22 @@ end
 
 def read_csv(file_name, keys)# :: String x [Symbol] -> [Hash]
 	csv = CSV.read("#{FILES_PATH}/#{file_name}")
-	keys.zip(csv.last).inject({}){|h,kv| h.merge({kv[0] => kv[1]}) }
+  keys.zip(csv.drop(1).transpose).inject({}){|h,kv| h.merge({kv[0] => kv[1]}) }
 end
 # #
 
 def expiration_path(next_expires,page,data_cache)
 	if (expires_cond = next_expires <= NOW + 30)
-		# TODO: set some kind of email flag to true.
-		# create an appropriate response message
-
 		# info_page =	Nokogiri::HTML(open("#{FILES_PATH}/info.html"))
-		ts = /ts=(\d+)/.match(page.at('.//a[@title="Profile"]')['href'])[1]
-		form = page.forms.first ; form['submenu'] = 'info' ; form['ts'] = ts
+		session = /ts=(\d+)/.match(page.at('.//a[@title="Profile"]')['href'])[1]
+		form = page.forms.first ; form['submenu'] = 'info' ; form['ts'] = session
 		info_page = form.submit
 
 		expires_td = info_page.search(EXPIRATION_COL_SEL).detect{|a|a.text =~/expires/i}
 		next_expires = expires_td.at('.//following-sibling::td').text
+
+		expire_msg_cond = next_expires == data_cache[:expiration]
+		@exp_msg = expire_msg_cond ? "\nyour card is sooooo expired" : ''
 
 		data_cache[:expiration] = next_expires
 		data_cache = hash_to_csv('data_cache.csv', [data_cache], DATA_HEADERS)
@@ -143,6 +124,10 @@ def renewal_path(next_due,page,data_cache)
 		# stores new data_cache
 		next_due = book_data.min_by{|data| str_to_date(data[:due])}[:due]
 		data_cache[:next_due] = next_due
+
+		renew_msg_cond = next_due == data_cache[:next_due]
+		@renew_msg = RENEW_TEXT % (renew_msg_cond ? 'not' : '')
+
 		data_cache = hash_to_csv('data_cache.csv',[data_cache], DATA_KEYS)
 
 		# RENEWAL POST
@@ -179,7 +164,7 @@ def process
 
 	# renew conditions
 	next_due = str_to_date(data_cache[:next_due])
-	renewal_path(next_due,page,data_cache)	
+	renewal_path(next_due,page,data_cache)
 	# #
 
 	# log out
@@ -187,12 +172,9 @@ def process
 	page = form.submit
 	# #
 
+	# email
 	email_builder
 end
 
-
-email_builder
-
 (puts "I should run") if should_i_run?
 process if should_i_run?
-# byebug ; '5'
