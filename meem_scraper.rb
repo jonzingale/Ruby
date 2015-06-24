@@ -50,7 +50,7 @@ def email_builder
 	book_data = BOOKDATA_SEL.map{|k|books[k]}.transpose.map(&:flatten)
  	book_info = book_data.inject(''){|s,b| s += ("\n'%s' '%s' %s %s"  % b) }
 
-	content = "%s%s%s" % [@renew_msg, @exp_msg, date_info]
+	content = "%s%s%s" % [RENEW_TEXT % @renew_msg, @exp_msg, date_info]
 	books_out = BOOKINFO_INIT + book_info + "\n\n"
 
 	message = message % (content + books_out)
@@ -122,7 +122,8 @@ def renewal_path(next_due,page,data_cache)
 		next_due = book_data.min_by{|data| str_to_date(data[:due])}[:due]
 		data_cache[:next_due] = next_due
 
-		renew_msg_cond = next_due == data_cache[:next_due]
+		# renew_msg_cond == true => renew must have failed
+		renew_msg_cond = NOW > str_to_date(next_due) - 5
 		@renew_msg = RENEW_TEXT % (renew_msg_cond ? 'not' : '')
 
 		data_cache = hash_to_csv('data_cache.csv',[data_cache], DATA_KEYS)
