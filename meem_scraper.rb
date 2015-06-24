@@ -93,9 +93,6 @@ end
 
 def renewal_path(next_due,page,data_cache)
 	if (renew_cond = NOW > next_due - 5)
-		# TODO: set some kind of email flag to true.
-		# create an appropriate response message
-
 		# items_page =	Nokogiri::HTML(open("#{FILES_PATH}/items_out.html"))
 		ts = /ts=(\d+)/.match(page.at('.//a[@title="Checked Out"]')['href'])[1]
 		form = page.forms.first ; form['submenu'] = 'itemsout' ; form['ts'] = ts
