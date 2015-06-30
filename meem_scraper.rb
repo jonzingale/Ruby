@@ -10,6 +10,7 @@ require 'active_support'
 # TODO: 
 #  Bibliography
 
+DUE_WINDOW = 5.freeze
 NOW = Date.today.freeze
 BASE_URL = 'http://stjohnsnm.ipac.dynixasp.com/ipac20/ipac.jsp?profile=meem'.freeze
 SESSION_URL =(BASE_URL+"&session=%s&menu=account").freeze
@@ -19,8 +20,8 @@ BOOKINFO_INIT = "\nCurrently, the following items are out:".freeze
 EXPIRATION_COL_SEL = './/a[@class="normalBlackFont2"]/parent::td'.freeze
 BOOK_SEL = './/table[@class="tableBackgroundHighlight"]//table[@class="tableBackground"]/parent::td/parent::tr'.freeze
 BOOK_HEADERS = %w(renew_key book author library_of_congress checked_out due renewed).freeze
-DATA_HEADERS = %w(CARD_EXPIRATION NEXT_DUE ADDRESSEE1 ADDRESSEE2).freeze
-DATA_KEYS = [:expiration, :next_due, :addressee1, :addressee2]
+DATA_HEADERS = %w(CARD_EXPIRATION NEXT_DUE).freeze
+DATA_KEYS = [:expiration, :next_due]
 RENEW_TEXT = "\nYour books have %sbeen renewed".freeze
 TITLE_SEL = './/a[@class="mediumBoldAnchor"]'.freeze
 BOOKDATA_SEL = %w(book author due renewed).freeze
@@ -28,15 +29,12 @@ BOOKDATA_SEL = %w(book author due renewed).freeze
 # a source directory off of crude. --untracked.
 FILES_PATH = File.expand_path('./../../src/meem_library', __FILE__).freeze
 
-csv = CSV.read("#{FILES_PATH}/meem_inits.csv") ; keys = [:borrower_id, :email]
+csv = CSV.read("#{FILES_PATH}/meem_inits.csv") ; keys = [:borrower_id, :email1, :email2]
 INITS_HASH = keys.zip(csv.last).inject({}){|h,kv| h.merge({kv[0] => kv[1]}) }.freeze
 
-def str_to_date(date_str) ; Date.strptime(date_str[0], '%m/%d/%Y') ; end
-
-def should_i_run?
-	data_cache = read_csv('data_cache.csv', DATA_KEYS)
-	next_expires, next_due = DATA_KEYS[0..1].map{|k|str_to_date(data_cache[k])}
-	next_expires <= NOW + 30 || NOW > next_due - 5
+def str_to_date(date)
+	date_str = date.is_a?(Array) ? date.flatten[0] : date
+	Date.strptime(date_str, '%m/%d/%Y')
 end
 
 def email_builder
@@ -55,8 +53,8 @@ def email_builder
 
 	message = message % (content + books_out)
 
-	cache_data[2..3].each do |address| 
-		%x(echo '#{message}' | mail -s 'meem_notifier' #{address})
+	[:email1,:email2].each do |email_key| 
+		%x(echo '#{message}' | mail -s 'meem_notifier' #{INITS_HASH[email_key]})
 	end
 end
 
@@ -64,7 +62,7 @@ end
 def hash_to_csv(file_name, key_values, headers)
 	file = "#{FILES_PATH}/#{file_name}" # :: String x [Hash] x [String] -> [Hash]
   CSV.open(file, 'w'){|csv| csv << headers.map(&:upcase) }
-	CSV.open(file, 'a'){|csv| key_values.map(&:values).each{|line| csv << line }}
+	CSV.open(file, 'a'){|csv| key_values.map(&:values).each{|line| csv << [line].flatten}}
 end
 
 def read_csv(file_name, keys)# :: String x [Symbol] -> [Hash]
@@ -73,15 +71,17 @@ def read_csv(file_name, keys)# :: String x [Symbol] -> [Hash]
 end
 # #
 
+# we enter this loop if expiration date is passed
 def expiration_path(next_expires,page,data_cache)
 	if (expires_cond = next_expires <= NOW + 30)
+		puts "\n\nEXPIRATION PATH\n\n"
 		# info_page =	Nokogiri::HTML(open("#{FILES_PATH}/info.html"))
 		session = /ts=(\d+)/.match(page.at('.//a[@title="Profile"]')['href'])[1]
 		form = page.forms.first ; form['submenu'] = 'info' ; form['ts'] = session
 		info_page = form.submit
 
 		expires_td = info_page.search(EXPIRATION_COL_SEL).detect{|a|a.text =~/expires/i}
-		next_expires = expires_td.at('.//following-sibling::td').text
+		next_expires = [expires_td.at('.//following-sibling::td').text]
 
 		expire_msg_cond = next_expires == data_cache[:expiration]
 		@exp_msg = expire_msg_cond ? "\nyour card is sooooo expired" : ''
@@ -91,54 +91,55 @@ def expiration_path(next_expires,page,data_cache)
 	end
 end
 
+def get_book_data(page)
+	# items_page =	Nokogiri::HTML(open("#{FILES_PATH}/items_out.html"))
+	ts = /ts=(\d+)/.match(page.at('.//a[@title="Checked Out"]')['href'])[1]
+	form = page.forms.first ; form['submenu'] = 'itemsout' ; form['ts'] = ts
+	items_page = form.submit
+
+	items_page.search(BOOK_SEL).inject([]) do |data, book|; row = {}
+		row[:renew_key] =  book.at('.//input[@name="renewitemkeys"]')['value']
+		row[:title] = /(.+)\/?/.match(book.at(TITLE_SEL).text)[1]
+		row[:author] = /by (.+), \d*/.match(book.search('.//a')[1].text)[1]
+		row[:id] = book.search('.//a')[2].text
+		row[:check_out] = book.search('.//a')[3].text
+		row[:due] = book.search('.//a')[4].text
+		row[:renewed] = book.search('.//a')[5].text
+		data << row ; data
+	end
+end
+
 def renewal_path(next_due,page,data_cache)
-	if (renew_cond = NOW > next_due - 5)
-		# items_page =	Nokogiri::HTML(open("#{FILES_PATH}/items_out.html"))
-		ts = /ts=(\d+)/.match(page.at('.//a[@title="Checked Out"]')['href'])[1]
-		form = page.forms.first ; form['submenu'] = 'itemsout' ; form['ts'] = ts
-		items_page = form.submit
+	if (renew_cond = NOW > next_due - DUE_WINDOW)
+		puts "\n\nRENEW PATH\n\n"
 
-		book_data = items_page.search(BOOK_SEL).inject([]) do |data, book|; row = {}
-			row[:renew_key] =  book.at('.//input[@name="renewitemkeys"]')['value']
-			row[:title] = /(.+)\//.match(book.at(TITLE_SEL).text)[1]
-			row[:author] = /by (.+), \d*/.match(book.search('.//a')[1].text)[1]
-			row[:id] = book.search('.//a')[2].text
-			row[:check_out] = book.search('.//a')[3].text
-			row[:due] = book.search('.//a')[4].text
-			row[:renewed] = book.search('.//a')[5].text
-			data << row
+		book_data = get_book_data(page)
+		# renew loop: get renew_keys for books due within the 5 days.
+		books_due = book_data.select{|book| str_to_date(book[:due]) - NOW < DUE_WINDOW}
+
+		renew_keys = books_due.each do |book|
+			get_book_data(page)
+			form = page.forms.first
+			form['renewitemkeys'] = book[:renew_key]
+			form['renewitems'] = 'Renew'
+			page = form.submit
 		end
-
-		# get renew_keys for books due within the 5 days.
-		books_due = book_data.select{|book| str_to_date(book[:due]) - NOW < 5 }
-		renew_keys = books_due.each{|book|form['renewitemkeys'] = book[:renew_key]}
-		form['renewitems'] = 'Renew'
-		items_page = form.submit
+		# #
 
 		# stores new items_out
+		book_data = get_book_data(page)
+
 		hash_to_csv('items_out.csv',book_data, BOOK_HEADERS)
 
 		# stores new data_cache
 		next_due = book_data.min_by{|data| str_to_date(data[:due])}[:due]
-		data_cache[:next_due] = next_due
+		data_cache[:next_due] = [next_due]
 
 		# renew_msg_cond == true => renew must have failed
-		renew_msg_cond = NOW > str_to_date(next_due) - 5
+		renew_msg_cond = NOW > str_to_date(next_due) - DUE_WINDOW
 		@renew_msg = RENEW_TEXT % (renew_msg_cond ? 'not' : '')
 
-		data_cache = hash_to_csv('data_cache.csv',[data_cache], DATA_KEYS)
-
-		# RENEWAL POST
-		# Can renew multiple entries at once. should I??
-		# http://stjohnsnm.ipac.dynixasp.com/ipac20/ipac.jsp
-			# session:14HE058C69468.1082
-			# profile:meem
-			# renewitemkeys:20013504
-			# renewitemkeys:25089696
-			# renewitems:Renew
-			# menu:account
-			# submenu:itemsout
-		# end
+		data_cache = hash_to_csv('data_cache.csv', [data_cache], DATA_KEYS)
 	end
 end
 
@@ -172,6 +173,12 @@ def process
 
 	# email
 	email_builder
+end
+
+def should_i_run?
+	data_cache = read_csv('data_cache.csv', DATA_KEYS)
+	next_expires, next_due = DATA_KEYS.map{|k|str_to_date(data_cache[k][0])}
+	next_expires <= NOW + 30 || NOW > next_due - DUE_WINDOW
 end
 
 (puts "I should run") if should_i_run?
