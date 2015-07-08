@@ -11,7 +11,6 @@ require 'geocoder'
 
 module Craigslist
 	class CraigslistGeocoder
-
 		NOW = Date.today.freeze
 		BASE_URL = 'http://santafe.craigslist.org'.freeze
 		APARTMENT_URL = 'http://santafe.craigslist.org/search/apa'.freeze
@@ -32,6 +31,9 @@ module Craigslist
 			agent.get(APARTMENT_URL,request_hash)
 		end
 		
+		# returns 0.21564558001485087 of a mile which is correct
+		# CraigslistGeocoder.dist('1410 hickox street santa fe new mexico', 
+															# '1115 Hickox St santa fe new mexico')
 		def self.dist(add_str1,add_str2) # Address(String) x Address(String) -> Float
 			places = [add_str1,add_str2].map { |p| Geocoder.search(p) }
 		
@@ -55,7 +57,7 @@ module Craigslist
 				distance = 3959 * cir # in miles
 			end
 		end
-		
+
 		def self.process
 			page = get_page('')
 			listings = page.search(LISTINGS_SEL)
