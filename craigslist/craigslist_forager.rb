@@ -10,7 +10,7 @@ require 'net/smtp'
 require 'active_support'
 
 module Craigslist
-	class CraigslistForager# < Craigslist::CraigslistGeocoder
+	class CraigslistForager
 		DUE_WINDOW = 5.freeze
 		NOW = Date.today.freeze
 		BASE_URL = 'http://santafe.craigslist.org'.freeze
@@ -228,6 +228,7 @@ byebug
 			email_builder
 		end
 	end
+
 	CraigslistForager.process
 end
 
