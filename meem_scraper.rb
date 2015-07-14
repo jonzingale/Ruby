@@ -54,7 +54,7 @@ def email_builder
 	message = message % (content + books_out)
 
 	[:email1,:email2].each do |email_key| 
-		%x(echo '#{message}' | mail -s 'meem_notifier' #{INITS_HASH[email_key]})
+		%x(echo "#{message}" | mail -s 'meem_notifier' #{INITS_HASH[email_key]})
 	end
 end
 
