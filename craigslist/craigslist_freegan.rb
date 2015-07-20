@@ -87,7 +87,7 @@ byebug
 		page = agent.get(LISTING_STUB % listings_data[0]['id'])
 		lat, long = GEOCOORDS.map{|l|page.at('.//div[@id="map"]')["data-#{l}"].to_f}
 		listing_body = page.at('.//section[@id="postingbody"]').text
-	
+byebug
 		# email
 		email_builder
 	end
