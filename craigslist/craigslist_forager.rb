@@ -16,12 +16,14 @@ module Craigslist
 		BASE_URL = 'http://santafe.craigslist.org'.freeze
 		APARTMENT_URL = 'http://santafe.craigslist.org/search/apa'.freeze
 		RECORD_HEADERS = %w(id name number rooms stove rent url reply_to).freeze
-		
+		DESIRED_HOUSES = ['725 manhattan','316 urioste']
 		# a source directory off of crude. --untracked.
 		FILES_PATH = File.expand_path('./..', __FILE__).freeze
 		# records_file = CSV.read("#{FILES_PATH}/craigslist_records.csv") ; 
 		
-		
+		BUCKMAN =  [35.698446,-105.982901]
+		MY_HOUSE = [35.680067,-105.962163]
+		ST_JOHNS = [35.671955,-105.913378]
 		##########
 		keys = [:borrower_id, :email1, :email2]
 		# INITS_HASH = keys.zip(records_file.last).inject({}){|h,kv| h.merge({kv[0] => kv[1]}) }.freeze
