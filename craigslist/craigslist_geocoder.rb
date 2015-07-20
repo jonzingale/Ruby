@@ -8,6 +8,7 @@ require 'date'
 require 'net/smtp'
 require 'active_support'
 require 'geocoder'
+require 'matrix'
 
 module Craigslist
 	class CraigslistGeocoder
@@ -23,7 +24,11 @@ module Craigslist
 		HOUSING_SEL = './/span[@class="housing"]'.freeze
 		PRICE_SEL = './/span[@class="price"]'.freeze
 		ID_SEL = './/span[@class="maptag"]'.freeze
-		
+
+		BUCKMAN =  [35.698446,-105.982901].freeze
+		MY_HOUSE = [35.680067,-105.962163].freeze
+		ST_JOHNS = [35.671955,-105.913378].freeze
+
 		def self.get_page(query)
 			agent = Mechanize.new
 			request_hash = {'max_price' => '1500', 'bedrooms' => '3',
@@ -57,7 +62,27 @@ module Craigslist
 				distance = 3959 * cir # in miles
 			end
 		end
+#####
+		COORDS = [BUCKMAN,MY_HOUSE,ST_JOHNS].freeze
+		VECTS = COORDS.map{|v|Vector.elements(v)}.freeze
 
+		def self.orth(vect) ; x,y = vect.to_a ; Vector.elements([-y,x]) ; end
+		def self.inner(vect,wect)
+			[vect,wect].map(&:to_a).transpose.map{|p| p.inject(1,:*)}.inject(0,:+)
+		end
+	
+		def self.inside?(point) # GEOCOORDS -> STRING
+			b, a, c = VECTS ; pt = Vector.elements(point) - a
+
+			# perpendiculars have opposite signs.
+			acute_cond =  inner(b - a, orth(a - c)) > 0
+			_B = inner(pt, orth(b - a)) > 0
+			_C = inner(pt, orth(a - c)) > 0
+			cond = acute_cond ? _B & _C : _B | _C
+	
+			puts "#{cond ? 'inside' : 'outside' }" 
+		end
+#####
 		def self.process
 			page = get_page('')
 			listings = page.search(LISTINGS_SEL)
@@ -92,5 +117,5 @@ module Craigslist
 			byebug ; 4
 		end
 	end
-	# CraigslistGeocoder.process
+	CraigslistGeocoder.process
 end
