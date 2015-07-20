@@ -117,5 +117,5 @@ module Craigslist
 			byebug ; 4
 		end
 	end
-	CraigslistGeocoder.process
+	# CraigslistGeocoder.process
 end
