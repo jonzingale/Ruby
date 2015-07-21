@@ -143,6 +143,7 @@ module Craigslist
 		RADII_BLACKLIST = ['sfuad'].freeze
 
 		def self.jacobi(coords)
+byebug
 			center = '1410 hickox street, santa fe, new mexico'
 			dist = CraigslistGeocoder.dist(coords,center)
 			dist < 10
@@ -210,7 +211,7 @@ module Craigslist
 			# a particular listing
 			agent = Mechanize.new
 			listing = agent.get(LISTING_STUB % '5069391447')
-		
+
 			lat, long = GEOCOORDS.map{|l|listing.at('.//div[@id="map"]')["data-#{l}"].to_f}
 			listing_body = listing.at('.//section[@id="postingbody"]').text
 
