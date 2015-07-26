@@ -1,6 +1,8 @@
 # Can ignore specific files
 .DS_Store
 bank_stuff.rb
+craigslist/email.txt
+craigslist/emailing.rb
 
 # Use wildcards as well
 *~
