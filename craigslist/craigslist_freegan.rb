@@ -18,6 +18,7 @@ module Craigslist
 		CONTENT_SEL = './/section[@id="postingbody"]'.freeze
 		NEXT_BUTTON_SEL = './/a[@title="next page"]'.freeze
 		LOCATION_SEL = './/span[@class="pnr"]/small'.freeze
+		ALL_LINKS = './/ul[@class="menu collapsible"]//a'.freeze
 		GEOCOORDS = %w(latitude longitude).freeze
 		MY_HOUSE = [35.680067,-105.962163].freeze
 		COORDS_SEL = './/div[@id="map"]'.freeze
@@ -28,6 +29,12 @@ module Craigslist
 		DESIREABLES = [['computer',5],['house',100],['bass',2],['amplifier',2],
 									 ['fender amp',5],['math',15],['bike',20],['lap ?top',15],
 									 ['bike',20],['sewing machine',100]].freeze
+
+		def self.get_craigslist_world
+			agent = Mechanize.new
+			agent.get(BASE_URL)
+			page.search(ALL_LINKS).map{|a|[a['href'],a.text]}
+		end
 
 		def self.content_regex
 			desires = DESIREABLES.transpose[0]
