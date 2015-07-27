@@ -116,10 +116,9 @@ module Craigslist
 			end
 
 			# email
-			email_builder(good_listings)
+			email_builder(good_listings) unless good_listings.empty?
 		end
 	
 		CraigslistFreegan.process
 	end
 end
-
