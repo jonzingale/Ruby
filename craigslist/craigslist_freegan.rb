@@ -18,23 +18,16 @@ module Craigslist
 		CONTENT_SEL = './/section[@id="postingbody"]'.freeze
 		NEXT_BUTTON_SEL = './/a[@title="next page"]'.freeze
 		LOCATION_SEL = './/span[@class="pnr"]/small'.freeze
-		ALL_LINKS = './/ul[@class="menu collapsible"]//a'.freeze
 		GEOCOORDS = %w(latitude longitude).freeze
 		MY_HOUSE = [35.680067,-105.962163].freeze
 		COORDS_SEL = './/div[@id="map"]'.freeze
 
-		PROBE_REGEX = /curb alert|stuff|take|sewing/i.freeze ; PROBE_NEAR = 2 # in miles
+		PROBE_REGEX = /curb alert|stuff|take/i.freeze ; PROBE_NEAR = 2 # in miles
 	
 		# perhaps a csv would be better?
 		DESIREABLES = [['computer',5],['house',100],['bass',2],['amplifier',2],
 									 ['fender amp',5],['math',15],['bike',20],['lap ?top',15],
 									 ['bike',20],['sewing machine',100]].freeze
-
-		def self.get_craigslist_world
-			agent = Mechanize.new
-			agent.get(BASE_URL)
-			page.search(ALL_LINKS).map{|a|[a['href'],a.text]}
-		end
 
 		def self.content_regex
 			desires = DESIREABLES.transpose[0]
@@ -106,24 +99,28 @@ module Craigslist
 
 		def self.process
 			agent = Mechanize.new ; page = agent.get(FREE_URL)
-			listings = todays_posts(page)
 
-			listings_data = listings.map do |ls| ; data = Hash.new
-				location = /\((.+)\)/.match(ls.at(LOCATION_SEL))
-				data['summary'] = ls.at('.//a').text
-				data['loc'] = location[1] unless location.nil?
-				data['id'] = ls.at('.//a')['data-id']
-				data
+			# better would be to open a file and check
+			# a last scraped date.
+			unless (listings = todays_posts(page)).empty?
+
+				listings_data = listings.map do |ls| ; data = Hash.new
+					location = /\((.+)\)/.match(ls.at(LOCATION_SEL))
+					data['summary'] = ls.at('.//a').text
+					data['loc'] = location[1] unless location.nil?
+					data['id'] = ls.at('.//a')['data-id']
+					data
+				end
+	
+				good_listings = listings_data.select do |data|
+					interest = crawl_listing(data['id']) if PROBE_REGEX =~ data['summary']
+					is_desired = content_regex.match(data['summary'])
+					interest || is_desired
+				end
+	
+				# email
+				email_builder(good_listings) unless good_listings.empty?
 			end
-
-			good_listings = listings_data.select do |data|
-				interest = crawl_listing(data['id']) if PROBE_REGEX =~ data['summary']
-				is_desired = content_regex.match(data['summary'])
-				interest || is_desired
-			end
-
-			# email
-			email_builder(good_listings) unless good_listings.empty?
 		end
 	
 		CraigslistFreegan.process

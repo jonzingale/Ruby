@@ -73,7 +73,7 @@ end
 
 # we enter this loop if expiration date is passed
 def expiration_path(next_expires,page,data_cache)
-	if (expires_cond = next_expires <= NOW + 30)
+	if (expires_cond = next_expires <= NOW + 3)
 		puts "\n\nEXPIRATION PATH\n\n"
 		# info_page =	Nokogiri::HTML(open("#{FILES_PATH}/info.html"))
 		session = /ts=(\d+)/.match(page.at('.//a[@title="Profile"]')['href'])[1]
@@ -112,7 +112,7 @@ end
 def renewal_path(next_due,page,data_cache)
 	if (renew_cond = NOW > next_due - DUE_WINDOW)
 		puts "\n\nRENEW PATH\n\n"
-
+byebug
 		book_data = get_book_data(page)
 		# renew loop: get renew_keys for books due within the 5 days.
 		books_due = book_data.select{|book| str_to_date(book[:due]) - NOW < DUE_WINDOW}
@@ -178,7 +178,7 @@ end
 def should_i_run?
 	data_cache = read_csv('data_cache.csv', DATA_KEYS)
 	next_expires, next_due = DATA_KEYS.map{|k|str_to_date(data_cache[k][0])}
-	next_expires <= NOW + 30 || NOW > next_due - DUE_WINDOW
+	next_expires <= NOW + 3 || NOW > next_due - DUE_WINDOW
 end
 
 (puts "I should run") if should_i_run?

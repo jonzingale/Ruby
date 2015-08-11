@@ -2,7 +2,7 @@
 require 'activesupport'
 require 'byebug'
 
-cwd = '/Users/Jon/Desktop/crude/Ruby/'
+cwd = '/Users/Jon/Desktop/crude/RubyProcessing/'
 # pure_data_file = gets.chomp
 pure_data_file = 'test.pd'
 pd = File.open(cwd + pure_data_file,'r').read.gsub(/\n/,'').split("\;#")
@@ -34,4 +34,5 @@ def tree(ary)#::[Hash]->Tree(Hash)
 end
 
 tree = tree(hindex(bary))
-puts tree
+
+pp tree
