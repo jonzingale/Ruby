@@ -10,6 +10,9 @@ require 'active_support'
 # TODO: 
 #  Bibliography
 
+# who was renewed?
+# who wasn't?
+
 DUE_WINDOW = 5.freeze
 NOW = Date.today.freeze
 BASE_URL = 'http://stjohnsnm.ipac.dynixasp.com/ipac20/ipac.jsp?profile=meem'.freeze
@@ -112,7 +115,7 @@ end
 def renewal_path(next_due,page,data_cache)
 	if (renew_cond = NOW > next_due - DUE_WINDOW)
 		puts "\n\nRENEW PATH\n\n"
-byebug
+
 		book_data = get_book_data(page)
 		# renew loop: get renew_keys for books due within the 5 days.
 		books_due = book_data.select{|book| str_to_date(book[:due]) - NOW < DUE_WINDOW}

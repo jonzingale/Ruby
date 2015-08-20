@@ -9,7 +9,7 @@ require 'uri'
   TOPICAL_GLUE =['but in other news','meanwhile']
   CLEAN_REGEX = /\/wiki\/(\w+|_)+/.freeze
   BADLINKS = %w(foo).map{|b|"/wiki/#{b}"}.freeze
-  WIKI_REGEX = /http:\/\/en.wikipedia.org\/wiki\//.freeze
+  WIKI_REGEX = /https?:\/\/en.wikipedia.org\/wiki\//.freeze
   BAD_HREF_REGEX = /Special|Wikipedia|Wikisource|'|\:|File:Lock|\(/.freeze#\%|%
   BADREGEX = /may refer to|have an article|page lists articles/.freeze
   WANDERER_PATH = '/Users/Jon/Desktop/wiki_wanderer.txt'.freeze
@@ -40,7 +40,7 @@ require 'uri'
 
   google_page_body = google_page.search('.//a/@href')
   wiki_select = google_page_body.detect{|href| WIKI_REGEX.match(href)}
-  wiki_page = /(http:\/\/en.+)\&sa/.match(wiki_select)[1] # replace sa with .+ ?
+  wiki_page = /(https?:\/\/en.+)\&sa/.match(wiki_select)[1] # replace sa with .+ ?
   old_link =/\/wiki\/.+/. match(URI.unescape(wiki_page))[0]
   agent.get(URI.unescape(wiki_page))
 

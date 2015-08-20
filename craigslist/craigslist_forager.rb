@@ -223,7 +223,6 @@ byebug
 			# santa fe to cougar canyon
 			# lat = 0.13210890000000575
 			# lng = 0.025386000000011677
-byebug
 		
 			data_cache = read_csv('data_cache.csv', DATA_KEYS)
 		
