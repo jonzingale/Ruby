@@ -3,6 +3,7 @@
 bank_stuff.rb
 craigslist/email.txt
 craigslist/emailing.rb
+banking_test.rb
 
 # Use wildcards as well
 *~
