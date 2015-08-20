@@ -91,5 +91,6 @@ require 'uri'
   wiki = wiki.delete('\\"')
   regex_num = BAD_TEXT+wiki.scan(/\[\d+\]/)
   wiki = regex_num.inject(wiki){|str,t|str.gsub(t,"") }
-  %x(say -v Alex "#{wiki}" )
+  # reading speed flag -r
+  %x(say -v Alex -r 150 "#{wiki}" )
 
