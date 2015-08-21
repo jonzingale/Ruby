@@ -12,7 +12,8 @@ require 'matrix'
 
 module Craigslist
 	class CraigslistGeocoder
-		BUCKMAN =  [35.698446,-105.982901]
+
+		BUCKMAN  = [35.698446,-105.9832] # and cl_santa_fe default
 		MY_HOUSE = [35.680067,-105.962163]
 		ST_JOHNS = [35.671955,-105.913378]
 		COORDS = [BUCKMAN,MY_HOUSE,ST_JOHNS].freeze
@@ -64,7 +65,8 @@ module Craigslist
 			_C = inner(pt, orth(a - c)) > 0
 			cond = acute_cond ? _B & _C : _B | _C
 	
-			puts "#{cond ? 'inside' : 'outside' }" 
+			puts "#{cond ? 'inside' : 'outside' }"
+			cond
 		end
 		#####
 

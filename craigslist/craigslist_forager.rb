@@ -38,7 +38,7 @@ module Craigslist
 		FILES_PATH = File.expand_path('./..', __FILE__).freeze
 		# records_file = CSV.read("#{FILES_PATH}/craigslist_records.csv") ; 
 		
-		BUCKMAN =  [35.698446,-105.982901]
+		# BUCKMAN =  [35.698446,-105.982901]
 		MY_HOUSE = [35.680067,-105.962163]
 		ST_JOHNS = [35.671955,-105.913378]
 		##########
@@ -97,24 +97,37 @@ module Craigslist
 				data
 			end
 
-			# will open all listings that have made it this far.
-			# listings_data.each{|i|`open "http://santafe.craigslist.org/apa/#{i['id']}.html"`}
-
-byebug
-			# once in_side a given listing, google maps offers:
-			# div id="map" data-latitude="35.639424" data-longitude="-105.965688" 
-			# to select on ?! 
-		
-			# a particular listing
 			agent = Mechanize.new
-			listing = agent.get(LISTING_STUB % '5069391447')
-byebug
-			lat, long = GEOCOORDS.map{|l|listing.at('.//div[@id="map"]')["data-#{l}"].to_f}
-			listing_body = listing.at('.//section[@id="postingbody"]').text
 
-			# call the geocoder class
-			it = jordan([lat,long])
-			# "lat"=>35.7540089, "lng"=>-105.894186}
+# code for offline mode, though still no geocodes.
+# 			# some_listing = agent.get(LISTING_STUB % listings_data[5]['id'])
+# 			file = File.open(FILES_PATH+'/some_listing.html')
+#    		listing = '' ; file.each { |line| listing << line }
+#    		listing = Nokogiri.parse(listing)
+
+			inside_listings = listings_data.inject([]) do |good,listing|
+
+				if !listing['loc'].nil?
+					page = agent.get(LISTING_STUB % listing['id'])
+
+					unless page.at('.//div[@id="map"]').nil?
+						lat, long = GEOCOORDS.map{|l| page.at('.//div[@id="map"]')["data-#{l}"].to_f}		
+						inside = CraigslistGeocoder.inside?([lat,long])
+					end
+				end
+
+				# opens listing in browser.
+				# if inside || inside.nil?
+				# 	`open "http://santafe.craigslist.org/apa/#{listing['id']}.html"`
+				# end
+
+				# black list on this body
+				# listing_body = page.at('.//section[@id="postingbody"]').text
+
+				inside == false ? good : good << listing
+			end
+
+byebug
 		end
 	end
 
