@@ -17,7 +17,7 @@ module Craigslist
 		ST_JOHNS = [35.671955,-105.913378]
 		COORDS = [BUCKMAN,MY_HOUSE,ST_JOHNS].freeze
 
-		def self.jacobi(coords,miles) ; coord_dist(MY_HOUSE,coords) < miles ; end
+		def self.jordan(coords,miles) ; coord_dist(MY_HOUSE,coords) < miles ; end
 
 		def self.coord_dist(here_coords,there_coords) # COORDS -> COORDS -> FLOAT
 			unless (places = [here_coords,there_coords]).any?(&:empty?)
