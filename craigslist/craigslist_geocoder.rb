@@ -65,7 +65,7 @@ module Craigslist
 			_C = inner(pt, orth(a - c)) > 0
 			cond = acute_cond ? _B & _C : _B | _C
 	
-			puts "#{cond ? 'inside' : 'outside' }"
+			# puts "#{cond ? 'inside' : 'outside' }"
 			cond
 		end
 		#####
