@@ -27,7 +27,7 @@ module Craigslist
 		# perhaps a csv would be better?
 		DESIREABLES = [['computer',5],['house',100],['bass',2],['amplifier',2],
 									 ['fender amp',5],['math',15],['bike',20],['lap ?top',15],
-									 ['bike',20],['sewing machine',100]].freeze
+									 ['bike',20],['sewing machine',100],['massage chair',100]].freeze
 
 		def self.content_regex
 			desires = DESIREABLES.transpose[0]

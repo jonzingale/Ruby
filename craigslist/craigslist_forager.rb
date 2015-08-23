@@ -19,7 +19,7 @@ module Craigslist
 		RADII_BLACKLIST = ['sfuad'].freeze
 		# APARTMENT_URL = 'http://santafe.craigslist.org/apa/5184025942.html'
 # http://santafe.craigslist.org/apa/5179106556.html
-		BLACKLIST_LOC = /Taos|Arroyo Seco|El Potrero|La Mesilla|Alcalde|Whites City|Calle Cuesta|San Mateo|Airport|Cerrillos|Sol y Lomas|Ojo Caliente|mobile home|newcomb|Ute Park|Llano Quemado|roswell|Arroyo Hondo|Espanola|Pojoaque|Velarde|Albuquerque|Las Vegas|artesia|Chama|Nambe|AIRPORT|abq|fnm|pub|los alamos|Glorieta|Truchas|Edgewood|Cochiti Lake|cvn|cos|Chimayo|El Prado|El Rancho|Bernalillo|Abiquiu/i
+		BLACKLIST_LOC = /Taos|Arroyo Seco|El Potrero|La Mesilla|Sombrillo|Alcalde|Whites City|Calle Cuesta|San Mateo|Airport|Cerrillos|Sol y Lomas|Ojo Caliente|mobile home|newcomb|Ute Park|Llano Quemado|roswell|Arroyo Hondo|Espanola|Pojoaque|Velarde|Albuquerque|Las Vegas|artesia|Chama|Nambe|AIRPORT|abq|fnm|pub|los alamos|Glorieta|Truchas|Edgewood|Cochiti Lake|cvn|cos|Chimayo|El Prado|El Rancho|Bernalillo|Abiquiu/i
 		LISTINGS_SEL = './/div[@class="content"]/p[@class="row"]/span'.freeze
 		NO_RESULTS_SEL = './/div[@class="noresults"]'.freeze
 		NUM_LISTINGS_SEL = './/span[@class="totalcount"]'.freeze
@@ -117,22 +117,19 @@ module Craigslist
 				end
 
 				# opens listing in browser.
-				# if inside || inside.nil?
-				# 	`open "http://santafe.craigslist.org/apa/#{listing['id']}.html"`
-				# end
+				if inside || inside.nil?
+					`open "http://santafe.craigslist.org/apa/#{listing['id']}.html"`
+				end
 
 				# black list on this body
 				# listing_body = page.at('.//section[@id="postingbody"]').text
 
 				inside == false ? good : good << listing
 			end
-
 byebug
 		end
 	end
 
 	CraigslistForager.process
 end
-
-
 
