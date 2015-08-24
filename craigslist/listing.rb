@@ -18,6 +18,8 @@
 			data['id'] = noko_elem.at('.//a')['data-id']
 			data['date'] = Date.parse(noko_elem.at('.//time')['datetime'])
 			data['summary'] = summary.text unless summary.nil?
+			data['body'] = nil
+
 			data['loc'] = location[1] unless location.nil?
 			data['coords'] = {'lat' => nil,'lng' => nil}
 
@@ -36,6 +38,7 @@
 		# some loc data is better than others
 		# addresses for instance over city.
 		def update_loc
+			# getting loc from listing_loc
 			if @listing['coords'][:lat].nil?
 				loc = @listing['loc']
 				address = ADDRESS_REGEX.match(loc)
@@ -45,6 +48,7 @@
 				end
 			end
 
+			# getting loc from summary
 			if @listing['coords'][:lat].nil?
 				summary = @listing['summary']
 				address = ADDRESS_REGEX.match(summary)
@@ -55,11 +59,24 @@
 				end
 			end
 
+
 			# inside a listing, 
 			# <div id="map"
 			# <div class="mapaddress">1880 Plaza del Sur</div>
 			# I should be able to further refine.
 			# http://santafe.craigslist.org/apa/5180181123.html
+
+			# getting loc from mapaddress
+			# if @listing['coords'][:lat].nil?
+			# 	mapaddress = @listing['mapaddress']
+
+			# 	address = ADDRESS_REGEX.match(summary)
+			# 	baddress = NOT_ADDRESS_REGEX.match(summary)
+			# 	if address && !baddress
+			# 		coords = get_coords(address[0])
+			# 		@listing['coords'] = coords
+			# 	end
+			# end
 
 			@listing
 		end
