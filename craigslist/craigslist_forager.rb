@@ -69,6 +69,10 @@ require 'active_support'
 			listings = listings.reject do |ls| 
 				cond1 = BLACKLIST_LOC.match(ls.text)
 				cond2 = BLIGHTLIST.match(ls.text)
+
+				# a listing_id blacklist would be nice
+				# http://santafe.craigslist.org/apa/5179106556.html
+
 				cond1 || cond2
 			end
 
@@ -89,17 +93,22 @@ require 'active_support'
 				# verify somehow that we aren't throwing out good posts.
 				# maybe make a false posting.
 				if listing.has_coords?
-					coords = listing.to_value['coords'].values
+					coords = listing.value['coords'].values
 					place = Region.new(*coords)
 					inside = place.in_region?
+				end
+
+				# opens listing in browser.
+				if inside || inside.nil?
+				  `open "http://santafe.craigslist.org/apa/#{listing.value['id']}.html"`
 				end
 
 				inside == false ? good : good << listing
 			end
 
 
-	it = listings_data.map(&:to_value)
-	byebug
+			it = listings_data.map(&:value)
+			byebug
 
 		# below this line, we start working inside of the
 		# the listings. better geocodes and body regex.
