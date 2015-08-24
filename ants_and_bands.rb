@@ -72,3 +72,15 @@ answer(11)
 
 
 
+def gcd(a,b)	
+	if b == 0
+		a
+	else
+		q = a < b ? [a, b % a] : [b, a % b]
+		gcd(*q)
+	end
+end
+
+
+
+byebug ; 4
