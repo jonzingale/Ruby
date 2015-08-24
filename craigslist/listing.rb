@@ -31,7 +31,7 @@
 			@listing['coords'] != {"lat"=>nil, "lng"=>nil}
 		end
 
-		def to_value ; @listing ; end
+		def value ; @listing ; end
 
 		# some loc data is better than others
 		# addresses for instance over city.
@@ -54,6 +54,12 @@
 					@listing['coords'] = coords
 				end
 			end
+
+			# inside a listing, 
+			# <div id="map"
+			# <div class="mapaddress">1880 Plaza del Sur</div>
+			# I should be able to further refine.
+			# http://santafe.craigslist.org/apa/5180181123.html
 
 			@listing
 		end
