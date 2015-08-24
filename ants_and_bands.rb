@@ -1,10 +1,9 @@
+# It would be cool to see Q as a module
+# which gets inherited into an Ant class.
 require 'byebug'
-require 'matrix'
 
-class Vect
-	def initialize(array) ; @vect = Vector.elements(array) ; end
-	def last ; @vect.to_a.last ; end
-	def to_v ; @vect ; end
+def simple_answer
+	(1..11).map{|i| Rational(1,i*3)}.inject :+
 end
 
 class Q
@@ -18,6 +17,17 @@ class Q
 		a, b = @q ; a / b.to_f
 	end
 
+	def +(it)
+	 	a,b = @q.to_a
+	 	x,y = it.to_a
+
+	 	l = b.to_i.lcm(y.to_i)
+	 	n = l / b
+	 	m = y / b
+
+	 	self.class.new(a*n + x*m, l)
+	end
+
 	def *(it)
 	 	a,b = @q.to_a
 	 	x,y = it.to_a
@@ -26,46 +36,39 @@ class Q
 
 	def re
 		a, b = @q
-		g = gcd(a, b)
+		g = a.to_i.gcd(b.to_i)
 		self.class.new(a/g,b/g)
 	end
-
-	def gcd(a, b)
-		a, b = [b, a] if a > b
-		vect = Vect.new([1, 0, a])
-		wect = Vect.new([0, 1, b])
-	
-		until wect.last == 0
-			vect, wect = vect.last < wect.last ? [vect, wect] : [wect, vect]
-			wect = Vect.new(wect.to_v - vect.to_v)
-		end
-
-		vect.last
-	end
-
 end
 
-def walk(n,m)
-	[n+1, m]
+def walk(q)
+	a, b = q.to_a
+	q + Q.new(1,b)
 end
 
-def stretch(a,b)
-	m = b + 3
-	n = (Q.new(m, b) * Q.new(a)).re
-	(n * Q.new(1, m)).to_a
+def stretch(q)
+	a, b = q.to_a
+	n = (Q.new(a) * Q.new(b+3,b)).to_f
+	Q.new(n,b+3)
 end
 
 
 def answer(i)
-	init = [0,3]
+	init = Q.new(0,3)
 
-	until i == 0
-		i -= 1
-		step = walk(*init)
-		init = stretch(*step)
-	end ; Q.new(*init).to_f
+	i.times do
+		step = walk(init)
+		init = stretch(step)
+	end
+
+	init.to_f
+
+	puts "\n\nAfter #{i} steps the ant\n" \
+			 "will be #{init.to_f}\n" \
+			 "the way across the band\n\n"
 end
 
-answer(6)
+answer(11)
 
-# too buggy for answer 7.
+
+
