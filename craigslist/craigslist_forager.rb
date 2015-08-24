@@ -17,7 +17,7 @@ require 'active_support'
 		BASE_URL = 'http://santafe.craigslist.org'.freeze
 		APARTMENT_URL = 'http://santafe.craigslist.org/search/apa'.freeze
 
-		BLACKLIST_LOC = /Taos|Arroyo Seco|south ?side|Rodeo|Berino|El Potrero|el Prado|Cuba|Mora|Condo|CR \d+|La Mesilla|Sombrillo|Alcalde|Whites City|Calle Cuesta|San Mateo|Airport|Cerrillos|Sol y Lomas|Ojo Caliente|mobile home|newcomb|Ute Park|Llano Quemado|roswell|Arroyo Hondo|Espanola|Pojoaque|Velarde|Albuquerque|Las Vegas|artesia|Chama|Nambe|AIRPORT|abq|fnm|pub|los alamos|Glorieta|Truchas|Edgewood|Cochiti Lake|cvn|cos|Chimayo|El Prado|El Rancho|Bernalillo|Abiquiu/i
+		BLACKLIST_LOC = /Taos|Arroyo Seco|south ?side|Rodeo|Berino|El Potrero|Rancho Viejo|el Prado|Cuba|Mora|Condo|CR \d+|La Mesilla|Sombrillo|Alcalde|Whites City|Calle Cuesta|San Mateo|Airport|Cerrillos|Sol y Lomas|Ojo Caliente|mobile home|newcomb|Ute Park|Llano Quemado|roswell|Arroyo Hondo|Espanola|Pojoaque|Velarde|Albuquerque|Las Vegas|artesia|Chama|Nambe|AIRPORT|abq|fnm|pub|los alamos|Glorieta|Truchas|Edgewood|Cochiti Lake|cvn|cos|Chimayo|El Prado|El Rancho|Bernalillo|Abiquiu/i
 		LISTINGS_SEL = './/div[@class="content"]/p[@class="row"]/span'.freeze
 		NO_RESULTS_SEL = './/div[@class="noresults"]'.freeze
 		NUM_LISTINGS_SEL = './/span[@class="totalcount"]'.freeze
@@ -26,13 +26,10 @@ require 'active_support'
 		GEOCOORDS = %w(latitude longitude).freeze
 		
 		LISTING_STUB = 'http://santafe.craigslist.org/apa/%s.html'.freeze
-
-		# RECORD_HEADERS = %w(id name number rooms stove rent url reply_to).freeze
 		DESIRED_HOUSES = ['725 manhattan','316 urioste']
+
 		# a source directory off of crude. --untracked.
-		FILES_PATH = File.expand_path('./..', __FILE__).freeze
-		# records_file = CSV.read("#{FILES_PATH}/craigslist_records.csv") ; 
-		
+		FILES_PATH = File.expand_path('./..', __FILE__).freeze		
 		##########
 		
 		def str_to_date(date)
@@ -51,6 +48,7 @@ require 'active_support'
 		end
 
 		BLIGHTLIST = /lease|housemate|gated|maintenance|recreation room|staff|compound|management|town ?house|the reserve|shower only|try us|deals|(vista|casa) alegre|visit us|tierra contenta/i
+		BLACK_IDS = /5186903444|5185114818|5179106556/
 
 		def process
 			agent = Mechanize.new
@@ -66,21 +64,22 @@ require 'active_support'
 
 			# cleans listings via location_blacklist on location.
 			# cleans listings via keywords_blacklist on summary.
+			# cleans listings via ids.
 			listings = listings.reject do |ls| 
 				cond1 = BLACKLIST_LOC.match(ls.text)
 				cond2 = BLIGHTLIST.match(ls.text)
 
-				# a listing_id blacklist would be nice
-				# http://santafe.craigslist.org/apa/5179106556.html
+				# it would be good to grab reposts as well. 
+				cond3 = BLACK_IDS.match(ls.at('.//a')['data-id'])
 
-				cond1 || cond2
+				cond1 || cond2 || cond3
 			end
 
-# code for offline mode, though still no geocodes.
-# 			# some_listing = agent.get(LISTING_STUB % listings_data[5]['id'])
-# 			file = File.open(FILES_PATH+'/some_listing.html')
-#    		listing = '' ; file.each { |line| listing << line }
-#    		listing = Nokogiri.parse(listing)
+			# code for offline mode, though still no geocodes.
+			# 			# some_listing = agent.get(LISTING_STUB % listings_data[5]['id'])
+			# 			file = File.open(FILES_PATH+'/some_listing.html')
+			#    		listing = '' ; file.each { |line| listing << line }
+			#    		listing = Nokogiri.parse(listing)
 
 			# testing and building location
 			listings_objs = listings.map{|ls| Listing.new(ls) }
@@ -99,9 +98,9 @@ require 'active_support'
 				end
 
 				# opens listing in browser.
-				if inside || inside.nil?
-				  `open "http://santafe.craigslist.org/apa/#{listing.value['id']}.html"`
-				end
+				# if inside || inside.nil?
+				#   `open "http://santafe.craigslist.org/apa/#{listing.value['id']}.html"`
+				# end
 
 				inside == false ? good : good << listing
 			end
