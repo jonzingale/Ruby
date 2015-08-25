@@ -1,5 +1,10 @@
 	require 'geocoder'
 
+	# better might be to call this Apartment
+	# or HouseListing or something, so that
+	# it can be distinguished from listings
+	# on craigslist free or something else.
+
 	class Listing
 		ADDRESS_REGEX = /\d{3,} (\w+| )+/.freeze
 		NOT_ADDRESS_REGEX = /(SQ|FT)/i.freeze
@@ -63,7 +68,7 @@
 			# <div class="mapaddress">1880 Plaza del Sur</div>
 			# page.search('.//div[@class="mapaddress"]')
 			# getting loc from map
-			if @listing['coords'][:lat].nil? && lat.present?
+			if @listing['coords'][:lat].nil? && !lat.nil?
 				@listing['coords'] = {"lat"=>lat, "lng"=>lng}
 			end
 
