@@ -13,15 +13,16 @@ require 'date'
 		BASE_URL = 'http://santafe.craigslist.org'.freeze
 		APARTMENT_URL = 'http://santafe.craigslist.org/search/apa'.freeze
 		LISTING_STUB = 'http://santafe.craigslist.org/apa/%s.html'.freeze
+		LISTINGS_SEL = './/div[@class="content"]/p[@class="row"]/span'.freeze
+		NUM_LISTINGS_SEL = './/span[@class="totalcount"]'.freeze
+		NEXT_BUTTON_SEL = './/a[@title="next page"]'.freeze
+		BODY_SEL = './/section[@id="postingbody"]'.freeze
+		COORDS_SEL = './/div[@id="map"]'.freeze
 
 		BLACKLIST_LOC = /Taos|Arroyo Seco|south ?side|Rodeo|Berino|Mentmore|El Potrero|Rancho Viejo|el Prado|Cuba|Mora|Condo|CR \d+|La Mesilla|Sombrillo|Alcalde|Whites City|Calle Cuesta|San Mateo|Airport|Cerrillos|Sol y Lomas|Ojo Caliente|mobile home|newcomb|Ute Park|Llano Quemado|roswell|Arroyo Hondo|Espanola|Pojoaque|Velarde|Albuquerque|Las Vegas|artesia|Chama|Nambe|AIRPORT|abq|fnm|pub|los alamos|Glorieta|Truchas|Edgewood|Cochiti Lake|cvn|cos|Chimayo|El Prado|El Rancho|Bernalillo|Abiquiu/i
 		BLIGHTLIST = /lease to|housemate|gated|maintenance|recreation room|South Meadows|staff|compound|management|town ?house|the reserve|shower only|try us|deals|(vista|casa) alegre|visit us|tierra contenta/i
 		BLACK_IDS = /5186903444|5185114818|5179106556|5184025942/
 		BODY_BLACKLIST = /Truchas|South Meadows/i
-
-		LISTINGS_SEL = './/div[@class="content"]/p[@class="row"]/span'.freeze
-		NUM_LISTINGS_SEL = './/span[@class="totalcount"]'.freeze
-		NEXT_BUTTON_SEL = './/a[@title="next page"]'.freeze
 
 		def open_listings(listings)
 			listings.each do |listing|
@@ -82,7 +83,7 @@ require 'date'
 			# inside pass at location determining.
 			listings_data.select! do |listing|
 				page = agent.get(LISTING_STUB % listing.value['id'])
-				coords = page.search('.//div[@id="map"]')
+				coords = page.search(COORDS_SEL)
 
 				if coords.present?
 					lat = coords.attr('data-latitude').value.to_f
@@ -101,7 +102,7 @@ require 'date'
 			# body pass at location, filtering.
 			listings_data.reject! do |listing|
 				page = agent.get(LISTING_STUB % listing.value['id'])
-				body = page.search('.//section[@id="postingbody"]').text
+				body = page.search(BODY_SEL).text
 
 				# perhaps it would be good to regex_loc once more
 				# from here?
