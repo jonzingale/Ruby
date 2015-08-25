@@ -115,8 +115,7 @@ require 'date'
 				end ; inside
 			end
 
-			# body pass at location determining.
-			# body pass at filtering.
+			# body pass at location, filtering.
 			listings_data.reject! do |listing|
 				page = agent.get(LISTING_STUB % listing.value['id'])
 				body = page.search('.//section[@id="postingbody"]').text
