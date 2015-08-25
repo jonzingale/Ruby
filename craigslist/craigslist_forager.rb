@@ -17,7 +17,11 @@ require 'active_support'
 		BASE_URL = 'http://santafe.craigslist.org'.freeze
 		APARTMENT_URL = 'http://santafe.craigslist.org/search/apa'.freeze
 
-		BLACKLIST_LOC = /Taos|Arroyo Seco|south ?side|Rodeo|Berino|El Potrero|Rancho Viejo|el Prado|Cuba|Mora|Condo|CR \d+|La Mesilla|Sombrillo|Alcalde|Whites City|Calle Cuesta|San Mateo|Airport|Cerrillos|Sol y Lomas|Ojo Caliente|mobile home|newcomb|Ute Park|Llano Quemado|roswell|Arroyo Hondo|Espanola|Pojoaque|Velarde|Albuquerque|Las Vegas|artesia|Chama|Nambe|AIRPORT|abq|fnm|pub|los alamos|Glorieta|Truchas|Edgewood|Cochiti Lake|cvn|cos|Chimayo|El Prado|El Rancho|Bernalillo|Abiquiu/i
+		BLACKLIST_LOC = /Taos|Arroyo Seco|south ?side|Rodeo|Berino|Mentmore|El Potrero|Rancho Viejo|el Prado|Cuba|Mora|Condo|CR \d+|La Mesilla|Sombrillo|Alcalde|Whites City|Calle Cuesta|San Mateo|Airport|Cerrillos|Sol y Lomas|Ojo Caliente|mobile home|newcomb|Ute Park|Llano Quemado|roswell|Arroyo Hondo|Espanola|Pojoaque|Velarde|Albuquerque|Las Vegas|artesia|Chama|Nambe|AIRPORT|abq|fnm|pub|los alamos|Glorieta|Truchas|Edgewood|Cochiti Lake|cvn|cos|Chimayo|El Prado|El Rancho|Bernalillo|Abiquiu/i
+		BLIGHTLIST = /lease to|housemate|gated|maintenance|recreation room|South Meadows|staff|compound|management|town ?house|the reserve|shower only|try us|deals|(vista|casa) alegre|visit us|tierra contenta/i
+		BLACK_IDS = /5186903444|5185114818|5179106556|5184025942/
+		BODY_BLACKLIST = /Truchas|South Meadows/i
+
 		LISTINGS_SEL = './/div[@class="content"]/p[@class="row"]/span'.freeze
 		NO_RESULTS_SEL = './/div[@class="noresults"]'.freeze
 		NUM_LISTINGS_SEL = './/span[@class="totalcount"]'.freeze
@@ -32,11 +36,20 @@ require 'active_support'
 		FILES_PATH = File.expand_path('./..', __FILE__).freeze		
 		##########
 		
+		def open_listings(listings)
+			listings.each do |listing|
+		 		`open "http://santafe.craigslist.org/apa/#{listing.value['id']}.html"`
+			end
+		end
+
 		def str_to_date(date)
 			date_str = date.is_a?(Array) ? date.flatten[0] : date
 			Date.strptime(date_str, '%m/%d/%Y')
 		end
 
+		# modify this as I would like 
+		# a 3 bedroom for 1500 or 
+		# 2 bedroom for 1100
 		def search(query)
 			agent = Mechanize.new
 			request_hash = {'max_price' => '1500', 
@@ -46,9 +59,6 @@ require 'active_support'
 		
 			agent.get(APARTMENT_URL,request_hash)
 		end
-
-		BLIGHTLIST = /lease|housemate|gated|maintenance|recreation room|staff|compound|management|town ?house|the reserve|shower only|try us|deals|(vista|casa) alegre|visit us|tierra contenta/i
-		BLACK_IDS = /5186903444|5185114818|5179106556/
 
 		def process
 			agent = Mechanize.new
@@ -75,45 +85,64 @@ require 'active_support'
 				cond1 || cond2 || cond3
 			end
 
+			# constructs and array of listings
+			listings_data = listings.map{|ls| Listing.new(ls) }
+
+			# outside pass at location determining.
+			listings_data.select! do |listing|
+				listing.update_loc
+
+				inside = true
+				if listing.has_coords?
+					coords = listing.value['coords'].values
+					place = Region.new(*coords)
+					inside = place.in_region?
+				end ; inside
+			end
+
+
+			# inside pass at location determining.
+			listings_data.select! do |listing|
+				page = agent.get(LISTING_STUB % listing.value['id'])
+				coords = page.search('.//div[@id="map"]')
+
+				if coords.present?
+					lat = coords.attr('data-latitude').value.to_f
+					lng = coords.attr('data-longitude').value.to_f
+					listing.update_loc(lat,lng)
+				end
+
+				inside = true
+				if listing.has_coords?
+					coords = listing.value['coords'].values
+					place = Region.new(*coords)
+					inside = place.in_region?
+				end ; inside
+			end
+
+			# body pass at location determining.
+			listings_data.reject! do |listing|
+				page = agent.get(LISTING_STUB % listing.value['id'])
+				body = page.search('.//section[@id="postingbody"]').text
+
+				BODY_BLACKLIST.match(body) || BLIGHTLIST.match(body)
+			end
+
+			open_listings(listings_data)
+			it = listings_data.map(&:value)
+			byebug
+		end
+
+process
+
+
+
+
+
+
 			# code for offline mode, though still no geocodes.
 			# 			# some_listing = agent.get(LISTING_STUB % listings_data[5]['id'])
 			# 			file = File.open(FILES_PATH+'/some_listing.html')
 			#    		listing = '' ; file.each { |line| listing << line }
 			#    		listing = Nokogiri.parse(listing)
-
-			# testing and building location
-			listings_objs = listings.map{|ls| Listing.new(ls) }
-
-			# At this point we check to see if any listing['loc']
-			# is an address. If so, we check that it is inside the region.
-			listings_data = listings_objs.inject([]) do |good, listing|
-				listing.update_loc
-
-				# verify somehow that we aren't throwing out good posts.
-				# maybe make a false posting.
-				if listing.has_coords?
-					coords = listing.value['coords'].values
-					place = Region.new(*coords)
-					inside = place.in_region?
-				end
-
-				# opens listing in browser.
-				# if inside || inside.nil?
-				#   `open "http://santafe.craigslist.org/apa/#{listing.value['id']}.html"`
-				# end
-
-				inside == false ? good : good << listing
-			end
-
-
-			it = listings_data.map(&:value)
-			byebug
-
-		# below this line, we start working inside of the
-		# the listings. better geocodes and body regex.
-
-		end
-
-
-process
 
