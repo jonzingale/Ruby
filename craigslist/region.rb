@@ -3,6 +3,7 @@ class Region
 	
 	RADII_BLACKLIST = ['sfuad'].freeze
 
+	JACKRABBIT = [35.689054,-105.946113]
 	MY_HOUSE = [35.680067,-105.962163]
 	ST_JOHNS = [35.671955,-105.913378]
 	BUCKMAN  = [35.698446,-105.9832] # default
@@ -10,7 +11,7 @@ class Region
 
 	def initialize(lat,long) ; @point = [lat,long] ; end
 
-	def jordan(miles) ; coord_dist(MY_HOUSE,@point) < miles ; end
+	def jordan(miles) ; coord_dist(JACKRABBIT,@point) < miles ; end
 
 	def coord_dist(here_coords,there_coords) # COORDS -> COORDS -> FLOAT
 		unless (places = [here_coords,there_coords]).any?(&:empty?)
@@ -44,6 +45,7 @@ class Region
 		_B = inner(pt, orth(b - a)) >= 0
 		_C = inner(pt, orth(a - c)) >= 0
 		cond = acute_cond ? _B & _C : _B | _C
+		jordan(2.0) && cond
 	end
 
 end
