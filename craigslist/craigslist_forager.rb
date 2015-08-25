@@ -1,18 +1,14 @@
 # !/usr/bin/env ruby
 require (File.expand_path('./listing', File.dirname(__FILE__)))
 require (File.expand_path('./region', File.dirname(__FILE__)))
-
-require 'byebug'
-require 'csv'
+require 'active_support/core_ext/object/blank'
+require 'active_support'
 require 'mechanize'
 require 'nokogiri'
-require 'open-uri'
+require 'byebug'
 require 'date'
-require 'net/smtp'
-require 'active_support'
 
 		# listing date cache.
-
 		NOW = Date.today.freeze
 		BASE_URL = 'http://santafe.craigslist.org'.freeze
 		APARTMENT_URL = 'http://santafe.craigslist.org/search/apa'.freeze
@@ -30,7 +26,6 @@ require 'active_support'
 		GEOCOORDS = %w(latitude longitude).freeze
 		
 		LISTING_STUB = 'http://santafe.craigslist.org/apa/%s.html'.freeze
-		DESIRED_HOUSES = ['725 manhattan','316 urioste']
 
 		# a source directory off of crude. --untracked.
 		FILES_PATH = File.expand_path('./..', __FILE__).freeze		
