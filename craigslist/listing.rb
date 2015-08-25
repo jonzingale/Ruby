@@ -1,8 +1,8 @@
-	require 'geocoder'
-	require 'active_support'
 	require 'active_support/core_ext/object/blank'
+	require 'active_support'
+	require 'geocoder'
 	# better might be to call this Apartment
-	# or HouseListing or something, so that
+	# or HouseListing or Rentals, so that
 	# it can be distinguished from listings
 	# on craigslist free or something else.
 
@@ -24,11 +24,8 @@
 			data['id'] = noko_elem.at('.//a')['data-id']
 			data['date'] = Date.parse(noko_elem.at('.//time')['datetime'])
 			data['summary'] = summary.text unless summary.nil?
-			data['body'] = nil
-
 			data['loc'] = location[1] unless location.nil?
 			data['coords'] = {'lat' => nil,'lng' => nil}
-
 			data['price'] = price[0].to_i unless price.nil?
 			data['beds'] = beds
 			data['footage'] = footage
@@ -65,10 +62,7 @@
 				end
 			end
 
-			# could also try
-			# <div class="mapaddress">1880 Plaza del Sur</div>
-			# page.search('.//div[@class="mapaddress"]')
-			# getting loc from map
+			# sets coords manually.
 			if @listing['coords'][:lat].nil? && lat.present?
 				@listing['coords'] = {"lat"=>lat, "lng"=>lng}
 			end
