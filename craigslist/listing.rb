@@ -37,7 +37,7 @@
 
 		# some loc data is better than others
 		# addresses for instance over city.
-		def update_loc
+		def update_loc(lat=nil,lng=nil)
 			# getting loc from listing_loc
 			if @listing['coords'][:lat].nil?
 				loc = @listing['loc']
@@ -59,24 +59,13 @@
 				end
 			end
 
-
-			# inside a listing, 
-			# <div id="map"
+			# could also try
 			# <div class="mapaddress">1880 Plaza del Sur</div>
-			# I should be able to further refine.
-			# http://santafe.craigslist.org/apa/5180181123.html
-
-			# getting loc from mapaddress
-			# if @listing['coords'][:lat].nil?
-			# 	mapaddress = @listing['mapaddress']
-
-			# 	address = ADDRESS_REGEX.match(summary)
-			# 	baddress = NOT_ADDRESS_REGEX.match(summary)
-			# 	if address && !baddress
-			# 		coords = get_coords(address[0])
-			# 		@listing['coords'] = coords
-			# 	end
-			# end
+			# page.search('.//div[@class="mapaddress"]')
+			# getting loc from map
+			if @listing['coords'][:lat].nil? && lat.present?
+				@listing['coords'] = {"lat"=>lat, "lng"=>lng}
+			end
 
 			@listing
 		end
