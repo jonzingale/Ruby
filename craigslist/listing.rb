@@ -1,5 +1,6 @@
 	require 'geocoder'
-
+	require 'active_support'
+	require 'active_support/core_ext/object/blank'
 	# better might be to call this Apartment
 	# or HouseListing or something, so that
 	# it can be distinguished from listings
@@ -68,7 +69,7 @@
 			# <div class="mapaddress">1880 Plaza del Sur</div>
 			# page.search('.//div[@class="mapaddress"]')
 			# getting loc from map
-			if @listing['coords'][:lat].nil? && !lat.nil?
+			if @listing['coords'][:lat].nil? && lat.present?
 				@listing['coords'] = {"lat"=>lat, "lng"=>lng}
 			end
 
