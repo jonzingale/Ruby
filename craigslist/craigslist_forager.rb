@@ -121,9 +121,13 @@ require 'active_support'
 			end
 
 			# body pass at location determining.
+			# body pass at filtering.
 			listings_data.reject! do |listing|
 				page = agent.get(LISTING_STUB % listing.value['id'])
 				body = page.search('.//section[@id="postingbody"]').text
+
+				# perhaps it would be good to regex_loc once more
+				# from here?
 
 				BODY_BLACKLIST.match(body) || BLIGHTLIST.match(body)
 			end
