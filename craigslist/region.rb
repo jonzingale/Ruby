@@ -1,7 +1,5 @@
 class Region
 	require 'matrix'
-	
-	RADII_BLACKLIST = ['sfuad'].freeze
 
 	JACKRABBIT = [35.689054,-105.946113]
 	MY_HOUSE = [35.680067,-105.962163]

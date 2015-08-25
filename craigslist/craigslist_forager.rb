@@ -12,6 +12,7 @@ require 'date'
 		NOW = Date.today.freeze
 		BASE_URL = 'http://santafe.craigslist.org'.freeze
 		APARTMENT_URL = 'http://santafe.craigslist.org/search/apa'.freeze
+		LISTING_STUB = 'http://santafe.craigslist.org/apa/%s.html'.freeze
 
 		BLACKLIST_LOC = /Taos|Arroyo Seco|south ?side|Rodeo|Berino|Mentmore|El Potrero|Rancho Viejo|el Prado|Cuba|Mora|Condo|CR \d+|La Mesilla|Sombrillo|Alcalde|Whites City|Calle Cuesta|San Mateo|Airport|Cerrillos|Sol y Lomas|Ojo Caliente|mobile home|newcomb|Ute Park|Llano Quemado|roswell|Arroyo Hondo|Espanola|Pojoaque|Velarde|Albuquerque|Las Vegas|artesia|Chama|Nambe|AIRPORT|abq|fnm|pub|los alamos|Glorieta|Truchas|Edgewood|Cochiti Lake|cvn|cos|Chimayo|El Prado|El Rancho|Bernalillo|Abiquiu/i
 		BLIGHTLIST = /lease to|housemate|gated|maintenance|recreation room|South Meadows|staff|compound|management|town ?house|the reserve|shower only|try us|deals|(vista|casa) alegre|visit us|tierra contenta/i
@@ -19,18 +20,9 @@ require 'date'
 		BODY_BLACKLIST = /Truchas|South Meadows/i
 
 		LISTINGS_SEL = './/div[@class="content"]/p[@class="row"]/span'.freeze
-		NO_RESULTS_SEL = './/div[@class="noresults"]'.freeze
 		NUM_LISTINGS_SEL = './/span[@class="totalcount"]'.freeze
 		NEXT_BUTTON_SEL = './/a[@title="next page"]'.freeze
-		ID_SEL = './/span[@class="maptag"]'.freeze
-		GEOCOORDS = %w(latitude longitude).freeze
-		
-		LISTING_STUB = 'http://santafe.craigslist.org/apa/%s.html'.freeze
 
-		# a source directory off of crude. --untracked.
-		FILES_PATH = File.expand_path('./..', __FILE__).freeze		
-		##########
-		
 		def open_listings(listings)
 			listings.each do |listing|
 		 		`open "http://santafe.craigslist.org/apa/#{listing.value['id']}.html"`
@@ -42,9 +34,6 @@ require 'date'
 			Date.strptime(date_str, '%m/%d/%Y')
 		end
 
-		# modify this as I would like 
-		# a 3 bedroom for 1500 or 
-		# 2 bedroom for 1100
 		def search(query)
 			agent = Mechanize.new
 			request_hash = {'max_price' => '1500', 
@@ -64,17 +53,12 @@ require 'date'
 
 			num_listings = page.at(NUM_LISTINGS_SEL).text.to_i
 			raise 'NoListings' if num_listings < 1
-		
-			listings = page.search(LISTINGS_SEL)
 
-			# cleans listings via location_blacklist on location.
-			# cleans listings via keywords_blacklist on summary.
-			# cleans listings via ids.
-			listings = listings.reject do |ls| 
+			# cleans listings via location_blacklist on location,
+			# keywords_blacklist on summary, and ids
+			listings = page.search(LISTINGS_SEL).reject do |ls| 
 				cond1 = BLACKLIST_LOC.match(ls.text)
 				cond2 = BLIGHTLIST.match(ls.text)
-
-				# it would be good to grab reposts as well. 
 				cond3 = BLACK_IDS.match(ls.at('.//a')['data-id'])
 
 				cond1 || cond2 || cond3
@@ -94,7 +78,6 @@ require 'date'
 					inside = place.in_region?
 				end ; inside
 			end
-
 
 			# inside pass at location determining.
 			listings_data.select! do |listing|
@@ -132,15 +115,4 @@ require 'date'
 		end
 
 process
-
-
-
-
-
-
-			# code for offline mode, though still no geocodes.
-			# 			# some_listing = agent.get(LISTING_STUB % listings_data[5]['id'])
-			# 			file = File.open(FILES_PATH+'/some_listing.html')
-			#    		listing = '' ; file.each { |line| listing << line }
-			#    		listing = Nokogiri.parse(listing)
 
