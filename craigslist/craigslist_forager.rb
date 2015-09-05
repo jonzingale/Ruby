@@ -8,6 +8,11 @@ require 'nokogiri'
 require 'byebug'
 require 'date'
 
+
+	# Todo:
+	# email them and then blacklist ids.
+
+
 		# listing date cache.
 		NOW = Date.today.freeze
 		BASE_URL = 'http://santafe.craigslist.org'.freeze
@@ -19,7 +24,7 @@ require 'date'
 		BODY_SEL = './/section[@id="postingbody"]'.freeze
 		COORDS_SEL = './/div[@id="map"]'.freeze
 
-		BLACKLIST_LOC = /Taos|Arroyo Seco|Zafarano|Fort Wingate|south ?side|Rodeo|Berino|Mentmore|El Potrero|Rancho Viejo|el Prado|Cuba|Mora|Condo|CR \d+|La Mesilla|Sombrillo|Alcalde|Whites City|Calle Cuesta|San Mateo|Airport|Cerrillos|Sol y Lomas|Ojo Caliente|mobile home|newcomb|Ute Park|Llano Quemado|roswell|Arroyo Hondo|Espanola|Pojoaque|Velarde|Albuquerque|Las Vegas|artesia|Chama|Nambe|AIRPORT|abq|fnm|pub|los alamos|Glorieta|Truchas|Edgewood|Cochiti Lake|cvn|cos|Chimayo|El Prado|El Rancho|Bernalillo|Abiquiu/i
+		BLACKLIST_LOC = /Taos|Arroyo Seco|La Cienega|Zafarano|Fort Wingate|south ?side|Rodeo|Berino|Mentmore|El Potrero|Rancho Viejo|el Prado|Cuba|Mora|Condo|CR \d+|La Mesilla|Sombrillo|Alcalde|Whites City|Calle Cuesta|San Mateo|Airport|Cerrillos|Sol y Lomas|Ojo Caliente|mobile home|newcomb|Ute Park|Llano Quemado|roswell|Arroyo Hondo|Espanola|Pojoaque|Velarde|Albuquerque|Las Vegas|artesia|Chama|Nambe|AIRPORT|abq|fnm|pub|los alamos|Glorieta|Truchas|Edgewood|Cochiti Lake|cvn|cos|Chimayo|El Prado|El Rancho|Bernalillo|Abiquiu/i
 		BLIGHTLIST = /lease to|housemate|gated|maintenance|recreation room|South Meadows|staff|compound|management|town ?house|the reserve|shower only|try us|deals|(vista|casa) alegre|visit us|tierra contenta/i
 		BLACK_IDS = /5186903444|5185114818|5194032603|5192969559|5189497658|5179106556|5184025942|5183612746|5186603979|5193059172/
 		BODY_BLACKLIST = /Truchas|South Meadows/i
