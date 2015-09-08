@@ -1,7 +1,6 @@
 # a simple collection of methods
 # for getting emails out there.
 require 'byebug'
-require 'curses'
 require 'active_support/core_ext/object/blank'
 
 class Email
