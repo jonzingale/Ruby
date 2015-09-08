@@ -7,7 +7,6 @@
 	TEMP = "#{FILES_PATH}/tmp.csv"
 	TEMP2 = "#{FILES_PATH}/tmp2.csv"
 
-
 	# TODO: DATA
 	# will want the first file to not already have counts.
 
@@ -36,6 +35,7 @@
 		end
 
 		# too slow for each line in chunks?
+		# keep file open while accumulating.
 		def append(content)
 			File.open(path,'a'){|target| target << content}
 			new_file = FileAry.new(path)
@@ -50,6 +50,16 @@
 			@head = read.lines.first
 			@lines = read.lines
 			@count = lines.count
+		end
+
+		def chunked_append
+			ary = []
+			while ary.count < 1000
+				color = head
+				count = same_as_first_count
+				ary << [color, count]
+				delete_same_as
+			end ; ary
 		end
 
 		def same_as_first_count
@@ -74,10 +84,10 @@
 			@count = lines.count
 			temp.delete
 		end
-
 	end
 
 
+	##### outside of class
 	def process_color(file_ary,temp2)
 		unless file_ary.head.nil?
 			# do this in chunks i suspect
