@@ -36,6 +36,7 @@
 
 		# too slow for each line in chunks?
 		# keep file open while accumulating.
+		# each_slice
 		def append(content)
 			File.open(path,'a'){|target| target << content}
 			new_file = FileAry.new(path)
