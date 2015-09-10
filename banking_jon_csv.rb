@@ -35,7 +35,8 @@ require 'csv'
 	end
 
 	class Bank
-		attr_accessor :dates, :description, :change, :balance, :credit, :debit
+		attr_accessor :dates, :description, :change, :contents_loop,
+									:balance, :credit, :debit
 
 		def initialize
 			ary = CSV.open(FILE1,'r').read
@@ -67,33 +68,34 @@ require 'csv'
 		def per_hour ; (credit_total / date_span).round(2) ; end
 		def per_month ; (per_hour * 30).round(2) ; end
 		def per_year ; (per_month * 12).round(2) ; end
-	end
 	
-	def contents_loop(bank)
-		key = wait_for_key_press
-
-		if key == 'q'
-			puts 'exiting'
-		elsif INDICES.any?{|i| i == key.to_i}
-			puts DATA[key.to_i]
-			puts bank.send(DATA[key.to_i])
-			puts 'press key to continue'
-
-			wait_for_key_press
-			system('clear')
-			puts CONTENTS
-
-			contents_loop(bank)
-		else
-			contents_loop(bank)
+		def contents_loop
+			key = wait_for_key_press
+	
+			if key == 'q'
+				puts 'exiting'
+			elsif INDICES.any?{|i| i == key.to_i}
+				puts DATA[key.to_i]
+				puts self.send(DATA[key.to_i])
+				puts 'press key to continue'
+	
+				wait_for_key_press
+				system('clear')
+				puts CONTENTS
+	
+				contents_loop
+			else
+				contents_loop
+			end
 		end
+
 	end
 
 	def process
 		system('clear')
 		bank = Bank.new
 		puts CONTENTS
-		contents_loop(bank)
+		bank.contents_loop
 	end
 
 process
