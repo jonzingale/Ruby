@@ -2,7 +2,7 @@ require 'byebug'
 require 'csv'
 
 	FILES_PATH = File.expand_path('./../../../../Downloads', __FILE__)
-	FILE1 = "#{FILES_PATH}/export.csv"
+	FILE1 = "#{FILES_PATH}/export_jon.csv"
 
 	INDICES = (0...10).to_a
 	METHODS = [:credit_total, :debit_total, :date_span, :per_hour, :per_month,
@@ -35,11 +35,12 @@ require 'csv'
 	end
 
 	class Bank
-		attr_accessor :dates, :description, :debit, :credit
+		attr_accessor :dates, :description, :change, :balance, :credit, :debit
 
 		def initialize
 			ary = CSV.open(FILE1,'r').read
-			@dates, @description, @debit, @credit = ary.transpose
+			@dates, @description, @change, @balance = ary.transpose
+			@debit, @credit = change.partition{|del| /-\$/.match(del)}
 		end
 
 		def to_date(date_str)
@@ -63,9 +64,9 @@ require 'csv'
 			debits.map(&:to_f).inject(:+).round(2)
 		end
 
-		def per_hour ; credit_total / date_span ; end
-		def per_month ; per_hour * 30 ; end
-		def per_year ; per_month * 12 ; end
+		def per_hour ; (credit_total / date_span).round(2) ; end
+		def per_month ; (per_hour * 30).round(2) ; end
+		def per_year ; (per_month * 12).round(2) ; end
 	end
 	
 	def contents_loop(bank)
