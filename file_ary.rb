@@ -1,17 +1,18 @@
 	# treat files like arrays.
 	require 'byebug'
+	require 'csv'
+
+	# how do I get these caches cleared?
+
 	FILES_PATH = File.expand_path('./../data', __FILE__)
-	EXAMPLE = "#{FILES_PATH}/color_distributions.csv"
+	# EXAMPLE = "#{FILES_PATH}/color_distributions.csv"
 	FILE1 = "#{FILES_PATH}/file1.csv"
 	FILE2 = "#{FILES_PATH}/file2.csv"
 	TEMP = "#{FILES_PATH}/tmp.csv"
 	TEMP2 = "#{FILES_PATH}/tmp2.csv"
 
-	# TODO: DATA
-	# will want the first file to not already have counts.
-
 	class FileAry
-		# keep things as strings.
+		# keep things as strings?
 		attr_accessor :read, :head, :lines, :path, :count
 		def initialize(path)
 			@path = path
@@ -24,6 +25,9 @@
 		# not sure how this works
 		# def rename(new_name_path)
 		# 	File.rename(self.path, new_name_path)
+
+		# $:.unshift File.dirname(__FILE__)
+		# File.rename("test.txt", "hope.txt")
 		# end
 
 		def delete
@@ -54,13 +58,24 @@
 		end
 
 		def chunked_append
+			temp = FileAry.new(TEMP2)
 			ary = []
+
 			while ary.count < 1000
 				color = head
 				count = same_as_first_count
+				puts ary.count
 				ary << [color, count]
-				delete_same_as
-			end ; ary
+			end
+
+			CSV.open(TEMP2,'wb'){|csv| csv << ary}
+			# temp.append(ary)
+
+			# ary.each{|elem| temp.append(elem)}
+			ary.each{|elem| delete_same_as(elem) }
+
+byebug
+			ary
 		end
 
 		def same_as_first_count
@@ -68,7 +83,7 @@
 		end	
 
 		def delete_same_as(content)
-			temp = FileAry.new(TEMP)
+			temp = FileAry.new(TEMP2)
 			temp.delete
 
 			File.open(temp.path,'a') do |file|
@@ -120,8 +135,8 @@
 	it = FileAry.new(FILE1)
 	that = FileAry.new(FILE2)
 	that.copy_from(it)
-
-	color_counts(that)
+	that.chunked_append
+	# color_counts(that)
 	
 
 	byebug ; 4

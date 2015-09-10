@@ -3,6 +3,9 @@
 require 'byebug'
 require 'active_support/core_ext/object/blank'
 
+# Todo: multiple recipients? maybe just a comma?
+# attachments? hyperlinks?
+
 class Email
 	# a source directory off of crude. --untracked.
 	FILES_PATH = File.expand_path('./..', __FILE__).freeze
@@ -42,7 +45,6 @@ class Email
 	end
 
 	def send_email
-byebug
 		unless (self.address || self.message || self.header).blank?
 			%x(echo "#{message}" | mail -s '#{header}' #{address} )
 		end
