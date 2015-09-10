@@ -35,10 +35,11 @@ require 'csv'
 	end
 
 	class Bank
-		attr_accessor :dates, :number, :description, :debit, :credit
+		attr_accessor :dates, :description, :debit, :credit
+
 		def initialize
 			ary = CSV.open(FILE1,'r').read
-			@dates, @number, @description, @debit, @credit = ary.transpose
+			@dates, @description, @debit, @credit = ary.transpose
 		end
 
 		def to_date(date_str)
@@ -47,17 +48,19 @@ require 'csv'
 		end
 
 		def date_span
-			start = to_date @dates.last
-			stop = to_date @dates[1]
+			start = to_date dates.last
+			stop = to_date dates.first
 			(stop-start).to_f
 		end
 
 		def credit_total
-			@credit.map(&:to_f).inject :+
+			credits = credit.map{|up| /\d+\.\d+/.match(up)[0]}
+			credits.map(&:to_f).inject(:+).round(2)
 		end
 
 		def debit_total
-			@debit.map(&:to_f).inject :+
+			debits = debit.map{|dn| /\d+\.\d+/.match(dn)[0]}
+			debits.map(&:to_f).inject(:+).round(2)
 		end
 
 		def per_hour ; credit_total / date_span ; end
