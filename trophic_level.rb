@@ -18,8 +18,7 @@ module Graphs
 		end
 	end
 
-	# todo: nodify objects
-	class Node
+	class Node# todo: nodify objects
 		def initialize(thing=nil)
 			@thing = thing
 			@nodes = node # should better be hash for name clash.
@@ -82,9 +81,14 @@ include Graphs
 			@id = Matrix.identity(@count)
 		end
 
+		def has_node?(node)
+			@nodes.any?{|n|n==node}
+		end
+
 		def is_source?(node)
+			has_node = self.has_node?(node)
 			heads_tails = @edges.values.map{|i|i[0..1]}
-			heads_tails.none?{|s,t| t == node && s != t}
+			has_node && heads_tails.none?{|s,t| t == node && s != t}
 		end
 
 		# Note: this is directed.
@@ -211,12 +215,13 @@ graph.add_edge('4','3',Rational(0.6))
 graph.add_edge('2','5',Rational(0.3))
 
 levine = Levine.new(graph)
+is_basal = levine.is_source?('you')
 
 sources = levine.nodes.select{|node| levine.is_source?(node) }
 
 # an absorbing markov chain.
 matrix = levine.transition
-trophic_vect = levine.trophic_position_vector.map{|t|t.to_f.round 2}
+trophic_vect = levine.trophic_position_vector
 
 pp_it(trophic_vect)
 pp_it(matrix)
