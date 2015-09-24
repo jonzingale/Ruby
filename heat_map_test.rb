@@ -37,17 +37,18 @@
 			@agent = Mechanize.new
 			agent.follow_meta_refresh = true # new data
 			agent.keep_alive = false # no time outs
-			@page = agent.get('http://www.weather.gov')
+			# @page = agent.get('http://www.weather.gov')
 			scrape_data
 
 			@geocoords = LAT_LON_REGEX.match(page.uri.to_s)[1..2]
 		end
 
 		def scrape_data
+			@page = agent.get('http://www.weather.gov')
 			form = page.form('getForecast')
 			form.inputstring = self.zipcode
 			@page = form.submit
-
+byebug
 			@temp = page.at(CURRENT_TEMP_SEL).text.to_i
 
 			page.search(CURRENT_CONDS_SEL).each do |tr|
