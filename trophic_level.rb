@@ -120,18 +120,22 @@ include Graphs
 		end
 
 
-		def trophic_specialization
-			# var(i) = sigma (k-xi)^2 * pi(k)
-			# where sigma ranges from k=0 to infinity
-			# k being a path length and xi and pi are
-			# the node and probability associated with
-			# energy reaching xi.
+		# var(i) = sigma (k-xi)^2 * pi(k)
+		# where sigma ranges from k=0 to infinity
+		# k being a path length and xi and pi are
+		# the node and probability associated with
+		# energy reaching xi. k and xi being the
+		# same type SET or index or otherwise.
+		# then convert to integer for differencing.
 
-			# again, as with path_length_probability,
-			# this may be a bitch to calculate. A second
-			# similar measure is based on the transition
-			# matrix.
-			# var(i) = sigma (xj - ri)^2 tij
+		# again, as with path_length_probability,
+		# this may be a bitch to calculate. A second
+		# similar measure is based on the transition
+		# matrix.
+		# var(i) = sigma (xj - ri)^2 tij
+		def trophic_spec(index)
+
+
 		end
 
 		def trophic_position_vector
