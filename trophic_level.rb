@@ -10,14 +10,6 @@ require 'active_support/all'
 # Pass objects for nodes, methods for edges?
 module Graphs
 
-	def pp_it(obj)
-		if obj.is_a?(Vector)
-			obj.map{|t|t.to_f.round 2}
-		elsif obj.is_a?(Matrix)
-			(0...obj.column_count).each{|i| puts obj.row(i).map{|t| t.to_f.round 2}}
-		end
-	end
-
 	class Node# todo: nodify objects
 		def initialize(thing=nil)
 			@thing = thing
@@ -65,6 +57,17 @@ module Graphs
 
 		# Todo: cohomology, cyclomatics?
 	end
+
+	def pp_it(obj)
+		if obj.is_a?(Vector)
+			obj.map{|t|t.to_f.round 2}
+		elsif obj.is_a?(Matrix)
+			(0...obj.column_count).each do |i| 
+				puts obj.row(i).map{|t| t.to_f.round 2}
+			end
+		end
+	end
+
 end
 ###############
 include Graphs
@@ -133,7 +136,8 @@ include Graphs
 		# similar measure is based on the transition
 		# matrix.
 		# var(i) = sigma (xj - ri)^2 tij
-		def trophic_spec(index)
+		def trophic_spec(node)
+			# let ri = xi - 1
 
 
 		end
