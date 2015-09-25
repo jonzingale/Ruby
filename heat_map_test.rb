@@ -48,7 +48,7 @@
 			form = page.form('getForecast')
 			form.inputstring = self.zipcode
 			@page = form.submit
-byebug
+# byebug
 			@temp = page.at(CURRENT_TEMP_SEL).text.to_i
 
 			page.search(CURRENT_CONDS_SEL).each do |tr|
