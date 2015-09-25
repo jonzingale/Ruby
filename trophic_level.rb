@@ -85,7 +85,8 @@ include Graphs
 		end
 
 		def has_node?(node)
-			@nodes.any?{|n|n==node}
+			@graph.has_node?(node)
+			# @nodes.any?{|n|n==node}
 		end
 
 		def is_source?(node)
@@ -95,9 +96,9 @@ include Graphs
 		end
 
 		# Note: this is directed.
-		# how can this inherit?
 		def has_edge?(node_1, node_2)
-			@edges["#{node_1}_#{node_2}"].present?
+			@graph.has_edge?(node_1, node_2)
+			# @edges["#{node_1}_#{node_2}"].present?
 		end
 
 		def tropic_height(node)
