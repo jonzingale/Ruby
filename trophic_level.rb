@@ -19,17 +19,18 @@ module Graphs
 
 	class DiGraph
 		attr_reader :edges, :weight, :nodes
-		def initialize(nodes=[],weighted_edges={})
+		def initialize(nodes={},weighted_edges={})
 			@nodes = nodes # should better be hash for name clash.
 			@edges = weighted_edges
 		end
 
-		def add_node(name=nil)
-			@nodes << name 
+		def add_node(name_str)
+			count = @nodes.count
+			@nodes[name_str] = count
 		end
 
 		def add_nodes(name_ary=[])
-			@nodes += name_ary
+			name_ary.each{|name| self.add_node(name) }
 		end
 
 		def weight(edge)
@@ -37,7 +38,8 @@ module Graphs
 		end
 
 		def has_node?(node)
-			@nodes.any?{|n|n==node}
+			@nodes.keys.any?{|n|n==node}
+			# @nodes.any?{|n|n==node}
 		end
 
 		# note: this is directed.
@@ -72,19 +74,19 @@ end
 ###############
 include Graphs
 
-	class Levine
+	class Levine#<DiGraph?
 		# include Graphs
 		require 'matrix'
-		attr_reader :edges, :nodes, :id
+		attr_reader :edges, :nodes, :id, :eval
 
 		def initialize(graph)
 			@graph = graph
 			@edges = graph.edges
 			@nodes = graph.nodes
-			@count = @nodes.count
-			@id = Matrix.identity(@count)
-			@sources = @nodes.select{|n| self.is_source?(n)}
-			@eval = Vector.elements([1] * @count) # todo: if source then 0
+
+			@id = Matrix.identity(@nodes.count)
+			@eval = self.non_source
+			@zero = @eval * 0
 		end
 
 		def has_node?(node)
@@ -95,6 +97,11 @@ include Graphs
 			has_node = self.has_node?(node)
 			heads_tails = @edges.values.map{|i|i[0..1]}
 			has_node && heads_tails.none?{|s,t| t == node && s != t}
+		end
+
+		def non_source
+			src_ary = @nodes.keys.map{|n| self.is_source?(n) ? 0 : 1}
+			Vector.elements(src_ary)
 		end
 
 		# Note: this is directed.
@@ -124,45 +131,52 @@ include Graphs
 			# multiplications?
 		end
 
-
 		# var(i) = sigma (k-xi)^2 * pi(k)
 		# where sigma ranges from k=0 to infinity
 		# k being a path length and xi and pi are
 		# the trophic position and probability 
 		# associated with energy reaching xi.
 		# alternatively .. .
-
-		# var(i) = sigma (xj - ri)^2 tij
 		def trophic_spec(node)
-			# let ri = xi - 1
+# :(s2) = Σ [(xi - x̅)2]/n - 1.
+# s2 = Variance
+# Σ = Summation, which means the sum of every term in the equation after the summation sign.
+# xi = Sample observation. This represents every term in the set.
+# x̅ = The mean. This represents the average of all the numbers in the set.
+# n = The sample size. You can think of this as the number of terms in the set.
+# from nets
 
-			# CHANGE FOR NODE
-			index = @nodes.index{|i| i == node}
-			ri = self.trophic_position[index] - 1
-
-			# CHANGE FOR NODE
-			ary = @nodes.map.with_index do |elem,j|
-				xj = self.trophic_position[j]
-				(xj - ri)**2 * self.transition[index,j]
-			end.inject :+
-
-		end
-
-		def trophic_position
-			# y = (I - Q)^-1 * vect 1
-			# Q is the non-source columns
-			mtx, non_source = self.transition, []
-
-			# the single arrow on the source
-			# is actually considered a non-source,
-			# but then singular matrix :(
-			mtx.column_vectors.each_with_index do |col,i|
-				non_source << (col[i] == 0 ? col : [0] * @count)
-			end
+			# var(i) = Σ(xj - ri)^2 tij
+			# where ri = xi - 1
 
 			# [0,1,2.08,1.47,2.33] x
 			# [0,0,0.95,0.99,0.85] sig
 			# [0,0,0.57,0.93,0.13] sig_h
+
+			# i am getting [1.0, 0.0, 0.32, 0.87, 0.05]
+			# though pp_it(levine.trophic_position)
+			# gives the correct position vector.
+
+			index = @nodes[node]
+			ti = self.transition.row(index)
+			ri = self.trophic_position[index] - 1
+			xjs = self.trophic_position
+
+			var = xjs.map{|xj| (xj - ri)**2}
+			dot_prod(var,ti)
+		end
+
+		def dot_prod(vect,wect) ; vect.zip(wect).map{|v,w| v*w}.inject :+ ; end
+
+		def trophic_position
+			# y = (I - Q)^-1 * vect 1
+			# Q are the non-source columns
+			mtx, non_source = self.transition, []
+
+			mtx.column_vectors.each_with_index do |col,i|
+				non_source << (col[i] == 0 ? col : @zero)
+			end
+
 			q_matrix = Matrix.columns(non_source)
 			n_matrix = (@id - q_matrix).inverse
 			y_vect = n_matrix * @eval
@@ -171,13 +185,11 @@ include Graphs
 		def transition
 			# the probability that a unit of energy entering
 			# component m was obtained directly from component n
-
-			# CHANGE FOR NODE
-			node_pair_rows = @nodes.map{|n| @nodes.map{|m| [n,m]}}
+			node_pair_rows = @nodes.keys.map{|n| @nodes.keys.map{|m| [n,m]}}
 
 			weight_rows = node_pair_rows.map do |row|
 				row.map do |s,t|
-					self.is_source?(s) && s==t ? 1 : # 1
+					self.is_source?(s) && s==t ? 1 :
 					has_edge?(s,t) ? edges["%s_%s" % [s,t]].last : 0
 				end
 			end
@@ -243,11 +255,11 @@ sources = levine.nodes.select{|node| levine.is_source?(node) }
 # an absorbing markov chain.
 matrix = levine.transition
 trophic_vect = levine.trophic_position.map{|t| t.to_f.round 2}
+var_3 = levine.trophic_spec('3')
 
 pp_it(trophic_vect)
 pp_it(matrix)
 
-var_3 = levine.trophic_spec('3')
 
 
 # Sarah's Graph
@@ -269,9 +281,8 @@ sarah.add_edge('n','o',Rational(1.0))
 sarah.add_edge('o','l',Rational(1/4.0))
 
 tr_sarah = Levine.new(sarah)
-
+sarah_pos = tr_sarah.trophic_position
 var_f = tr_sarah.trophic_spec('f')
-
 
 # a simple third
 simple = DiGraph.new
@@ -283,8 +294,8 @@ simple.add_edge('2','3',1)
 simple.add_edge('3','4',1)
 simple.add_edge('4','5',1)
 
-
 tr_simple = Levine.new(simple)
+simple_pos = tr_simple.trophic_position
 var_2 = tr_simple.trophic_spec('2')
 
 
