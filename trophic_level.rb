@@ -20,13 +20,12 @@ module Graphs
 	class DiGraph
 		attr_reader :edges, :weight, :nodes
 		def initialize(nodes={},weighted_edges={})
-			@nodes = nodes # should better be hash for name clash.
 			@edges = weighted_edges
+			@nodes = nodes
 		end
 
 		def add_node(name_str)
-			count = @nodes.count
-			@nodes[name_str] = count
+			@nodes[name_str] = @nodes.count
 		end
 
 		def add_nodes(name_ary=[])
@@ -39,7 +38,6 @@ module Graphs
 
 		def has_node?(node)
 			@nodes.keys.any?{|n|n==node}
-			# @nodes.any?{|n|n==node}
 		end
 
 		# note: this is directed.
@@ -154,12 +152,10 @@ include Graphs
 			# [0,0,0.57,0.93,0.13] sig_h
 
 			# i am getting [1.0, 0.0, 0.32, 0.87, 0.05]
-			# though pp_it(levine.trophic_position)
-			# gives the correct position vector.
 
 			index = @nodes[node]
 			ti = self.transition.row(index)
-			ri = self.trophic_position[index] - 1
+			ri = self.trophic_position[index] - 1 # <-- why minus 1?
 			xjs = self.trophic_position
 
 			var = xjs.map{|xj| (xj - ri)**2}
@@ -298,5 +294,6 @@ tr_simple = Levine.new(simple)
 simple_pos = tr_simple.trophic_position
 var_2 = tr_simple.trophic_spec('2')
 
+vars = levine.nodes.keys.map{|t| levine.trophic_spec(t).to_f}
 
 byebug ; 4
