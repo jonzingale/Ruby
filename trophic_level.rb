@@ -61,7 +61,7 @@ module Graphs
 	def pp_it(obj)
 		puts "\n\n"
 		if obj.is_a?(Vector)
-			obj.map{|t|t.to_f.round 2}
+			puts obj.map{|t|t.to_f.round 2}
 		elsif obj.is_a?(Matrix)
 			(0...obj.column_count).each do |i| 
 				puts obj.row(i).map{|t| t.to_f.round 2}
@@ -90,7 +90,7 @@ end
 
 			@id = Matrix.identity(count)
 			@one = Vector.elements([1] * count)
-			@eval = self.non_source
+			@eval = self.non_sources
 			@zero = @eval * 0
 		end
 
@@ -100,35 +100,65 @@ end
 			has_node && heads_tails.none?{|s,t| t == node && s != t}
 		end
 
-		def non_source
+		def non_sources
 			src_ary = @nodes.keys.map{|n| self.is_source?(n) ? 0 : 1}
 			Vector.elements(src_ary)
 		end
 
-		# path method
-		# TODO:
-		# def tropic_height(node)
-		# 	if self.is_source?(node)
-		# 		1
-		# 	else
-		# 		# todo: start a calculation of all paths.
-		# 		# and compute upto 90 % of diet.
-		# 		# xi = Σ k*pi(k), Σ 0..inf
-		# 		# i is component, 
-		# 		# k is path length
-		# 	end
-		# end
+	# resource_deviation, path_deviation
+		# path methods
+		def walk(index,with_loop=false)
+			index == 0 ? @id : self.transition(with_loop) ** index
+		end
 
-		# def path_length_probability(k)
-		# 	# should compute trophic position from
-		# 	# contribution of paths of given lengths.
-		# 	# How do I test that there are only n 
-		# 	# paths of length k from a source to a 
-		# 	# given component?		
-		# end
+		def path_approx
+			@approx, @approx_cond = 0 , nil # get to within 98 % of energy
+			while (@approx_cond.nil? || @approx_cond) && @approx < 10
+				@approx_cond = self.walk(@approx+1,true).column(0).min <= 0.98
+				@approx += 1
+			end ; @approx
+		end
+
+		def path_position
+			approx = path_approx
+			position_ary = @nodes.values.map do |index|
+				elem = (1..approx).map{|steps| walk(steps)[index,0] * steps}
+				elem.inject :+
+			end
+
+			Vector.elements(position_ary)
+		end
+
+		# works ; but can it be done as matrix multiplication?
+		def path_variance
+			approx = path_approx
+			positions = self.path_position
+
+			# rows are nodes probabilities, columns are steps
+			path_probs = @nodes.values.map do |k|
+				probs = (1..approx).map{|steps| walk(steps)[k,0]}
+				Vector.elements(probs)
+			end
+
+			# rows are nodes positions, columns are steps
+			path_pos = (1..approx).map do |k|
+				(positions -  k * @one).map {|t|t**2}
+			end
+
+			path_pos = Matrix.columns(path_pos).to_a.map{|t| Vector.elements(t)}
+
+			vars = path_pos.zip(path_probs).map{|v,w|v.inner_product w}
+
+			Vector.elements(vars)
+		end
+
+		def path_specialization
+			self.path_variance.map{|t| t**0.5}
+		end
+
 		# # # #
 
-		# transition method
+		# transition methods
 		def trophic_variance(node)
 			index = @nodes[node]
 			positions = self.trophic_position
@@ -141,7 +171,7 @@ end
 			average_resource = positions[index] * @one - cannibal_offset
 			dist = (positions - average_resource).map{|v| v ** 2}
 
-			dot_prod(dist,masses)
+			dist.inner_product masses
 		end
 
 		def specialization(node)
@@ -152,35 +182,30 @@ end
 		# y = (I - Q)^-1 * vect 1
 		# Q are the non-source columns
 		def trophic_position
-			mtx, non_source = self.transition, []
+			mtx, non_sources = self.transition, []
 
 			mtx.column_vectors.each_with_index do |col,i|
-				non_source << (col[i] == 0 ? col : @zero)
+				non_sources << (col[i] == 0 ? col : @zero)
 			end
 
-			q_matrix = Matrix.columns(non_source)
+			q_matrix = Matrix.columns(non_sources)
 			n_matrix = (@id - q_matrix).inverse
 			y_vect = n_matrix * @eval
 		end
 
-		def transition
+		def transition(with_loop=false)
 			# the probability that a unit of energy entering
 			# component m was obtained directly from component n
 			node_pair_rows = @nodes.keys.map{|n| @nodes.keys.map{|m| [n,m]}}
 
 			weight_rows = node_pair_rows.map do |row|
-				row.map do |s_t|
-					has_edge?(*s_t) ? edges["%s_%s" % s_t].last : 0
+				row.map do |s,t|
+			    self.is_source?(s) && s==t ? (with_loop ? 1 : 0) :
+					has_edge?(s,t) ? edges["%s_%s" % [s,t]].last : 0
 				end
 			end
 
 			Matrix.columns(weight_rows)
-		end
-
-		private
-
-		def dot_prod(vect,wect)
-			vect.zip(wect).map{|v,w|v*w}.inject :+
 		end
 	end
 
@@ -210,7 +235,6 @@ end
 # puts them
 
 ########### Levine
-
 graph = DiGraph.new
 graph.add_nodes((1..5).map &:to_s)
 # graph.add_edge('1','1',1.0) # source
@@ -228,8 +252,12 @@ is_basal = levine.is_source?('you')
 
 matrix = levine.transition
 trophic_vect = levine.trophic_position
-std_dev = levine.nodes.keys.map{|k| levine.specialization(k) }
+resource_dev = levine.nodes.keys.map{|k| levine.specialization(k) }
 
-pp_it(std_dev)
+pp_it(resource_dev)
 
+# path_pos = levine.path_position
+path_var = levine.path_variance
+path_dev = levine.path_specialization
+pp_it path_dev
 byebug ; 4
