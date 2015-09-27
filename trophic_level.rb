@@ -13,7 +13,7 @@ module Graphs
 	class Node# todo: nodify objects
 		def initialize(thing=nil)
 			@thing = thing
-			@nodes = node # should better be hash for name clash.
+			@nodes = node
 		end
 	end
 
@@ -59,13 +59,17 @@ module Graphs
 	end
 
 	def pp_it(obj)
+		puts "\n\n"
 		if obj.is_a?(Vector)
 			obj.map{|t|t.to_f.round 2}
 		elsif obj.is_a?(Matrix)
 			(0...obj.column_count).each do |i| 
 				puts obj.row(i).map{|t| t.to_f.round 2}
 			end
+		elsif obj.is_a?(Array)
+			puts obj.map{|t|t.round(2)}.to_s
 		end
+		puts "\n\n"
 	end
 
 end
@@ -81,8 +85,10 @@ include Graphs
 			@graph = graph
 			@edges = graph.edges
 			@nodes = graph.nodes
+			count = @nodes.count
 
-			@id = Matrix.identity(@nodes.count)
+			@id = Matrix.identity(count)
+			@one = Vector.elements([1] * count)
 			@eval = self.non_source
 			@zero = @eval * 0
 		end
@@ -107,62 +113,49 @@ include Graphs
 			@graph.has_edge?(node_1, node_2)
 		end
 
-		def tropic_height(node)
-			if self.is_source?(node)
-				1
-			else
-				# todo: start a calculation of all paths.
-				# and compute upto 90 % of diet.
-				# xi = sigma k*pi(k)
-				# where sigma from 0 to inf
-				# i is component, k is path length
-			end
-		end
+		# path method
+		# TODO:
+		# def tropic_height(node)
+		# 	if self.is_source?(node)
+		# 		1
+		# 	else
+		# 		# todo: start a calculation of all paths.
+		# 		# and compute upto 90 % of diet.
+		# 		# xi = Σ k*pi(k), Σ 0..inf
+		# 		# i is component, 
+		# 		# k is path length
+		# 	end
+		# end
 
-		def path_length_probability(k)
-			# should compute trophic position from
-			# contribution of paths of given lengths.
-			# How do I test that there are only n 
-			# paths of length k from a source to a 
-			# given component?
+		# def path_length_probability(k)
+		# 	# should compute trophic position from
+		# 	# contribution of paths of given lengths.
+		# 	# How do I test that there are only n 
+		# 	# paths of length k from a source to a 
+		# 	# given component?		
+		# end
+		# # # #
 
-			# multiplications?
-		end
-
-		# var(i) = sigma (k-xi)^2 * pi(k)
-		# where sigma ranges from k=0 to infinity
-		# k being a path length and xi and pi are
-		# the trophic position and probability 
-		# associated with energy reaching xi.
-		# alternatively .. .
-		def trophic_spec(node)
-# :(s2) = Σ [(xi - x̅)2]/n - 1.
-# s2 = Variance
-# Σ = Summation, which means the sum of every term in the equation after the summation sign.
-# xi = Sample observation. This represents every term in the set.
-# x̅ = The mean. This represents the average of all the numbers in the set.
-# n = The sample size. You can think of this as the number of terms in the set.
-# from nets
-
-			# var(i) = Σ(xj - ri)^2 tij
-			# where ri = xi - 1
-
-			# [0,1,2.08,1.47,2.33] x
-			# [0,0,0.95,0.99,0.85] sig
-			# [0,0,0.57,0.93,0.13] sig_h
-
-			# i am getting [1.0, 0.0, 0.32, 0.87, 0.05]
-
+		# transition method
+		def trophic_variance(node)
 			index = @nodes[node]
-			ti = self.transition.row(index)
-			ri = self.trophic_position[index] - 1 # <-- why minus 1?
-			xjs = self.trophic_position
+			positions = self.trophic_position
+			masses = self.transition.row(index)
 
-			var = xjs.map{|xj| (xj - ri)**2}
-			dot_prod(var,ti)
+			# handles the case of cannibalism
+			unit = @id.row(index)
+			cannibal_offset = masses[index] == 0 ? @one : @one - unit
+
+			average_resource = positions[index] * @one - cannibal_offset
+			dist = (positions - average_resource).map{|v| v ** 2}
+
+			dot_prod(dist,masses)
 		end
 
-		def dot_prod(vect,wect) ; vect.zip(wect).map{|v,w| v*w}.inject :+ ; end
+		def specialization(node)
+			self.trophic_variance(node)**(0.5)
+		end
+		# # # #
 
 		def trophic_position
 			# y = (I - Q)^-1 * vect 1
@@ -184,15 +177,19 @@ include Graphs
 			node_pair_rows = @nodes.keys.map{|n| @nodes.keys.map{|m| [n,m]}}
 
 			weight_rows = node_pair_rows.map do |row|
-				row.map do |s,t|
-					self.is_source?(s) && s==t ? 1 :
-					has_edge?(s,t) ? edges["%s_%s" % [s,t]].last : 0
+				row.map do |s_t|
+					has_edge?(*s_t) ? edges["%s_%s" % s_t].last : 0
 				end
 			end
 
 			Matrix.columns(weight_rows)
 		end
 
+		private
+
+		def dot_prod(vect,wect)
+			vect.zip(wect).map{|v,w|v*w}.inject :+
+		end
 	end
 
 ########
@@ -213,87 +210,35 @@ include Graphs
 	
 	# many = trophic_k 2000
 	
+	# # calculates how fast the max tropic position 
+	# # drops as number nodes goes to infinity
 	# them = many.map.with_index do |elem,n| 
 	# 	ratio = elem/(n+1).to_f.round(3)
-	# end.map(&:to_f)
-	
+	# end.map(&:to_f)	
 	# puts them
 	
 	##########
 
-it = DiGraph.new
-it.add_nodes(['me','you','them','these'])
-it.add_edge('you','me',Rational(0.5))
-it.add_edge('you','you',1)
-
-weight = it.weight('you_me')
-
-trop_it = Levine.new(it)
-is_basal = trop_it.is_source?('you')
-
 # levine's paper
 graph = DiGraph.new
 graph.add_nodes((1..5).map &:to_s)
-graph.add_edge('1','2',Rational(1.0))
-graph.add_edge('1','3',Rational(0.2))
-graph.add_edge('1','4',Rational(0.8))
-graph.add_edge('2','3',Rational(0.2))
-graph.add_edge('4','5',Rational(0.7))
-graph.add_edge('5','4',Rational(0.2))
-graph.add_edge('4','3',Rational(0.6))
-graph.add_edge('2','5',Rational(0.3))
+# graph.add_edge('1','1',1.0) # source
+graph.add_edge('1','2',1.0)
+graph.add_edge('1','3',0.2)
+graph.add_edge('1','4',0.8)
+graph.add_edge('2','3',0.2)
+graph.add_edge('4','5',0.7)
+graph.add_edge('5','4',0.2)
+graph.add_edge('4','3',0.6)
+graph.add_edge('2','5',0.3)
 
 levine = Levine.new(graph)
 is_basal = levine.is_source?('you')
 
-sources = levine.nodes.select{|node| levine.is_source?(node) }
-
-# an absorbing markov chain.
 matrix = levine.transition
-trophic_vect = levine.trophic_position.map{|t| t.to_f.round 2}
-var_3 = levine.trophic_spec('3')
+trophic_vect = levine.trophic_position
+std_dev = levine.nodes.keys.map{|k| levine.specialization(k) }
 
-pp_it(trophic_vect)
-pp_it(matrix)
-
-
-
-# Sarah's Graph
-sarah = DiGraph.new
-sarah.add_nodes(('a'..'o').map &:to_s)
-sarah.add_edge('a','b',Rational(1.0))
-sarah.add_edge('b','c',Rational(1/2.0))
-sarah.add_edge('c','d',Rational(1.0))
-sarah.add_edge('d','e',Rational(1.0))
-sarah.add_edge('e','f',Rational(1/3.0))
-sarah.add_edge('g','h',Rational(1.0))
-sarah.add_edge('h','c',Rational(1/2.0))
-sarah.add_edge('i','j',Rational(1.0))
-sarah.add_edge('j','k',Rational(1.0))
-sarah.add_edge('k','l',Rational(3/4.0))
-sarah.add_edge('l','m',Rational(1.0))
-sarah.add_edge('m','f',Rational(2/3.0))
-sarah.add_edge('n','o',Rational(1.0))
-sarah.add_edge('o','l',Rational(1/4.0))
-
-tr_sarah = Levine.new(sarah)
-sarah_pos = tr_sarah.trophic_position
-var_f = tr_sarah.trophic_spec('f')
-
-# a simple third
-simple = DiGraph.new
-simple.add_nodes((0..5).map &:to_s)
-simple.add_edge('0','2',0.5)
-simple.add_edge('1','2',0.5)
-
-simple.add_edge('2','3',1)
-simple.add_edge('3','4',1)
-simple.add_edge('4','5',1)
-
-tr_simple = Levine.new(simple)
-simple_pos = tr_simple.trophic_position
-var_2 = tr_simple.trophic_spec('2')
-
-vars = levine.nodes.keys.map{|t| levine.trophic_spec(t).to_f}
+pp_it(std_dev)
 
 byebug ; 4
