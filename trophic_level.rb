@@ -74,10 +74,11 @@ module Graphs
 
 end
 ###############
-include Graphs
+
+	include Graphs
 
 	class Levine < DiGraph
-		# include Graphs
+		include Graphs
 		require 'matrix'
 		attr_reader :edges, :nodes, :id, :eval
 
@@ -183,34 +184,33 @@ include Graphs
 		end
 	end
 
-########
-	# from Williams & Martinez
-	# Calculates the trophic level
-	# of each component in a complete graph.
-	def trophic_k(n=1,sum=1,i=1,accum=[])
-		if n == 1 || i == 1
-			tot = i
-		else
-			tot = 1 + (i-1)**-1 * sum
-			sum += tot
-		end
-		accum << tot
-		trophic_k(n,sum,i+1,accum) unless n == i
-		accum
-	end
-	
-	# many = trophic_k 2000
-	
-	# # calculates how fast the max tropic position 
-	# # drops as number nodes goes to infinity
-	# them = many.map.with_index do |elem,n| 
-	# 	ratio = elem/(n+1).to_f.round(3)
-	# end.map(&:to_f)	
-	# puts them
-	
-	##########
+######## Williams & Martinez
 
-# Levine's paper
+# Calculates the trophic level
+# of each component in a complete graph.
+def trophic_k(n=1,sum=1,i=1,accum=[])
+	if n == 1 || i == 1
+		tot = i
+	else
+		tot = 1 + (i-1)**-1 * sum
+		sum += tot
+	end
+	accum << tot
+	trophic_k(n,sum,i+1,accum) unless n == i
+	accum
+end
+
+# many = trophic_k 2000
+
+# # calculates how fast the max tropic position 
+# # drops as number nodes goes to infinity
+# them = many.map.with_index do |elem,n| 
+# 	ratio = elem/(n+1).to_f.round(3)
+# end.map(&:to_f)
+# puts them
+
+########### Levine
+
 graph = DiGraph.new
 graph.add_nodes((1..5).map &:to_s)
 # graph.add_edge('1','1',1.0) # source
