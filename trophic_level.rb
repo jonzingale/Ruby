@@ -76,7 +76,7 @@ end
 ###############
 include Graphs
 
-	class Levine#<DiGraph?
+	class Levine < DiGraph
 		# include Graphs
 		require 'matrix'
 		attr_reader :edges, :nodes, :id, :eval
@@ -93,10 +93,6 @@ include Graphs
 			@zero = @eval * 0
 		end
 
-		def has_node?(node)
-			@graph.has_node?(node)
-		end
-
 		def is_source?(node)
 			has_node = self.has_node?(node)
 			heads_tails = @edges.values.map{|i|i[0..1]}
@@ -106,11 +102,6 @@ include Graphs
 		def non_source
 			src_ary = @nodes.keys.map{|n| self.is_source?(n) ? 0 : 1}
 			Vector.elements(src_ary)
-		end
-
-		# Note: this is directed.
-		def has_edge?(node_1, node_2)
-			@graph.has_edge?(node_1, node_2)
 		end
 
 		# path method
@@ -157,9 +148,9 @@ include Graphs
 		end
 		# # # #
 
+		# y = (I - Q)^-1 * vect 1
+		# Q are the non-source columns
 		def trophic_position
-			# y = (I - Q)^-1 * vect 1
-			# Q are the non-source columns
 			mtx, non_source = self.transition, []
 
 			mtx.column_vectors.each_with_index do |col,i|
@@ -219,7 +210,7 @@ include Graphs
 	
 	##########
 
-# levine's paper
+# Levine's paper
 graph = DiGraph.new
 graph.add_nodes((1..5).map &:to_s)
 # graph.add_edge('1','1',1.0) # source
