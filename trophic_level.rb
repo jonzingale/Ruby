@@ -1,4 +1,7 @@
 # a place to calculate trophic_level.
+# resource and path specializations.
+# resource and path trophic levels.
+# Digraphs
 
 # some data sets:
 # personal banking? banking versus walking paths?
@@ -71,9 +74,7 @@ module Graphs
 		end
 		puts "\n\n"
 	end
-
 end
-###############
 
 	include Graphs
 
@@ -105,16 +106,15 @@ end
 			Vector.elements(src_ary)
 		end
 
-	# resource_deviation, path_deviation
 		# path methods
 		def walk(index,with_loop=false)
 			index == 0 ? @id : self.transition(with_loop) ** index
 		end
 
 		def path_approx
-			@approx, @approx_cond = 0 , nil # get to within 98 % of energy
+			@approx, @approx_cond = 0 , nil # 98 % of energy acquired.
 			while (@approx_cond.nil? || @approx_cond) && @approx < 10
-				@approx_cond = self.walk(@approx+1,true).column(0).min <= 0.98
+				@approx_cond = self.walk(@approx+1,true).column(0).min <= 0.9999
 				@approx += 1
 			end ; @approx
 		end
@@ -122,40 +122,35 @@ end
 		def path_position
 			approx = path_approx
 			position_ary = @nodes.values.map do |index|
-				elem = (1..approx).map{|steps| walk(steps)[index,0] * steps}
-				elem.inject :+
-			end
-
-			Vector.elements(position_ary)
+				(1..approx).map{|steps| walk(steps)[index,0] * steps}.inject :+
+			end ; Vector.elements(position_ary)
 		end
 
-		# works ; but can it be done as matrix multiplication?
+		def get_diagonal(matrix)
+			raise 'not a square matrix' unless matrix.square?
+			(0...matrix.row_count).map{|i| matrix[i,i]}
+		end
+
 		def path_variance
 			approx = path_approx
 			positions = self.path_position
 
-			# rows are nodes probabilities, columns are steps
+			# nodes and probabilities
 			path_probs = @nodes.values.map do |k|
 				probs = (1..approx).map{|steps| walk(steps)[k,0]}
-				Vector.elements(probs)
-			end
+			end ; path_probs = Matrix.rows(path_probs)
 
-			# rows are nodes positions, columns are steps
+			# nodes and position
 			path_pos = (1..approx).map do |k|
-				(positions -  k * @one).map {|t|t**2}
-			end
+				(positions -  k * @one).map{|t|t**2}
+			end ; path_pos = Matrix.rows(path_pos)
 
-			path_pos = Matrix.columns(path_pos).to_a.map{|t| Vector.elements(t)}
-
-			vars = path_pos.zip(path_probs).map{|v,w|v.inner_product w}
-
-			Vector.elements(vars)
+			get_diagonal(path_probs * path_pos)
 		end
 
 		def path_specialization
 			self.path_variance.map{|t| t**0.5}
 		end
-
 		# # # #
 
 		# transition methods
@@ -164,7 +159,7 @@ end
 			positions = self.trophic_position
 			masses = self.transition.row(index)
 
-			# handles the case of cannibalism
+			# cannibalism handling
 			unit = @id.row(index)
 			cannibal_offset = masses[index] == 0 ? @one : @one - unit
 
@@ -174,7 +169,7 @@ end
 			dist.inner_product masses
 		end
 
-		def specialization(node)
+		def resource_specialization(node)
 			self.trophic_variance(node)**(0.5)
 		end
 		# # # #
@@ -203,9 +198,7 @@ end
 			    self.is_source?(s) && s==t ? (with_loop ? 1 : 0) :
 					has_edge?(s,t) ? edges["%s_%s" % [s,t]].last : 0
 				end
-			end
-
-			Matrix.columns(weight_rows)
+			end ; Matrix.columns(weight_rows)
 		end
 	end
 
@@ -252,8 +245,7 @@ is_basal = levine.is_source?('you')
 
 matrix = levine.transition
 trophic_vect = levine.trophic_position
-resource_dev = levine.nodes.keys.map{|k| levine.specialization(k) }
-
+resource_dev = levine.nodes.keys.map{|k| levine.resource_specialization(k) }
 pp_it(resource_dev)
 
 # path_pos = levine.path_position
