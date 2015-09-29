@@ -48,14 +48,17 @@
 			form = page.form('getForecast')
 			form.inputstring = self.zipcode
 			@page = form.submit
-# byebug
-			@temp = page.at(CURRENT_TEMP_SEL).text.to_i
 
-			page.search(CURRENT_CONDS_SEL).each do |tr|
-				/humidity/i =~ tr.text ?  @humidity = data_grabber(tr,/(\d+)%/i) :
-				/barometer/i =~ tr.text ? @pressure = data_grabber(tr,/(\d+\.\d+)/i) :
-				/dewpoint/i =~ tr.text ?  @dewpoint = data_grabber(tr,/(\d+)°F/i): nil
+		 	unless page.at(CURRENT_TEMP_SEL).nil?
+				@temp = page.at(CURRENT_TEMP_SEL).text.to_i
+	
+				page.search(CURRENT_CONDS_SEL).each do |tr|
+					/humidity/i =~ tr.text ?  @humidity = data_grabber(tr,/(\d+)%/i) :
+					/barometer/i =~ tr.text ? @pressure = data_grabber(tr,/(\d+\.\d+)/i) :
+					/dewpoint/i =~ tr.text ?  @dewpoint = data_grabber(tr,/(\d+)°F/i): nil
+				end
 			end
+
 		end
 
 		def data_grabber tr, regex

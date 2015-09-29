@@ -117,7 +117,6 @@ require 'date'
 
 			open_listings(listings_data)
 			it = listings_data.map(&:value)
-			# byebug
 		end
 
 process
