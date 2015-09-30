@@ -2,8 +2,8 @@
 
 class Blinky
 	def initialize(width=20,height=20)
-		@board = rand_board(width, height)
 		@width, @height = width, height
+		@board = rand_board
 		@i = 0
 	end
 
@@ -13,8 +13,8 @@ class Blinky
 		end
 	end
 
-	def rand_board(width=20,height=20)
-		(0...width).map{|i| (0...height).map{|j| rand(2)} }
+	def rand_board
+		(0...@width).map{|i| (0...@height).map{|j| rand 2} }
 	end
 	
 	def cell_at(row,col) ; @board[row][col] ; end
@@ -31,21 +31,19 @@ class Blinky
 	end
 	
 	def update(board)
-		b = board.take(@width)
-		bs = board.drop(@width)
-		board.empty? ? [] : update(bs).unshift(b)
+		b = board.take @width
+		bs = board.drop @width
+		@board = board.empty? ? [] : update(bs).unshift(b)
 	end
 	
 	def go_team
 		beers = (0...@width).inject([]) do |is,i| 
-			is + (0...@height).map{|j| [i,j]}
+			is + (0...@height).map do |j| 
+				blink cell_at(i,j), neighborhood(i,j)
+			end
 		end
 
-		beers.map! do |x,y|
-			blink cell_at(x,y), neighborhood(x,y)
-		end
-
-		@board = update(beers)
+		update(beers)
 	end
 
 	def run_blinky
@@ -58,9 +56,5 @@ class Blinky
 	end
 end
 
-
 blinky = Blinky.new
 blinky.run_blinky
-
-
-
