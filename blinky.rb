@@ -1,5 +1,4 @@
 # Blinky Lights
-
 class Blinky
 	def initialize(width=20,height=20)
 		@width, @height = width, height
@@ -8,7 +7,7 @@ class Blinky
 	end
 
 	def pretty_print
-		@board.map do |row| 
+		@board.each do |row| 
 			puts row.join('').gsub(/[01]/, '0' => '   ', '1' => ' * ')
 		end
 	end
@@ -22,11 +21,11 @@ class Blinky
 	def neighborhood(row,col)
 		nears = (-1..1).inject([]){|is,i| is + (-1..1).map{|j| [i,j]} }
 		nears = nears.select{|i| i!=[0,0]}
-		nears.map{|n,m| cell_at((row+n) % @width,(col+m) % @height) }
+		nears.map{|n,m| cell_at((row+n) % @width, (col+m) % @height) }
 	end
 		
 	def blink(state,neigh)
-		sum=neigh.inject(0){|sum,i| sum+i}
+		sum = neigh.inject :+
 		sum == 3 ? 1 : (sum==2&&state==1) ? 1 : 0 
 	end
 	
