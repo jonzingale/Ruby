@@ -18,12 +18,14 @@ class Blinky
 	
 	def cell_at(row,col) ; @board[row][col] ; end
 	
+	# generalize this
 	def neighborhood(row,col)
 		nears = (-1..1).inject([]){|is,i| is + (-1..1).map{|j| [i,j]} }
 		nears = nears.select{|i| i!=[0,0]}
 		nears.map{|n,m| cell_at((row+n) % @width, (col+m) % @height) }
 	end
-		
+
+	# generalize this
 	def blink(state,neigh)
 		sum = neigh.inject :+
 		sum == 3 ? 1 : (sum==2&&state==1) ? 1 : 0 
