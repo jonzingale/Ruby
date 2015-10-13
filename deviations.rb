@@ -7,6 +7,7 @@ require 'byebug'
 # https://en.wikipedia.org/wiki/T-statistic
 # https://en.wikipedia.org/wiki/Sample_maximum_and_minimum
 # https://en.wikipedia.org/wiki/Normality_test
+# https://en.wikipedia.org/wiki/Secretary_problem
 
 class Stats
 	attr_reader :distr, :with_counts, :count, :mean, :var, :low, :sig
@@ -41,6 +42,16 @@ class Stats
 		cond ? i : sigs_from_center(low_stat,i+1)
 	end
 
+	# reject n/e, then grab next lowest thus far.
+	# really i should likely uniq in there somehow
+	# and figure out a large enough data set to have
+	# a reasonable sample set.
+	def secretary
+		low_reject = distr.take(count/2.718281828).min
+		considered = distr.drop(count/2.718281828)
+		considered.detect{|good| good <= low_reject}
+	end
+
 	def get_data
 		# "distribution:\n#{@distr}\n" \
 		"counts:\n#{@with_counts}\n" \
@@ -63,6 +74,8 @@ latham = Stats.new latham_rates
 
 vagabond = [109.99, 109.99, 119.99, 119.99, 129.99, 139.99, 149.99, 98.99, 98.99, 107.99, 107.99, 116.99, 125.99, 134.99, 98.99, 98.99, 107.99, 107.99, 116.99, 125.99, 134.99, 149.99, 149.99, 159.99, 159.99, 169.99, 179.99, 189.99, 189.99, 189.99, 199.99, 199.99, 209.99, 219.99, 229.99, 98.99, 98.99, 107.99, 107.99, 116.99, 125.99, 134.99]
 vagabond = Stats.new vagabond
+
+vagabond.secretary
 
 # low is how many sigs from center?
 # system('clear')
