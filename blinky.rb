@@ -1,5 +1,7 @@
 # Blinky Lights
 class Blinky
+	NEARS = [-1,0,1].product([-1,0,1]).select{|i| i!=[0,0]}
+
 	def initialize(width=20,height=20)
 		@width, @height = width, height
 		@board = rand_board
@@ -17,12 +19,9 @@ class Blinky
 	end
 	
 	def cell_at(row,col) ; @board[row][col] ; end
-	
-	# generalize this
-	def neighborhood(row,col)
-		nears = (-1..1).inject([]){|is,i| is + (-1..1).map{|j| [i,j]} }
-		nears = nears.select{|i| i!=[0,0]}
-		nears.map{|n,m| cell_at((row+n) % @width, (col+m) % @height) }
+
+	def neighborhood(row,col) # generalize this
+		NEARS.map{|ns| cell_at((row+ns[0]) % @width, (col+ns[1]) % @height) }
 	end
 
 	# generalize this
@@ -30,7 +29,7 @@ class Blinky
 		sum = neigh.inject :+
 		sum == 3 ? 1 : (sum==2&&state==1) ? 1 : 0 
 	end
-	
+
 	def update(board)
 		b = board.take @width
 		bs = board.drop @width
