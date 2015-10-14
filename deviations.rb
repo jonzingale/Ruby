@@ -10,6 +10,8 @@ require 'byebug'
 # https://en.wikipedia.org/wiki/Secretary_problem
 
 class Stats
+	EXP = 2.718281828.freeze
+
 	attr_reader :distr, :with_counts, :count, :mean, :var, :low, :sig
 	def initialize rates
 		@distr = rates
@@ -47,9 +49,9 @@ class Stats
 	# and figure out a large enough data set to have
 	# a reasonable sample set.
 	def secretary
-		low_reject = distr.take(count/2.718281828).min
-		considered = distr.drop(count/2.718281828)
-		considered.detect{|good| good <= low_reject}
+		rejects, considered = distr.partition.with_index{|t,i| i < count/EXP}
+		low = rejects.min
+		considered.detect{|good| good <= low} or low
 	end
 
 	def get_data

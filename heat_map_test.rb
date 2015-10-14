@@ -37,7 +37,7 @@
 			@agent = Mechanize.new
 			agent.follow_meta_refresh = true # new data
 			agent.keep_alive = false # no time outs
-			# @page = agent.get('http://www.weather.gov')
+			@page = agent.get('http://www.weather.gov')
 			scrape_data
 
 			@geocoords = LAT_LON_REGEX.match(page.uri.to_s)[1..2]
@@ -47,6 +47,7 @@
 			@page = agent.get('http://www.weather.gov')
 			form = page.form('getForecast')
 			form.inputstring = self.zipcode
+
 			@page = form.submit
 
 		 	unless page.at(CURRENT_TEMP_SEL).nil?
@@ -55,7 +56,7 @@
 				page.search(CURRENT_CONDS_SEL).each do |tr|
 					/humidity/i =~ tr.text ?  @humidity = data_grabber(tr,/(\d+)%/i) :
 					/barometer/i =~ tr.text ? @pressure = data_grabber(tr,/(\d+\.\d+)/i) :
-					/dewpoint/i =~ tr.text ?  @dewpoint = data_grabber(tr,/(\d+)°F/i): nil
+					/dewpoint/i =~ tr.text ?  @dewpoint = data_grabber(tr,/(\d+).F/i): nil
 				end
 			end
 
