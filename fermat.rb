@@ -1,28 +1,36 @@
+# require 'byebug'
+# require 'benchmark'
+
+BEST_TIME = 4.720000.freeze
+PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47].freeze
+
+def lookup(num) ; PRIMES.any?{|p| p == num} ; end
+
 def fermat(num,tol=2)
-	[2,3].any?{|i| num == i} ? true :
-	[4,6,15].any?{|i| num == i} ? false :
-	# (0...tol).map {rand (num/2)}.all?{|a| rmod(a,num) == a}
-	fast_list(num/2, tol).all?{|a| rmod(a,num) == a}
+	num < 48 ? lookup(num) : rands(num/2).all?{|a| rmod(a,num) == a}
 end
 
-def rmod base, pow, row=nil
-	row = row||pow
-	row < 10 ? (base**row) % pow : # find a best value < 10?
+def rmod base, pow, row=nil	
+	(row = row||pow) < 4 ? (base**row) % pow :
 	row.even? ? (rmod(base, pow, row/2)**2) % pow :
 	(base * rmod(base, pow, row/2)**2) % pow
 end
 
-# shuffled_list with a tol
-def fast_list len, tol
-	lim = (Math.log(4.8265592) * len).floor
-	len = tol.nil? ? len : tol
-	(0...len).map do
-		k = (lim-lim**2)/(2*Math.log(0.5))
-		rand(k) % lim
-	end
+def rands num, tol=2 # better shuffling.
+	r = {} ; (r[rand(num)] = true) while (r.length < tol) ; r.keys
 end
 
-# 8 seconds for fermat primes < 1 M
-def fprimats(tol=2, lim=100) ; (2..lim).select{|n| fermat n} ; end
+# 4.72 seconds for fermat primes < 1 M
+def fprimats tol=2, lim=100
+	(2..lim).select{|n| fermat n}
+end
 
 puts "#{fprimats}"
+
+Benchmark.bm do |x|
+	x.report{ fprimats(2, 1000000) }
+end
+
+# byebug ; 4
+
+
