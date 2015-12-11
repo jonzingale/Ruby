@@ -3,7 +3,6 @@ require (File.expand_path('./craigslist_geocoder', File.dirname(__FILE__)))
 GEMS = %w(byebug csv date nokogiri mechanize open-uri active_support net/smtp)
 GEMS.each{|gemm| eval("require '#{ gemm }'") }
 
-module Craigslist
 	class CraigslistFreegan
 		DUE_WINDOW = 5.freeze
 		NOW = Date.today.freeze
@@ -27,20 +26,21 @@ module Craigslist
 		# perhaps a csv would be better?
 		DESIREABLES = [['computer',5],['house',100],['bass',2],['amplifier',2],
 									 ['fender amp',5],['math',15],['bike',20],['lap ?top',15],
-									 ['bike',20],['sewing machine',100],['massage chair',100]].freeze
+									 ['bike',20],['sewing machine',100],['massage chair',100],
+									 ['couch',0]].freeze
 
-		def self.content_regex
+		def content_regex
 			desires = DESIREABLES.transpose[0]
 			desire_str = desires.inject('house'){ |str,s| str = str + '|' + s }
 			Regexp.new(desire_str,'i')
 		end
 
-		def self.desired_pairs
+		def desired_pairs
 			desires, distances = DESIREABLES.transpose
 			[desires.map { |desire| Regexp.new(desire,'i') }, distances]
 		end
 		
-		def self.email_builder(listings)
+		def email_builder(listings)
 			message = ''
 			listings.each do |line|
 				summary = line['summary']
@@ -55,7 +55,7 @@ module Craigslist
 			end
 		end
 	
-		def self.todays_posts(page,accum_list=[])
+		def todays_posts(page,accum_list=[])
 			agent = Mechanize.new # must i Mechanize.new?
 			next_button = page.at(NEXT_BUTTON_SEL)
 			next_url = next_button.nil? ? nil : BASE_URL+next_button['href']
@@ -77,7 +77,7 @@ module Craigslist
 			cond ? accum_list : todays_posts(agent.get(next_url), accum_list)
 		end
 
-		def self.crawl_listing(id)
+		def crawl_listing(id)
 			agent = Mechanize.new ; page = agent.get(LISTING_STUB % id)
 
 			lat, long = GEOCOORDS.map do |l|
@@ -97,7 +97,7 @@ module Craigslist
 			(is_close||dist) && good_content
 		end
 
-		def self.process
+		def process
 			agent = Mechanize.new ; page = agent.get(FREE_URL)
 
 			# better would be to open a file and check
@@ -122,7 +122,5 @@ module Craigslist
 				email_builder(good_listings) unless good_listings.empty?
 			end
 		end
-	
-		CraigslistFreegan.process
-	end
-end
+
+
