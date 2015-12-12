@@ -1,14 +1,14 @@
 require 'byebug'
 require 'benchmark'
 
-BEST_TIME = 4.720000.freeze
+BEST_TIME = 2.640000.freeze
 MERSENNE = (2**4423 - 1).freeze
 PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47].freeze
 
 def lookup(num) ; PRIMES.any?{|p| p == num} ; end
 
 def fermat(num,tol=2)
-	# even?
+	num.even? && num != 2 ? false :
 	num < 48 ? lookup(num) : rands(num/2).all?{|a| rmod(a,num) == a}
 end
 
@@ -22,7 +22,7 @@ def rands num, tol=2 # better shuffling.
 	r = {} ; (r[rand(num)] = true) while (r.length < tol) ; r.keys
 end
 
-# 4.72 seconds for fermat primes < 1 M
+# 2.64 seconds for fermat primes < 1 M
 def fprimats tol=2, lim=100
 	(2..lim).select{|n| fermat n}
 end
