@@ -1,5 +1,5 @@
-require 'byebug'
 require 'benchmark'
+require 'byebug'
 
 BEST_TIME = 51.570000.freeze
 MERSENNE = (2**4423 - 1).freeze
