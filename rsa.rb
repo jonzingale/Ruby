@@ -1,3 +1,4 @@
+require 'benchmark'
 require 'byebug'
 
 module Factorization
@@ -14,7 +15,9 @@ module Factorization
 		n.gcd(p) == 1 ? i-1 : psinnum(p,n/p,i+1)
 	end
 
-	def rel_prime?(a,b) ; (a.gcd b) == 1 ; end
+	def totient num
+		hotmomma(num).map{|a,n| a**(n-1) * (a-1)}.inject :*
+	end
 
 	def factors(num)
 		root = Math.sqrt num
@@ -25,26 +28,22 @@ module Factorization
 		(1..lim).select{|i| factors(i).count == 2}
 	end
 
-	def hotmomma number
+##### FACTORIZATIONS
+	def hotmomma number # deterministic
 		primes(number).inject([]) do |ps, p| 
 			(pin = psinnum(p, number)) > 0 ? ps << [p, pin] : ps
 		end
 	end
 
-	def rotmomma number # recursive
-		ps = primes number
-		good_p = ps.select{|p| psinnum(p,number) > 0}
-
-		ary = []
-		primes(number).inject(number) do |num, p|
+	def protmomma num
+		ary = [] # recursive & probabilistic, fast!
+		primates(2,num).inject(num) do |num, p|
 			(pin = psinnum(p, num)) > 0 ? (ary << [p, pin] ; num = num/p) : num
 		end ; ary
 	end
 
 ##### BIRTHDAY SHUFFLES
-	# via Feller's approximation
-	# to the birthday problem
-	def shuffled_list len
+	def b_day_shuffle len
 		lim = (Math.log(4.8265592) * len).floor
 		(0...len).map do
 			k = (lim-lim**2)/(2*Math.log(0.5))
@@ -55,47 +54,52 @@ module Factorization
 	# shows power law for shuffled's 
 	# 23 -> 14, 230 -> 146, 2300 -> 1461, ...
 	def find_avg(num) # k ~ 0.63527
-		(0..200).inject(0){|sum, i| sum += shuffled_list(num).uniq.count}/200
+		(0..200).inject(0){|sum, i| sum += b_day_shuffle(num).uniq.count}/200
 	end
 
 ##### FERMAT PRIMES
-	PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47].freeze
+MERSENNE = (2**4423 - 1).freeze
+PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47].freeze
 
-	def lookup(num) ; PRIMES.any?{|p| p == num} ; end
+def lookup(num) ; PRIMES.any?{|p| p == num} ; end
 
-	def fermat(num,tol=2)
-		num < 48 ? lookup(num) : rands(num/2).all?{|a| rmod(a,num) == a}
-	end
+def fermat(num,tol=2)
+	num != 2 && num.even? ? false :
+	num < 48 ? lookup(num) : rands(num/2).all? {|a| rmod(a,num) == a }
+end
 
-	def rmod base, pow, row=nil	
-		(row = row||pow) < 4 ? (base**row) % pow :
-		row.even? ? (rmod(base, pow, row/2)**2) % pow :
-		(base * rmod(base, pow, row/2)**2) % pow
-	end
+def rmod base, pow, row=nil	
+	(row = row||pow) < 4 ? (base**row) % pow :
+	row.even? ? (rmod(base, pow, row/2)**2) % pow :
+	(base * rmod(base, pow, row/2)**2) % pow
+end
 
-	def rands num, tol=2 # better shuffling.
-		r = {} ; (r[rand(num)] = true) while (r.length < tol) ; r.keys
-	end
+def rands num, tol=2 # psuedo-shuffle
+	r = {} ; (r[rand(num)] = true) while (r.length < tol) ; r.keys
+end
 
-	# 4.72 seconds for fermat primes < 1 M
-	def fprimats tol=2, lim=100
-		(2..lim).select{|n| fermat n}
-	end
+# 51.570000 seconds for fermat primes < 10 M
+def primates tol=2, lim=100
+	(2..lim).select{|n| fermat n}
+end
+
 ########
 end
 
-
 class Z_Prime
 	include Factorization
-	attr_accessor :prime, :totient
+	attr_accessor :prime
 
 	def initialize(prime)
 		@prime = prime
-		@totient = totient(prime)
 	end
 
-	def totient(num)
+	# list rel_primes num
+	def self.tots(num) ; (2..num).select{|rel| rel.gcd(num) == 1}.unshift 1 ; end
+	def rel_prime?(a,b) ; (a.gcd b) == 1 ; end
 
+	def self.totient num
+		hotmomma(num).map{|a,n| a**(n-1) * (a-1)}.inject :*
 	end
 
 	def inverse()
@@ -108,12 +112,19 @@ class Z_Prime
 
 end
 
-
 include Factorization
+BIG = 7957792.freeze
 
-# rmod 9365, 7700
-# hotmomma 24
-# psinnum 2, 24
-# rmod 19, 21
+def test num
+	Benchmark.bm do |x|
+		# x.report{ hotmomma num }
+		# x.report{ protmomma num }
+
+		# x.report{ tots num }
+	end
+end
+
+z_11 = Z_Prime.new(11)
+puts "#{them = Z_Prime.tots(30)}"
 byebug ; 4
 
