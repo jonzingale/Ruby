@@ -99,7 +99,7 @@ class Z_Prime
 	def rel_prime?(a,b) ; (a.gcd b) == 1 ; end
 
 	def self.totient num
-		hotmomma(num).map{|a,n| a**(n-1) * (a-1)}.inject :*
+		protmomma(num).map{|a,n| a**(n-1) * (a-1)}.inject :*
 	end
 
 	def inverse()
