@@ -1,15 +1,15 @@
 require 'byebug'
 require 'benchmark'
 
-BEST_TIME = 2.640000.freeze
+BEST_TIME = 51.570000.freeze
 MERSENNE = (2**4423 - 1).freeze
 PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47].freeze
 
 def lookup(num) ; PRIMES.any?{|p| p == num} ; end
 
 def fermat(num,tol=2)
-	num.even? && num != 2 ? false :
-	num < 48 ? lookup(num) : rands(num/2).all?{|a| rmod(a,num) == a}
+	num != 2 && num.even? ? false :
+	num < 48 ? lookup(num) : rands(num/2).all? {|a| rmod(a,num) == a }
 end
 
 def rmod base, pow, row=nil	
@@ -18,21 +18,23 @@ def rmod base, pow, row=nil
 	(base * rmod(base, pow, row/2)**2) % pow
 end
 
-def rands num, tol=2 # better shuffling.
+def rands num, tol=2 # psuedo-shuffle
 	r = {} ; (r[rand(num)] = true) while (r.length < tol) ; r.keys
 end
 
-# 2.64 seconds for fermat primes < 1 M
-def fprimats tol=2, lim=100
+# 51.570000 seconds for fermat primes < 10 M
+def primates tol=2, lim=100
 	(2..lim).select{|n| fermat n}
 end
 
-Benchmark.bm do |x|
-	x.report{ fprimats(2, 1000000) }
-	x.report{ fermat MERSENNE}
+def test 
+	Benchmark.bm do |x|
+		x.report{ fermat MERSENNE, 20}
+		x.report{ primates(2, 10_000_000) }
+	end
 end
-puts "#{fprimats 2, 10**3}"
 
-byebug ; 4
+puts "primes under 100: #{primates 2, 10**2}"
+test
 
-
+byebug ; 4 
