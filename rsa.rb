@@ -1,6 +1,14 @@
 require 'byebug'
 
 module Factorization
+	def baseList(num) ; num < 10 ? [num] : baseList(num/10) << (num % 10) ; end
+	def div_3?(num) ; baseList(num).inject(0,:+) % 3 == 0 ; end
+
+	def div_11? num
+		ns = baseList(num)
+		diff = ns.zip(ns.drop 1).map{|a,b| b.nil? ? 0 : a-b}
+		diff.inject(:+) % 11 == 0
+	end
 
 	def psinnum(p, n, i=1)
 		n.gcd(p) == 1 ? i-1 : psinnum(p,n/p,i+1)
