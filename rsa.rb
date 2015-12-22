@@ -34,15 +34,14 @@ end
 
 class Modulus
 	include Factorization
-	attr_accessor :num, :len, :φ, :m, :rootφ, :pubkey, :prvkey
+	attr_accessor :num, :len, :φ, :m, :rootφ,
+								:pubkey, :prvkey
 
 	def initialize(length)
 		@num, @len = 0, length
 		@φ, @m = get_modulus
 		@rootφ = Math.sqrt @φ
-		@prvkey = 0
-		get_pubkey
-		# inverse
+		get_pubkey ; get_prvkey
 	end
 
 	def get_modulus
@@ -68,41 +67,16 @@ class Modulus
 		(@pubkey2-= 1) until @φ/(@pubkey2.to_f) - @φ/@pubkey2 == 0
 	end
 
+######### attempts at inverses.
+def get_prvkey ; @prvkey = inverse ; end
 
-##
-	def inverse
-		windup ; @prvkey
-	end
-
-	def windup # this is super inefficient.
-		@prvkey +=1
-		until (@pubkey*@prvkey % @φ) == 1
-
-			# byebug if @prvkey == 3
-			windup
-		end
-	end
-#########
+def inverse # brute force inverse
+	start = @φ/@pubkey
+	(start..@φ).detect{|i| i*@pubkey % @φ == 1}
+end
 
 	# def self.inverse(mod, num)
 	# 	(2...mod).detect{|i| i * num % mod == 1}
-	# end
-
-	# def self.return_key_pair(modulus)
-	# 	tot = totient modulus #<-- dont use this because I think up a pair of primes.
-	# 	rtot = rand tot
-	# 	(rtot = rand tot) unless rtot != 1 && rel_prime?(rtot, tot)
-
-	# 	[rtot, self.inverse(tot, rtot)]
-	# end
-
-	# def self.encode(modulus)
-	# 	# select a modulus, find the totient t
-	# 	# choose a k,j pair such that k*j == 1 mod t
-	# 	pr, qr = self.return_key_pair(modulus)
-	# 	while qr.nil?
-	# 		pr, qr = self.return_key_pair(modulus)
-	# 	end
 	# end
 end
 
@@ -112,28 +86,22 @@ def test(num)
 	mod = Modulus.new(num)
 
 	Benchmark.bm do |x|
-		x.report{ mod.pubkey }
+		# x.report{ thing mod }
+		# x.report{ thing2 mod }
 	end
 end
 
-
-def thing(mod) # brute force inverse
-	(1..1_000_000).detect{|i| i*mod.pubkey%mod.φ==1}
-end
-
-def example val # 3
+def example val # 4
 mod = Modulus.new(val)# φ
 msg = 5367
 puts "\n\nmod.m = #{mod.m}\nmod.φ = #{mod.φ}\n"\
-			"mod.pubkey = #{mod.pubkey}\npvkey = #{that=(thing mod)}\n"\
-			"msg = #{msg}\nrmod_logic(msg,mod.m,that*mod.pubkey) = "\
-			"#{rmod_logic(msg,mod.m,that*mod.pubkey)}"
+			"mod.pubkey = #{mod.pubkey}\nmod.pvkey = #{mod.prvkey}\n"\
+			"msg = #{msg}\nrmod_logic(msg,mod.m,mod.prvkey*mod.pubkey) = "\
+			"#{rmod_logic(msg,mod.m,mod.prvkey*mod.pubkey)}"
 end
 
 
-
-mod = Modulus.new(3)# φ
-that = thing(mod)
+mod = Modulus.new(4)# φ
 
 byebug ; 4
 
