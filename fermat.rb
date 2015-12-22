@@ -4,7 +4,7 @@ require 'byebug'
 # Todo: threading.
 PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47].freeze
 Mersenne = (2**4423 - 1).freeze
-BigMersenne= (2**9689 - 1)
+BigMersenne = (2**9689 - 1)
 Fermat = (2**2**4+1).freeze
 BEST_TIME = 48.650000.freeze
 
@@ -47,27 +47,3 @@ end
 tests
 
 # byebug ; 4
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

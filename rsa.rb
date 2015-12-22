@@ -58,40 +58,27 @@ class Modulus
 	end
 
 	def get_pubkey
-		@pubkey = big_num # make this number @rootφ long.
+		@pubkey = big_num
 		(@pubkey-= 1) until @φ.gcd(@pubkey) == 1
 	end
 
-	def get_pubkey2
-		@pubkey2 = get_fermat # an idea?
-		(@pubkey2-= 1) until @φ/(@pubkey2.to_f) - @φ/@pubkey2 == 0
+	def get_prvkey # brute force inverse
+		start = @φ/@pubkey
+		@prvkey = (start..@φ).detect{|i| i*@pubkey % @φ == 1}
 	end
 
-######### attempts at inverses.
-def get_prvkey ; @prvkey = inverse ; end
-
-def inverse # brute force inverse
-	start = @φ/@pubkey
-	(start..@φ).detect{|i| i*@pubkey % @φ == 1}
-end
-
-	# def self.inverse(mod, num)
-	# 	(2...mod).detect{|i| i * num % mod == 1}
-	# end
 end
 
 include Factorization
 
-def test(num)
-	mod = Modulus.new(num)
-
+def test(mod)
+	# mod = Modulus.new(num)
 	Benchmark.bm do |x|
-		# x.report{ thing mod }
-		# x.report{ thing2 mod }
+		x.report{ }
 	end
 end
 
-def example val # 4
+def example val # 5
 mod = Modulus.new(val)# φ
 msg = 5367
 puts "\n\nmod.m = #{mod.m}\nmod.φ = #{mod.φ}\n"\
@@ -102,6 +89,7 @@ end
 
 
 mod = Modulus.new(4)# φ
+# test(mod)
 
 byebug ; 4
 
