@@ -36,7 +36,7 @@ def test
 
 	Benchmark.bm do |x|
 		puts "\nfermat (2**4423 - 1)"
-		x.report{ fermat MERSENNE, 20}
+		x.report{ fermat Mersenne, 20}
 		puts "\nprimates(2, 1_000_000)"
 		x.report{ primates(2, 1_000_000) }
 		# puts "\nprimates(2, 10_000_000)"
@@ -44,6 +44,6 @@ def test
 	end
 end
 
-tests
+# test
 
-# byebug ; 4
+byebug ; 4
