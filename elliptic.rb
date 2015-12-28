@@ -39,18 +39,18 @@ class ECM
 
 	def pollard_factor
 		@a = rmod_logic @a, @m, rand(@m)
-		(factor = @m.gcd(@a)) > 1 ? factor : pollard_factor
+		(factor = @m.gcd(@a-1)) > 1 ? factor : pollard_factor
 	end
 end
 
-# def test(num)
-# 	it = ECM.new(num)
-# 	Benchmark.bm do |x|
-# 		# x.report{ it.pollard_factor}
-# 		# puts it.pollard_factor
-# 	end
-# end
+def test(num)
+	composite = ECM.new(num)
 
+	Benchmark.bm do |x|
+		x.report{ composite.pollard_factor}
+		puts "#{composite.pollard_factor}"
+	end
+end
 
 it = ECM.new(5612)
 them = it.pollard_factor
