@@ -2,11 +2,7 @@
 # good upto n =27
 
 def fact(n)
-  if n == 0 
-   1.0
-  else
-   (1..n).inject(1.0) {|fac,n| n*fac}
-  end
+  n < 2 ? 1.0 : (1..n).inject(1.0) {|fac,n| n*fac}
 end
 
 def summation(list)
@@ -24,7 +20,6 @@ end
 def terms(n)
 	(0..n).map{|k| numerator(k) / denominator(k)} 
 end
-
 
 def chudnovsky(n)
 	(12.0*(summation(terms(n)))).to_f ** (-1.0)
