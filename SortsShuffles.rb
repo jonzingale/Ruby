@@ -5,7 +5,16 @@ def keyshuffle(list)
 end
 
 def qsort(list)
-	list == [] ? [] : (qsort(list.drop(1).select{|d| d <= list[0]})) + [list[0]] + (qsort(list.drop(1).select{|d| d > list[0]}))
+	list == [] ? [] : 
+	(qsort(list.drop(1).select{|d| d <= list[0]})) + [list[0]] + (qsort(list.drop(1).select{|d| d > list[0]}))
+end
+
+def qksort(arr)
+	if arr.nil? || arr.empty? then [] else
+	  piv = arr.pop
+	  left, right = arr.partition{|x| x < piv}
+	  (qksort(left) << piv) + qksort(right)
+	end
 end
 
 def rand_qsort(list)
