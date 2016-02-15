@@ -25,7 +25,19 @@ def array(n)
 	(1..n).inject ([]) {|ary,j| ary << j }
 end
 
-# example
+def comb ary
+	c = ary.count
+	[*1...c-1].each do |k|
+		[*0...k].each do |j| ; hi = c - k + j
+			ary[hi], ary[j] = ary[j], ary[hi] if ary[hi] < ary[j]
+		end
+	end ; ary
+end
+
+# examples
+
+# ary = [10, 5, 12, 2, 4, 3, 8, 11, 7, 1, 9, 6]
+# puts comb(ary)
 
 # keyshuffle([1,2,3,4,5,6,7,8])
 # qsort([5,4,6,3,2,9,1])

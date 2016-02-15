@@ -66,7 +66,7 @@ require 'pry'
     # page = agent.post(BASE_URL+FIRST_STUB,QUERY1)
     html_to_csv(page) ; get_next_action(page)
 
-    while !@next_action.nil?
+    until @next_action.nil?
       page = agent.post(BASE_URL+@next_action,BIG_QUERY2)
       # page = agent.post(BASE_URL+@next_action,QUERY2)
       html_to_csv(page) ; get_next_action(page)
