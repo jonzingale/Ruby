@@ -1,12 +1,9 @@
-require 'byebug'
 def comb ary
 	c = ary.count
-	pairs = [*1...c-1].inject([]) do |pairs, k|
-		pairs += [*0...k].map{|j| [c-k, j]}
-	end
-
-	pairs.each do |k, j| ; k += j
-		ary[k], ary[j] = ary[j], ary[k] if ary[k] < ary[j]
+	[*1...c-1].each do |k|
+		[*0...k].each do |j| ; hi = c - k + j
+			ary[hi], ary[j] = ary[j], ary[hi] if ary[hi] < ary[j]
+		end
 	end ; ary
 end
 
