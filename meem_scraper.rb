@@ -8,7 +8,8 @@ require 'date'
 require 'net/smtp'
 require 'active_support'
 # TODO: 
-#  Bibliography
+# Bibliography ; Ralf's app?
+# Extend this to handle my own books as well.
 
 # who was renewed?
 # who wasn't?
@@ -23,8 +24,8 @@ BOOKINFO_INIT = "\nCurrently, the following items are out:".freeze
 EXPIRATION_COL_SEL = './/a[@class="normalBlackFont2"]/parent::td'.freeze
 BOOK_SEL = './/table[@class="tableBackgroundHighlight"]//table[@class="tableBackground"]/parent::td/parent::tr'.freeze
 BOOK_HEADERS = %w(renew_key book author library_of_congress checked_out due renewed).freeze
-DATA_HEADERS = %w(CARD_EXPIRATION NEXT_DUE).freeze
-DATA_KEYS = [:expiration, :next_due]
+DATA_HEADERS = %w(CARD_EXPIRATION NEXT_DUE CHECK_TODAY).freeze
+DATA_KEYS = [:expiration, :next_due, :check_today]
 RENEW_TEXT = "\nYour books have %sbeen renewed".freeze
 TITLE_SEL = './/a[@class="mediumBoldAnchor"]'.freeze
 RENEW_KEYS = './/input[@name="renewitemkeys"]'.freeze
@@ -145,13 +146,18 @@ def renewal_path(next_due,page,data_cache)
 		book_data = get_book_data(page)
 		hash_to_csv('items_out.csv',book_data, BOOK_HEADERS)
 
-		# stores new data_cache
-		next_due = book_data.min_by{|data| str_to_date(data.due)}.due
-		data_cache[:next_due] = [next_due]
+		# stores todays date and breaks out if book_data is empty
+		if book_data.empty?
+			data_cache[:check_today] = Date.today.strftime('%m/%d/%Y')
+		else
+			# stores new data_cache
+			next_due = book_data.min_by{|data| str_to_date(data.due)}.due
+			data_cache[:next_due] = [next_due]
 
-		# renew_msg_cond == true => renew must have failed
-		renew_msg_cond = NOW > str_to_date(next_due) - DUE_WINDOW
-		@renew_msg = RENEW_TEXT % (renew_msg_cond ? 'not' : '')
+			# renew_msg_cond == true => renew must have failed
+			renew_msg_cond = NOW > str_to_date(next_due) - DUE_WINDOW
+			@renew_msg = RENEW_TEXT % (renew_msg_cond ? 'not' : '')
+		end
 
 		data_cache = hash_to_csv('data_cache.csv', [data_cache], DATA_KEYS)
 	end
@@ -194,13 +200,18 @@ def process
 	email_builder
 end
 
+def check_today
+	data_cache = read_csv('data_cache.csv', DATA_KEYS)
+	str_to_date(data_cache[:check_today]) < Date.today
+end
+
 def should_i_run?
 	data_cache = read_csv('data_cache.csv', DATA_KEYS)
-	next_expires, next_due = DATA_KEYS.map{|k|str_to_date(data_cache[k][0])}
+	next_expires, next_due, no = DATA_KEYS.map{|k|str_to_date(data_cache[k][0])}
 	next_expires <= NOW + 3 || NOW > next_due - DUE_WINDOW
 end
 
-if should_i_run?
+if should_i_run? && check_today
 	puts "I should run"
 	process
 end
