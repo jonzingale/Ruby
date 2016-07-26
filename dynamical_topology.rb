@@ -8,58 +8,38 @@ class DSet
 	def initialize(dyn)
 		@states = dyn.map(&:first)
 		@closed = closed_seqs dyn
-		@pset = Set.new(powerset(@states))
+		@pset = nil
 		@dyn = dyn
 	end
 
-	def pp thing
-		thing.map(&:to_a).map(&:to_s)
-	end
-
-	# not the right notion. 
-	# i need all_seqs.
-	def powerset(set)
-	  return [set] if set.empty?
-
-	  p = set.pop
-	  subset = powerset(set)
-	  subset | subset.map { |x| x | [p] }
-	end
-
 	def all_seqs
-		
+		# how do i get these?
 	end
-
-	# def pset
-	# 	pts = @states.count
-	# 	str_st = @states.map(&:to_s)
-	# 	bstrs = (0...2**pts).map{|t| "%0#{pts}d" % t.to_s(2)}
-	# 	bins = bstrs.map{|t|t.split('').map(&:to_i)}
-	# 	bins.map!{|bin| bin.zip(str_st).inject(''){|it,(b,c)| it << c*b } }
-	# 	bins.map!{|t| t.split('')}
-	# 	Set.new(bins)
-	# end
 
 	def open
 		@pset - @closed
 	end
 
-	def closed_seqs dyn # the closed sets
+	def closed_seqs dyn
+		closed = closed_basis dyn
+		empty = Set.new []
+
+		seqs = closed.inject(empty) do |u,p|
+			u | closed.map{|t| Set.new(t|p)}
+		end
+	end
+
+	def closed_basis dyn
 		arys = dyn.inject([]) do |sq,(s, t)|
 			elem = []
 
 			while elem.index(t).nil?
 				elem << s
-				s, t = get_target(s, dyn)
+				s, t = dyn[dyn[s][1]]
 			end
 
 			sq << elem.sort
 		end
-		Set.new arys
-	end
-
-	def get_target s, dyn
-		dyn[dyn[s][1]]
 	end
 end
 
@@ -70,13 +50,7 @@ end
 test_dyn = [*0...6].zip [0, 0, 0, 1, 1, 2]
 it = DSet.new(test_dyn)
 
-
-
-
-
-
-
-
+puts it.closed.map(&:to_a).to_s
 
 
 byebug ; 4
