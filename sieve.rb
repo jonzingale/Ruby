@@ -3,7 +3,7 @@ require 'byebug'
 
 class Sieve
   def initialize(limit)
-    @range = (2..limit).to_a
+    @range = *2..limit
   end
 
   def primes
@@ -21,7 +21,7 @@ class Sieve
 
     until range.empty?
       x, *range = range
-      range.reject!{|t| t % x == 0 }
+      range.reject! { |t| t % x == 0 }
       primes << x
     end
 
@@ -38,6 +38,6 @@ def test(num)
   end
 end
 
-test 100_000
+test 50_000
 
 byebug ; 4
