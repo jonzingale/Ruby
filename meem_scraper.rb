@@ -6,6 +6,8 @@ require 'nokogiri'
 require 'open-uri'
 require 'date'
 require 'net/smtp'
+# Look in to postfix
+
 require 'active_support'
 # TODO: 
 # Bibliography ; Ralf's app?
