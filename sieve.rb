@@ -3,7 +3,24 @@ require 'byebug'
 
 class Sieve
   def initialize(limit)
+    @limit = limit
     @range = *2..limit
+    @range2 = *1..limit
+  end
+
+  def sundaram
+    ary = []
+    @range2.each do |j|
+      # 2*(j + j**2) <= n
+      (1..j).each do |i| # while this shit or something
+        if (cond = i + j + 2*i*j) < @limit
+          ary << i + j + 2*i*j
+        end
+      end
+    end
+
+    it = [*1..@limit]-ary
+    it.map{|t|2*t+1}.unshift 2
   end
 
   def primes
@@ -38,6 +55,8 @@ def test(num)
   end
 end
 
-test 50_000
+# test 10_000
+it = Sieve.new(100)
+it.sundaram
 
-# byebug ; 4
+byebug ; 4
