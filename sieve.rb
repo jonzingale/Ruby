@@ -7,8 +7,8 @@ class Sieve
   end
 
   def sundaram
-    ary = []
     limit  = (@limit/2 - 2)
+    ary = []
 
     (1..limit).each do |j|
       (1..j).each do |i|
@@ -40,10 +40,13 @@ def test(num)
   Benchmark.bm do |x|
     x.report{ it.primes.count }
     x.report{ it.sundaram.count}
-    puts it.primes == it.sundaram
+    # puts it.primes == it.sundaram
   end
 end
 
-test 10000
+test 10_000
 
-byebug ; 4
+# it = Sieve.new(100)
+# puts it.sundaram.to_s
+
+# byebug ; 4
