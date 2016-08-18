@@ -8,17 +8,13 @@ class Sieve
 
   def sundaram
     ary = []
-    limit  = (@limit/2 - 2)#**0.52644
+    limit  = (@limit/2 - 2)
 
     (1..limit).each do |j|
       (1..j).each do |i|
-        if (@that = i + j + 2*i*j) < limit
-          ary << @that
-        end
+        @that = i + j + 2*i*j
+        @that <= limit ? ary << @that : break
       end
-
-      # break if @that > limit # hmm how?
-      # must think about how i + j + 2*i*j increments.
     end
 
     ary = [*1..limit]-ary
@@ -44,7 +40,7 @@ def test(num)
   Benchmark.bm do |x|
     x.report{ it.primes.count }
     x.report{ it.sundaram.count}
-    puts it.primes.count
+    puts it.primes == it.sundaram
   end
 end
 
