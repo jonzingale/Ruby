@@ -12,7 +12,7 @@ class Sieve
   def sundaram # 10**7 max
     limit  = @limit/2 - 2
     j_limit = (limit-1)/3
-    ary = [*1..limit]
+    ary = *1..limit
 
     (1..j_limit).each do |j|
       (1..j).each do |i|
