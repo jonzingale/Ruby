@@ -45,12 +45,12 @@ end
 def test(num)
   it = Sieve.new(num)
   Benchmark.bm do |x|
-    puts 'primes.count'
+    puts 'primes'
     x.report{ it.primes.count }
-    puts 'sundaram.count'
+    puts 'sundaram'
     x.report{ it.sundaram.count }
   end
-  puts "primes == sundaram\n" \
+  puts 'primes == sundaram: ' \
        "#{it.primes.count == it.sundaram.count}"
 end
 
