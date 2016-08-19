@@ -12,7 +12,7 @@ class Sieve
   # Computing with i_limit is slower
   # than just breaking when limit is reached.
   # i_limit = (limit-j)/(2*j+1)
-  def sundaram # 10**7 max
+  def sundaram # 10**8 max
     limit  = @limit/2 - 2
     j_limit = (limit-1)/3
     # only odd are needed.
@@ -45,10 +45,13 @@ end
 def test(num)
   it = Sieve.new(num)
   Benchmark.bm do |x|
+    puts 'primes.count'
     x.report{ it.primes.count }
+    puts 'sundaram.count'
     x.report{ it.sundaram.count }
   end
-  puts it.primes == it.sundaram
+  puts "primes == sundaram\n" \
+       "#{it.primes.count == it.sundaram.count}"
 end
 
 test 10**5
