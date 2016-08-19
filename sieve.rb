@@ -6,9 +6,6 @@ class Sieve
     @limit = limit
   end
 
-# binary tree search
-# enumerable class docs
-
   # Computing with i_limit is slower
   # than just breaking when limit is reached.
   # i_limit = (limit-j)/(2*j+1)
@@ -16,6 +13,7 @@ class Sieve
     limit  = @limit/2 - 2
     j_limit = (limit-1)/3
     # only odd are needed.
+
     ary = (2..@limit/2).map{|t| 2*t - 1}
 
     (1..j_limit).each do |j|
@@ -44,14 +42,15 @@ end
 
 def test(num)
   it = Sieve.new(num)
+  puts 'sundaram'
+
   Benchmark.bm do |x|
-    puts 'primes'
-    x.report{ it.primes.count }
-    puts 'sundaram'
+    # x.report{ it.primes.count }
     x.report{ it.sundaram.count }
   end
-  puts 'primes == sundaram: ' \
-       "#{it.primes.count == it.sundaram.count}"
+  puts it.sundaram.last
 end
 
-test 10**5
+# user     system      total        real
+# 0.340000   0.000000   0.340000 (  0.350320)
+test 10**6
