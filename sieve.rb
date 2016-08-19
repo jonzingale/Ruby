@@ -12,8 +12,8 @@ class Sieve
   def sundaram # 10**8 max
     limit  = @limit/2 - 2
     j_limit = (limit-1)/3
-    # only odd are needed.
 
+    # only odd are needed.
     ary = (2..@limit/2).map{|t| 2*t - 1}
 
     (1..j_limit).each do |j|
