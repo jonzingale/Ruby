@@ -6,20 +6,24 @@ class Sieve
     @limit = limit
   end
 
-  def sundaram
+  # Computing with i_limit is slower
+  # than just breaking when limit is reached.
+  # i_limit = (limit-j)/(2*j+1)
+  def sundaram # 10**7 max
     limit  = @limit/2 - 2
-    ary = []
+    j_limit = (limit-1)/3
+    ary = [*1..limit]
 
-    (1..limit).each do |j|
+    (1..j_limit).each do |j|
       (1..j).each do |i|
-        @that = i + j + 2*i*j
-        @that > limit ? break : ary << @that
+        num = i + j + 2*i*j
+        break if num > limit
+        ary[num-1] = nil
       end
     end
-
-    ary = [*1..limit]-ary
-    ary.map{|t|2*t+1}.unshift 2
+    ary.compact.map{|t| 1 + 2*t }.unshift 2
   end
+
 
   def primes
     range = *2..@limit
@@ -39,14 +43,9 @@ def test(num)
   it = Sieve.new(num)
   Benchmark.bm do |x|
     x.report{ it.primes.count }
-    x.report{ it.sundaram.count}
-    # puts it.primes == it.sundaram
+    x.report{ it.sundaram.count }
+    puts it.primes == it.sundaram
   end
 end
 
-test 10_000
-
-# it = Sieve.new(100)
-# puts it.sundaram.to_s
-
-# byebug ; 4
+test 10**5
