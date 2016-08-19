@@ -7,13 +7,13 @@ class Sieve
   end
 
   def sundaram
-    limit  = (@limit/2 - 2)
+    limit  = @limit/2 - 2
     ary = []
 
     (1..limit).each do |j|
       (1..j).each do |i|
         @that = i + j + 2*i*j
-        @that <= limit ? ary << @that : break
+        @that > limit ? break : ary << @that
       end
     end
 
