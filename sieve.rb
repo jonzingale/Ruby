@@ -6,10 +6,13 @@ class Sieve
     @limit = limit
   end
 
-  # Computing with i_limit is slower
-  # than just breaking when limit is reached.
+  # Can i,j pairs be Enumerated?
+  # not very likely.
+
+  # i_limit is slower than braking
   # i_limit = (limit-j)/(2*j+1)
-  def sundaram # 10**8 max
+
+  def sundaram
     limit  = @limit/2 - 2
     j_limit = (limit-1)/3
 
@@ -42,13 +45,12 @@ end
 
 def test(num)
   it = Sieve.new(num)
-  puts 'sundaram'
+  puts "sundaram primes under #{num}"
 
   Benchmark.bm do |x|
     # x.report{ it.primes.count }
     x.report{ it.sundaram.count }
   end
-  puts it.sundaram.last
 end
 
 # user     system      total        real
