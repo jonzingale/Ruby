@@ -179,7 +179,6 @@ def process
 	agent = Mechanize.new
 	landing_page = agent.get(BASE_URL)
 	session = URI.encode(landing_page.at(SESSION_SEL)['value'])
-
 	form = agent.get(session_url = SESSION_URL % session).forms.first
 	form['sec1'] = INITS_HASH[:borrower_id]
 	page = form.submit
