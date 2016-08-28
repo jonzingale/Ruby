@@ -21,6 +21,8 @@ module Factorization
 		num < 48 ? lookup(num) : rands(num/2).all? {|a| rmod(a,num) == a }
 	end
 
+	# Take a second to make these non-recursive
+	# for the sake of not blowing the stack.
 	def rmod_logic base, pow, row
 		row < 4 ? (base**row) % pow :
 		row.even? ? rmod_logic(base, pow, row/2)**2 % pow :
@@ -41,7 +43,7 @@ class Modulus
 		@num, @len = 0, length
 		@φ, @m = get_modulus
 		@rootφ = Math.sqrt @φ
-		get_pubkey ; get_prvkey
+		get_pubkey ; #get_prvkey #super fucking slow.
 	end
 
 	def get_modulus
@@ -82,9 +84,9 @@ def example val # 5
 mod = Modulus.new(val)# φ
 msg = 5367
 puts "\n\nmod.m = #{mod.m}\nmod.φ = #{mod.φ}\n"\
-			"mod.pubkey = #{mod.pubkey}\nmod.pvkey = #{mod.prvkey}\n"\
-			"msg = #{msg}\nrmod_logic(msg,mod.m,mod.prvkey*mod.pubkey) = "\
-			"#{rmod_logic(msg,mod.m,mod.prvkey*mod.pubkey)}"
+			# "mod.pubkey = #{mod.pubkey}\nmod.pvkey = #{mod.prvkey}\n"\
+			# "msg = #{msg}\nrmod_logic(msg,mod.m,mod.prvkey*mod.pubkey) = "\
+			# "#{rmod_logic(msg,mod.m,mod.prvkey*mod.pubkey)}"
 end
 
 
