@@ -27,19 +27,6 @@ def rmod_logic base, pow, row
 	base * rmod_logic(base, pow, row/2)**2 % pow
 end
 
-# def rmod a, p
-# 	r, i, b = p, 0, 1
-# 	r = r-(i+=1) until r % 4 == 0
-# 	d, red_a = r/4, a**4 % p
-
-# 	# slow because d is still large.
-# 	d.times do
-# 		b = (b * red_a) % p
-# 	end
-
-# 	s = p-r ; (b*a**s)%p
-# end
-
 def rands num, tol=2 # psuedo-shuffle
 	r = {} ; (r[rand(num)] = true) while (r.length < tol) ; r.keys
 end
@@ -55,10 +42,4 @@ def test
 	end
 end
 
-# test
-# puts "#{12 % 132321127}"
-# puts (rmod 12, 132321127)
-
-puts "#{12 % 1323211271}"
-puts (rmod 12, 1323211271)
-byebug ; 4
+test

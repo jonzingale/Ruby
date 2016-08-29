@@ -21,8 +21,6 @@ module Factorization
 		num < 48 ? lookup(num) : rands(num/2).all? {|a| rmod(a,num) == a }
 	end
 
-	# Take a second to make these non-recursive
-	# for the sake of not blowing the stack.
 	def rmod_logic base, pow, row
 		row < 4 ? (base**row) % pow :
 		row.even? ? rmod_logic(base, pow, row/2)**2 % pow :
