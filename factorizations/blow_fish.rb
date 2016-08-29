@@ -14,7 +14,7 @@ SS = (0...4).map{ (1..256).map{ rand_uint32 } }
 # }
 def ff x
   h = SS[0][x >> 24] + SS[1][x >> 16 & 0xff]
-  h | SS[2][x >> 8 & 0xff] + SS[3][x & 0xff]
+  h ^ SS[2][x >> 8 & 0xff] + SS[3][x & 0xff]
 end
 
 # break up message into length 16 L and R messages
@@ -37,13 +37,13 @@ end
 def encrypt(l_32, r_32)
   i=0
   while i < 16 ; i+=2
-    l_32 |= PP[i]
-    r_32 |= ff(l_32)
-    r_32 |= PP[i+1]
-    l_32 |= ff(r_32)
+    l_32 ^= PP[i]
+    r_32 ^= ff(l_32)
+    r_32 ^= PP[i+1]
+    l_32 ^= ff(r_32)
   end
-  l_32 |= PP[16]
-  r_32 |= PP[17]
+  l_32 ^= PP[16]
+  r_32 ^= PP[17]
   [r_32, l_32]
 end
 
@@ -61,13 +61,13 @@ end
 def decrypt(l_32, r_32)
   i=16
   while i > 0 ; i -= 1
-    l_32 |= PP[i+1]
-    r_32 |= ff(l_32)
-    r_32 |= PP[i]
-    l_32 |= ff(r_32)
+    l_32 ^= PP[i+1]
+    r_32 ^= ff(l_32)
+    r_32 ^= PP[i]
+    l_32 ^= ff(r_32)
   end
-  l_32 |= PP[1]
-  r_32 |= PP[0]
+  l_32 ^= PP[1]
+  r_32 ^= PP[0]
   [r_32, l_32]
 end
 
