@@ -1,12 +1,10 @@
 require 'byebug'
+# AN ATTEMPT TO BUILD BlowFish.
+
+def rand_uint32 ; 2**(rand 32) ; end
 
 # uint32_t P[18];
 # uint32_t S[4][256];
-
-def rand_uint32
-  rand 32
-end
-
 PP = (0...18).map{ rand_uint32 }
 SS = (0...4).map{ (1..256).map{ rand_uint32 } }
 
@@ -14,10 +12,15 @@ SS = (0...4).map{ (1..256).map{ rand_uint32 } }
 #    uint32_t h = S[0][x >> 24] + S[1][x >> 16 & 0xff];
 #    return ( h ^ S[2][x >> 8 & 0xff] ) + S[3][x & 0xff];
 # }
-
 def ff x
   h = SS[0][x >> 24] + SS[1][x >> 16 & 0xff]
   h | SS[2][x >> 8 & 0xff] + SS[3][x & 0xff]
+end
+
+# break up message into length 16 L and R messages
+def encode msg
+  code = msg.split('').inject(''){|str,n|str += n.ord.to_s}
+  code.scan(/.{4}/).map(&:to_i) # likely good for
 end
 
 # void encrypt (uint32_t & L, uint32_t & R) {
@@ -31,9 +34,17 @@ end
 #    R ^= P[17];
 #    swap (L, R);
 # }
-
-def encrypt
-
+def encrypt(l_32, r_32)
+  i=0
+  while i < 16 ; i+=2
+    l_32 |= PP[i]
+    r_32 |= ff(l_32)
+    r_32 |= PP[i+1]
+    l_32 |= ff(r_32)
+  end
+  l_32 |= PP[16]
+  r_32 |= PP[17]
+  [r_32, l_32]
 end
 
 # void decrypt (uint32_t & L, uint32_t & R) {
@@ -47,10 +58,23 @@ end
 #    R ^= P[0];
 #    swap (L, R);
 # }
+def decrypt(l_32, r_32)
+  i=16
+  while i > 0 ; i -= 1
+    l_32 |= PP[i+1]
+    r_32 |= ff(l_32)
+    r_32 |= PP[i]
+    l_32 |= ff(r_32)
+  end
+  l_32 |= PP[1]
+  r_32 |= PP[0]
+  [r_32, l_32]
+end
 
 # {
 #    // ...
-#    // initializing the P-array and S-boxes with values derived from pi; omitted in the example
+#    // initializing the P-array and S-boxes with values
+#    // derived from pi; omitted in the example
 #    // ...
 #    for (int i=0 ; i<18 ; ++i)
 #       P[i] ^= key[i % keylen];
@@ -66,24 +90,8 @@ end
 #       }
 # }
 
-# AN ATTEMPT TO BUILD THIS CIPHER.
-# BlowFish
-
-def note msg
-  msg.split('').map(&:ord).map(&:to_s).inject(:+).length
-end
-
-class Blowfish
-  attr_reader :text
-  def initialize msg
-    @msg = 'Damn'.split('').map(&:ord).map(&:to_s).inject :+
-    @text = "%.18d" % @msg
-  end
-end
-
-# lets start with a x < 18 digit block of plaintext.
-msg = 'Damn'
-it = Blowfish.new msg
-ff (rand 32)
+msg = encode('Damn')
+ee = encrypt(*msg)
+dd = decrypt(*ee)
 
 byebug ; 4
