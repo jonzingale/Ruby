@@ -2,23 +2,20 @@ class Blinky
   NEARS = [-1,0,1].product([-1,0,1]).reject{|t| t==[0,0]}
 
   attr_accessor :board
-  def initialize(width=20, height=20)
+  def initialize(width=30, height=20)
     @width, @height = width, height
     @ary_size = width * height
-    @board = rand_board
+    @board = (0...@ary_size).map { rand 2 } 
     @next_board = []
     @i = 0
   end
 
-  def rand_board ; (0...@ary_size).map{ rand 2 } ; end
-
   def pretty_print
-    system("clear")
-    ary = @board.dup
+    system('clear')
 
-    until ary.empty? 
-      line = ary.shift(@width).join('')
-      puts line.gsub(/[01]/, '0' => '   ', '1' => ' * ')
+    until @next_board.empty? 
+      line = @next_board.shift(@width).join('')
+      puts line.gsub(/[01]/, '0' => '  ', '1' => '* ')
     end
   end
 
@@ -28,28 +25,27 @@ class Blinky
     NEARS.map do |j, i|
       rr = (row + j) % @height
       cc = (col + i) % @width
-      @board[rr * @width +  cc]
+      @board[rr * @width + cc]
     end
   end
 
-  # generalize this
   def blink state, neigh
     sum = neigh.inject :+
-    sum == 3 ? 1 : (sum == 2 && state == 1) ? 1 : 0
+    sum == 3 || state == 1 && sum == 2 ? 1 : 0
   end
 
   def update
     @ary_size.times do |val|
       cell = @board[val]
-      neigh = neighborhood val
-      @next_board[val] = blink cell, neigh
+      neighbors = neighborhood val
+      @next_board[val] = blink cell, neighbors
     end
 
     @board = @next_board.dup
   end
 
   def run_blinky
-    while @i<10**3
+    while @i<20**2
       @i += 1
       # sleep(0.3)
       pretty_print
