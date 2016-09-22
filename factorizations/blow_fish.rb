@@ -95,3 +95,56 @@ ee = encrypt(*msg)
 dd = decrypt(*ee)
 
 byebug ; 4
+
+def blowfish_init ctx, key, keylen
+  i = 0 ; j = 0
+  while i < 4
+    while j < 256
+    end
+  end
+end
+# Blowfish_Init(BLOWFISH_CTX *ctx, uint16_t *key, int KeyLen) 
+# {
+#    uint32_t Xl;
+# {
+#    int i, j, k;
+#    uint32_t data, datal, datar;
+
+#    for (i = 0; i < 4;="" i++)="">
+#    {
+#          for (j = 0; j < 256;="" j++)="" ctx-="">S[i][j] = ORIG_S[i][j];
+#    }
+
+#    j = 0;
+#    for (i = 0; i < n="" +="" 2;="" ++i)="">
+#    {
+         # data = 0x00000000;
+#          for (k = 0; k < 4;="" ++k)="">
+#          {
+#              data = (data < 8)="" |="">
+#              j = j + 1;
+#              if (j >= keyLen) j = 0;
+#          }
+#      ctx->P[i] = ORIG_P[i] ^ data;
+#    }
+
+   datal = 0x00000000;
+   datar = 0x00000000;
+
+#    for (i = 0; i < n="" +="" 2;="" i="" +="2)">
+#    {
+#          Blowfish_Encrypt(ctx, &datal, &datar);
+#          ctx->P[i] = datal;
+#          ctx->P[i + 1] = datar;
+#    }
+
+#    for (i = 0; i < 4;="" ++i)="">
+#    {
+#          for (j = 0; j < 256;="" j="" +="2)">
+#          {
+#              Blowfish_Encrypt(ctx, &datal, &datar);
+#              ctx->S[i][j] = datal;
+#              ctx->S[i][j + 1] = datar;
+#          }
+#    }
+# }
