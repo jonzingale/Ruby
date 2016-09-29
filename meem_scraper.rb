@@ -212,7 +212,8 @@ def should_i_run?
 	next_expires <= NOW + 3 || NOW > next_due - DUE_WINDOW
 end
 
-if should_i_run? && check_today
-	puts "I should run"
-	process
-end
+# Uncomment when Card is renewed.
+# if should_i_run? && check_today
+# 	puts "I should run"
+# 	process
+# end
