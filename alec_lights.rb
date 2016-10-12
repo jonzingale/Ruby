@@ -4,16 +4,12 @@ class Stringy
   attr_reader :str, :ary
 
   def initialize
-    @ary = [255]
-    reset
+    @top = 255
+    @ary = [1]
   end
 
-  def reset
-    @str = 255 ; put
-  end
-
-  def put
-    puts "%08d" % @str.to_s(2)
+  def put it
+    puts "%08d" % it.to_s(2)
   end
 
   def modify str, n
@@ -22,23 +18,22 @@ class Stringy
     elsif n == 7
       str ^ 192
     else
-      pp = 2 ** (n+1)
-      nn = 2 ** n
-      mm = 2 ** (n-1)
-      str^(pp + nn + mm)
+      val = 7 * 2 ** (n-1)
+      str ^ val
     end
   end
 
   def accum
-    @i = 0
-    while @ary.length < 255
+    while @ary.length < @top
       @ary.each do |str|
         (0..7).each do |n|
           val = modify str, n
-          (@ary << val ; @i+=1) unless @ary.include?(val)
+          unless @ary.include?(val)
+            @ary << val
+            puts val
+          end
         end
       end
-puts @i
     end
   end
 end
