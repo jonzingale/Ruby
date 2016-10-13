@@ -9,6 +9,10 @@ class Stringy
     accum
   end
 
+  def put
+    puts ary.sort.to_s
+  end
+
   def accum
     while ary.length < TwoFiftySix/2
       ary.each do |bits|
@@ -21,5 +25,4 @@ class Stringy
   end
 end
 
-it = Stringy.new
-puts it.ary.sort.to_s
+Stringy.new.put
