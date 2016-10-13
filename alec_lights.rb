@@ -6,6 +6,7 @@ class Stringy
 
   def initialize
     @ary = [255]
+    accum
   end
 
   def accum
@@ -21,5 +22,4 @@ class Stringy
 end
 
 it = Stringy.new
-it.accum
 puts it.ary.sort.to_s
