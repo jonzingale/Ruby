@@ -5,46 +5,44 @@ require 'byebug'
 include Decks
 
 file = File.read('./allcards.json')
-json = JSON.parse(file)
+Json = JSON.parse(file)
 
 deck = Decks.deck_1
 
-ColorKeys = {'U' => 'Blue', 'G' => 'Green', 'W' => 'White',
-             'B' => 'Black', 'R' => 'Red'}
+# ColorKeys = {'U' => 'Blue', 'G' => 'Green', 'W' => 'White',
+#              'B' => 'Black', 'R' => 'Red'}
 
-AirElemental = json.first
-EmpyrealVoyager = json['Empyreal Voyager']
+# "manaCost"=>"{3}{U}{U}": 3 colorless, 2 blue.
+# cmc is cummulative mana cost.
 
-pure_blue_cards = json.select{|k,v| json[k]['colorIdentity']==['U']}
-
-blue_cards = json.select do |k,v|
-  unless (id = json[k]['colorIdentity']).nil?
-    id.include? 'U'
-  end
+def deck_data(deck) # :: Hash -> [Hash]
+  deck.keys.map { |k,c| Json[k] }
 end
 
-# Island
-# {"layout"=>"normal", "name"=>"Island", "type"=>"Basic Land — Island",
-#  "supertypes"=>["Basic"], "types"=>["Land"], "subtypes"=>["Island"],
-#  "imageName"=>"island", "colorIdentity"=>["U"]}
+def stack_data(stack) # :: [Keys] -> Hash
+  hash = {}
+  stack.each {|k| hash.merge!({k => Json[k]})}
+  hash
+end
 
-# Aether Hub
-# {"layout"=>"normal", "name"=>"Aether Hub", "type"=>"Land",
-#  "types"=>["Land"], "text"=>"When Aether Hub enters the battlefield,
-#   you get {E} (an energy counter).\n{T}: Add {C} to your mana pool.\n{T},
-#   Pay {E}: Add one mana of any color to your mana pool.", 
-#  "imageName"=>"aether hub"}
+def some_hand deck
+  stack = deck.inject([]){|accum,(k,v)| accum + [k] * v }
+  stack_data = stack_data stack.shuffle
 
-# Air Elemental
-# {"layout"=>"normal", "name"=>"Air Elemental", "manaCost"=>"{3}{U}{U}",
-   # "cmc"=>5, "colors"=>["Blue"], "type"=>"Creature — Elemental",
-   # "types"=>["Creature"], "subtypes"=>["Elemental"], "text"=>"Flying",
-   # "power"=>"4", "toughness"=>"4", "imageName"=>"air elemental",
-   # "colorIdentity"=>["U"]}
+  total = stack.count
+  hand = (1..7).map{stack[rand total]}
 
+  data = hand.map do |key|
+    card = Json[key]
+    name = card['name']
+    cmc = card['cmc'] ? card['cmc'] : 0
+    [name, cmc]
+  end
 
-# "manaCost"=>"{3}{U}{U}"
-# 3 colorless, 2 blue.
-# cmc is cummulative mana cost.
+  # pretty prints a hand, ordered by mana cost
+  puts data.sort_by(&:last).map{|n,c| "#{n}: #{c}"}
+end
+
+some_hand deck
 
 byebug ; 3
