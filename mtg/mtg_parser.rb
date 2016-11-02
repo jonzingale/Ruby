@@ -7,7 +7,12 @@ include Decks
 file = File.read('./allcards.json')
 Json = JSON.parse(file)
 
-deck = Decks.deck_1
+# deck = Decks.deck_1 # :: {Name => Multiplicity}
+deck = Decks.corwins_fire_deck # :: {Name => Multiplicity}
+
+def stack deck
+  deck.inject([]) { |acc, (k,v)| acc + [k] * v }.shuffle
+end
 
 # ColorKeys = {'U' => 'Blue', 'G' => 'Green', 'W' => 'White',
 #              'B' => 'Black', 'R' => 'Red'}
@@ -15,7 +20,7 @@ deck = Decks.deck_1
 # "manaCost"=>"{3}{U}{U}": 3 colorless, 2 blue.
 # cmc is cummulative mana cost.
 
-def deck_data(deck) # :: Hash -> [Hash]
+def deck_data(deck) # :: Hash -> [Hash] ie. a stack.
   deck.keys.map { |k,c| Json[k] }
 end
 
@@ -26,11 +31,9 @@ def stack_data(stack) # :: [Keys] -> Hash
 end
 
 def some_hand deck
-  stack = deck.inject([]){|accum,(k,v)| accum + [k] * v }
-  stack_data = stack_data stack.shuffle
-
+  stack = stack deck
   total = stack.count
-  hand = (1..7).map{stack[rand total]}
+  hand = stack.take 7
 
   data = hand.map do |key|
     card = Json[key]
@@ -40,7 +43,7 @@ def some_hand deck
   end
 
   # pretty prints a hand, ordered by mana cost
-  puts data.sort_by(&:last).map{|n,c| "#{n}: #{c}"}
+  puts data.sort_by(&:last).map { |n,c| "#{n}: #{c}" }
 end
 
 some_hand deck

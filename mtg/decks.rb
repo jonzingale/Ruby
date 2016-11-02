@@ -2,7 +2,8 @@
   # name, count
 
 module Decks
-  attr_reader :deck_1
+  attr_reader :deck_1, :corwins_fire_deck
+  # this could use another howling mine.
   @deck_1 = {
     'Empyreal Voyager' => 4,
     'Dynavolt Tower' => 2,
@@ -36,7 +37,37 @@ module Decks
     'Sky Skiff' => 1,
     'Thriving Turtle' => 4,
     'Filigree Familiar' => 1,
-    'Fabrication Module' => 2
+    'Fabrication Module' => 1
+  }
+
+  @corwins_fire_deck = { # 60
+    'Mountain' => 7,
+    'Dwarven Ruins' => 1,
+    'Saprazzan Cove' => 1,
+    'Shivan Gorge' => 1,
+    'Ghitu Encampment' => 2,
+    'Smoldering Crater' => 2,
+    'Sandstone Needle' => 1,
+    'Forgotten Cave' => 4,
+    'Harness the Storm' => 2,
+    'Dual Casting' => 1,
+    'Shock' => 4,
+    'Incinerate' => 4,
+    'Lightning Blast' => 2,
+    'Lightning Bolt' => 4,
+    'Disintegrate' => 3,
+    'Deathforge Shaman' => 1,
+    'Thermo-Alchemist' => 2,
+    'Cinder Pyromancer' => 2,
+    'Mana Seism' => 2,
+    'Fireball' => 1,
+    'Fire Servant' => 1,
+    'Crystal Vein' => 1,
+    'Sol Ring' => 1,
+    'Lava Axe' => 2,
+    'Pyre Hound' => 2,
+    'Vessel of Volatility' => 4,
+    'Dragon\'s Claw' => 2
   }
 
 end
