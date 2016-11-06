@@ -1,51 +1,86 @@
 require (File.expand_path('./decks', File.dirname(__FILE__)))
-require 'json'
 require 'byebug'
+require 'json'
 
 include Decks
 
+UsefulMethods = [:some_hand, :cmc_totals, :lands, :creatures]
 file = File.read('./allcards.json')
 Json = JSON.parse(file)
 
-# deck = Decks.deck_1 # :: {Name => Multiplicity}
-deck = Decks.corwins_fire_deck # :: {Name => Multiplicity}
+class Deck
+  ColorKeys = {'Blue' => 'U', 'Green' => 'G', 'White' => 'W',
+               'Black' => 'B', 'Red' => 'R'}
 
-def stack deck
-  deck.inject([]) { |acc, (k,v)| acc + [k] * v }.shuffle
-end
-
-# ColorKeys = {'U' => 'Blue', 'G' => 'Green', 'W' => 'White',
-#              'B' => 'Black', 'R' => 'Red'}
-
-# "manaCost"=>"{3}{U}{U}": 3 colorless, 2 blue.
-# cmc is cummulative mana cost.
-
-def deck_data(deck) # :: Hash -> [Hash] ie. a stack.
-  deck.keys.map { |k,c| Json[k] }
-end
-
-def stack_data(stack) # :: [Keys] -> Hash
-  hash = {}
-  stack.each {|k| hash.merge!({k => Json[k]})}
-  hash
-end
-
-def some_hand deck
-  stack = stack deck
-  total = stack.count
-  hand = stack.take 7
-
-  data = hand.map do |key|
-    card = Json[key]
-    name = card['name']
-    cmc = card['cmc'] ? card['cmc'] : 0
-    [name, cmc]
+  attr_reader :deck, :stack, :cmc_totals, :lands, :creatures
+  def initialize deck
+    @deck = deck
+    @stack = mk_stack
+    @cmc_totals = cmc_distribution
+    @creatures = get_by_type 'Creature'
+    @lands = get_by_type 'Land'
   end
 
-  # pretty prints a hand, ordered by mana cost
-  puts data.sort_by(&:last).map { |n,c| "#{n}: #{c}" }
+  def deck_data
+    stack.inject({}) {|hash, k| hash.merge!({k => Json[k]})}
+  end
+
+  def get_by_type type
+    deck.select { |k, v| deck_data[k]['types'].include?(type) }
+  end
+
+  def some_hand
+    # hand ordered by mana cost
+    hand = stack.shuffle.take 7
+
+    data = hand.map do |key|
+      card = Json[key]
+      name = card['name']
+      cmc = card['cmc'] || 0
+      [name, cmc]
+    end
+
+    data.sort_by!(&:last)
+    data.map { |n, c| "#{n}: #{c}" }
+  end
+
+  def mk_stack
+    deck.inject([]) { |acc, (k,v)| acc + [k] * v }
+  end
+
+  def cmc_distribution
+    total_cmc = stack.map do |card|
+      cmc = Json[card]['cmc']
+      cmc.nil? ? 0 : cmc
+    end.sort
+
+    total_cmc.inject({}) do |distr, n|
+      count = total_cmc.count { |t| t == n }
+      total_cmc.reject! { |c| c == n }
+      distr.merge!({n => count})
+    end
+  end
 end
 
-some_hand deck
+def useful_data deck
+  system('clear')
+  UsefulMethods.each do |sym|
+    puts "\n" ; puts "#{sym.to_s}:"
+    puts deck.send(sym)
+  end
+end
 
-byebug ; 3
+bcc = Deck.new(Decks.blue_creature_control)
+cfd = Deck.new(Decks.corwins_fire_deck)
+
+useful_data bcc
+
+# byebug ; 3
+
+# :: {Name => Multiplicity}
+# deck = Decks.blue_creature_control
+# {0=>21, 1=>14, 2=>13, 3=>10, 5=>2}
+# deck = Decks.deck_1
+# {0=>21, 1=>14, 2=>17, 3=>11, 5=>4}
+# deck = Decks.corwins_fire_deck
+# {0=>20, 1=>13, 2=>15, 3=>4, 5=>4}
