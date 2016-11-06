@@ -2,7 +2,7 @@
   # name, count
 
 module Decks
-  attr_reader :deck_1, :corwins_fire_deck
+  attr_reader :deck_1, :corwins_fire_deck, :blue_creature_control
   # this could use another howling mine.
   @deck_1 = {
     'Empyreal Voyager' => 4,
@@ -68,6 +68,35 @@ module Decks
     'Pyre Hound' => 2,
     'Vessel of Volatility' => 4,
     'Dragon\'s Claw' => 2
+  }
+
+  @blue_creature_control = { # 63
+    'Island' => 10,
+    'Thornwood Falls' => 4,
+    'Lumbering Falls' => 2,
+    'Hinterland Harbor' => 2,
+    'Woodland Stream' => 1,
+    'Alchemist\'s Refuge' => 2,
+    'Howling Mine' => 2,
+    'Geth\'s Grimoire' => 1,
+    'Skysovereign, Consul Flagship' => 1,
+    'Dynavolt Tower' => 4,
+    'Burgeoning' => 2,
+    'Spreading Seas' => 2, # not enough against non-blue.
+    'Breakthrough' => 2,
+    'Pore Over the Pages' => 1,
+    'Force Spike' => 3,
+    'Counterspell' => 4,
+    'Condescend' => 2,
+    'Broken Ambitions' => 2,
+    'Negate' => 1,
+    'Unsubstantiate' => 2,
+    'Thing in the Ice' => 2,
+    'Seasinger' => 4,
+    'Echo Mage' => 2,
+    'Thriving Turtle' => 2,
+    'Enclave Cryptologist' => 1,
+    'Padeem, Consul of Innovation' => 2
   }
 
 end
