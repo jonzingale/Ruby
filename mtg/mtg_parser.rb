@@ -4,20 +4,28 @@ require 'json'
 
 include Decks
 
-UsefulMethods = [:some_hand, :cmc_totals, :lands, :creatures]
+UsefulMethods = [:some_hand, :cmc_totals, :lands, :creatures,
+                 :sorceries, :instants, :enchantments, :artifacts]
 file = File.read('./allcards.json')
 Json = JSON.parse(file)
 
 class Deck
+  Types = [:Land, :Artifact, :Enchantment, :Sorcery, :Instant, :Creature]
+
   ColorKeys = {'Blue' => 'U', 'Green' => 'G', 'White' => 'W',
                'Black' => 'B', 'Red' => 'R'}
 
-  attr_reader :deck, :stack, :cmc_totals, :lands, :creatures
+  attr_reader :deck, :stack, :cmc_totals, :lands, :creatures, :artifacts,
+              :sorceries, :instants, :enchantments
   def initialize deck
     @deck = deck
     @stack = mk_stack
     @cmc_totals = cmc_distribution
+    @enchantments = get_by_type 'Enchantment'
     @creatures = get_by_type 'Creature'
+    @artifacts = get_by_type 'Artifact'
+    @sorceries = get_by_type 'Sorcery'
+    @instants = get_by_type 'Instant'
     @lands = get_by_type 'Land'
   end
 
@@ -65,8 +73,10 @@ end
 def useful_data deck
   system('clear')
   UsefulMethods.each do |sym|
-    puts "\n" ; puts "#{sym.to_s}:"
-    puts deck.send(sym)
+    datum = deck.send(sym)
+    total = datum.values.inject(:+) if datum.is_a?(Hash)
+    puts "\n" ; puts "#{sym.to_s}: #{total}"
+    puts datum
   end
 end
 
