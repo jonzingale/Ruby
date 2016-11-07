@@ -2,7 +2,8 @@
   # name, count
 
 module Decks
-  attr_reader :deck_1, :corwins_fire_deck, :blue_creature_control
+  attr_reader :deck_1, :corwins_fire_deck, :blue_creature_control,
+              :cards_from_zeke
   # this could use another howling mine.
   @deck_1 = {
     'Empyreal Voyager' => 4,
@@ -97,6 +98,17 @@ module Decks
     'Thriving Turtle' => 2,
     'Enclave Cryptologist' => 1,
     'Padeem, Consul of Innovation' => 2
+  }
+
+  @cards_from_zeke = {
+    'Arcane Melee' => 1,
+    'Amass the Components' => 2,
+    'Makeshift Mauler' => 1,
+    'Blue Sun\'s Zenith' => 1,
+    'Impaler Shrike' => 2,
+    'Soul Net' => 1,
+    'Tormod\'s Crypt' => 1,
+    'Circle of Protection: Red' => 1
   }
 
 end
