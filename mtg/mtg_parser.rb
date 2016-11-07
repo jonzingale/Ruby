@@ -82,6 +82,7 @@ end
 
 bcc = Deck.new(Decks.blue_creature_control)
 cfd = Deck.new(Decks.corwins_fire_deck)
+cfz = Deck.new(Decks.cards_from_zeke)
 
 useful_data bcc
 
