@@ -3,9 +3,9 @@
 
 module Decks
   attr_reader :deck_1, :corwins_fire_deck, :blue_creature_control,
-              :cards_from_zeke
-  # this could use another howling mine.
-  @deck_1 = {
+              :blue_creature_control_redux, :cards_from_zeke
+
+  @deck_1 = { # 70
     'Empyreal Voyager' => 4,
     'Dynavolt Tower' => 2,
     'Condescend' => 2,
@@ -98,6 +98,35 @@ module Decks
     'Thriving Turtle' => 2,
     'Enclave Cryptologist' => 1,
     'Padeem, Consul of Innovation' => 2
+  }
+
+  @blue_creature_control_redux = { # 61
+    'Island' => 11,
+    'Thornwood Falls' => 4,
+    'Lumbering Falls' => 2,
+    'Hinterland Harbor' => 1,
+    'Alchemist\'s Refuge' => 2,
+    'Howling Mine' => 2,
+    'Chalice of the Void' => 2,
+    'Kraken\'s Eye' => 1,
+    'Dynavolt Tower' => 4,
+    'Burgeoning' => 2,
+    'Spreading Seas' => 2,
+    'Phantasmal Terrain' => 1,
+    'Breakthrough' => 2,
+    'Pore Over the Pages' => 1,
+    'Hidden Strings' => 1,
+    'Force Spike' => 2,
+    'Counterspell' => 4,
+    'Condescend' => 2,
+    'Broken Ambitions' => 2,
+    'Negate' => 1,
+    'Unsubstantiate' => 2,
+    'Thing in the Ice' => 2,
+    'Seasinger' => 4,
+    'Thriving Turtle' => 2,
+    'Elder Deep-Fiend' => 1,
+    'Jace, Unraveler of Secrets' => 1
   }
 
   @cards_from_zeke = {
