@@ -2,8 +2,20 @@
   # name, count
 
 module Decks
-  attr_reader :deck_1, :corwins_fire_deck, :blue_creature_control,
-              :blue_creature_control_redux, :cards_from_zeke
+  attr_reader :deck_1, :cards_from_zeke, :corwins_fire_deck,
+              :blue_creature_control, :blue_creature_control_redux,
+              :nissa_and_jace_towers
+
+  @cards_from_zeke = {
+    'Arcane Melee' => 1,
+    'Amass the Components' => 2,
+    'Makeshift Mauler' => 1,
+    'Blue Sun\'s Zenith' => 1,
+    'Impaler Shrike' => 2,
+    'Soul Net' => 1,
+    'Tormod\'s Crypt' => 1,
+    'Circle of Protection: Red' => 1
+  }
 
   @deck_1 = { # 70
     'Empyreal Voyager' => 4,
@@ -101,10 +113,10 @@ module Decks
   }
 
   @blue_creature_control_redux = { # 61
-    'Island' => 11,
+    'Island' => 10,
     'Thornwood Falls' => 4,
     'Lumbering Falls' => 2,
-    'Hinterland Harbor' => 1,
+    'Hinterland Harbor' => 2,
     'Alchemist\'s Refuge' => 2,
     'Howling Mine' => 2,
     'Chalice of the Void' => 2,
@@ -129,15 +141,38 @@ module Decks
     'Jace, Unraveler of Secrets' => 1
   }
 
-  @cards_from_zeke = {
-    'Arcane Melee' => 1,
-    'Amass the Components' => 2,
-    'Makeshift Mauler' => 1,
-    'Blue Sun\'s Zenith' => 1,
-    'Impaler Shrike' => 2,
-    'Soul Net' => 1,
-    'Tormod\'s Crypt' => 1,
-    'Circle of Protection: Red' => 1
+  @nissa_and_jace_towers = {
+    'Forest' => 1,
+    'Island' => 10,
+    'Lumbering Falls' => 2,
+    'Hinterland Harbor' => 2,
+    'Alchemist\'s Refuge' => 2,
+    'Thornwood Falls' => 4,
+    'Crawlspace' => 1,
+    'Skysovereign, Consul Flagship' => 1,
+    'Staff of the Mind Magus' => 2,
+    'Howling Mine' => 2,
+    'Sol Ring' => 1,
+    'Scuttling Doom Engine' => 1,
+    'Hangarback Walker' => 1,
+    'Dynavolt Tower' => 3,
+    'Sylvan Advocate' => 2,
+    'Vesuvan Doppelganger' => 1,
+    'Elder Deep-Fiend' => 1,
+    'Thriving Turtle' => 1,
+    'Empyreal Voyager' => 2,
+    'Feed the Clan' => 2,
+    'Back to Nature' => 3,
+    'Force Spike' => 1,
+    'Negate' => 2,
+    'Pore Over the Pages' => 1,
+    'Unsubstantiate' => 2,
+    'Counterspell' => 4,
+    'Condescend' => 4,
+    'Brainstorm' => 1,
+    'Hidden Strings' => 1,
+    'Nissa, Vital Force' => 1,
+    'Jace, Unraveler of Secrets' => 1
   }
 
 end
