@@ -42,6 +42,12 @@ class Deck
     deck.select { |k, v| deck_data[k]['types'].include?(type) }
   end
 
+  def with_mana_cost num
+    deck_data.keys.select do |k|
+      (deck_data[k]['cmc'] || 0) == num
+    end
+  end
+
   def some_hand
     # hand ordered by mana cost
     hand = stack.shuffle.take 7
@@ -86,22 +92,9 @@ def useful_data deck
   end
 end
 
-bcc = Deck.new(Decks.blue_creature_control)
-bcc2 = Deck.new(Decks.blue_creature_control_redux)
-cfd = Deck.new(Decks.corwins_fire_deck)
-cfz = Deck.new(Decks.cards_from_zeke)
-deck_1 = Deck.new(Decks.deck_1)
+# {0=>22, 1=>8, 2=>18, 3=>8, 5=>5, 6=>1, 8=>1}
+njt = Deck.new(Decks.nissa_and_jace_towers)
 
-useful_data bcc2
+puts njt.with_mana_cost 1
+useful_data njt
 
-# byebug ; 3
-
-# :: {Name => Multiplicity}
-# blue_creature_control_redux
-# {0=>22, 1=>12, 2=>16, 3=>8, 5=>2, 8=>1}
-# blue_creature_control
-# {0=>21, 1=>14, 2=>13, 3=>10, 4=>3, 5=>2}
-# deck_1
-# {0=>21, 1=>14, 2=>17, 3=>11, 4=>3, 5=>4}
-# corwins_fire_deck
-# {0=>20, 1=>13, 2=>15, 3=>4, 4=>4, 5=>4}
