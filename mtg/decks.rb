@@ -4,7 +4,7 @@
 module Decks
   attr_reader :deck_1, :cards_from_zeke, :corwins_fire_deck,
               :blue_creature_control, :blue_creature_control_redux,
-              :nissa_and_jace_towers
+              :nissa_and_jace_towers, :blue_versus_the_rats
 
   @cards_from_zeke = {
     'Arcane Melee' => 1,
@@ -173,6 +173,40 @@ module Decks
     'Hidden Strings' => 1,
     'Nissa, Vital Force' => 1,
     'Jace, Unraveler of Secrets' => 1
+  }
+
+  @blue_versus_the_rats ={
+    'Saprazzan Cove' => 2,
+    'Thornwood Falls' => 1,
+    'Hinterland Harbor' => 2,
+    'Island' => 9,
+    'Inventors\' Fair' => 3,
+    'Forest' => 4,
+    'Alchemist\'s Refuge' => 2,
+    'Crawlspace' => 1,
+    'Howling Mine' => 2,
+    'Sol Ring' => 2,
+    'Hangarback Walker' => 1,
+    'Skysovereign, Consul Flagship' => 1,
+    'Chalice of the Void' => 2,
+    'Dynavolt Tower' => 4,
+    'Staff of the Mind Magus' => 1,
+    'Scuttling Doom Engine' => 1,
+    'Empyreal Voyager' => 2,
+    'Sylvan Advocate' => 1,
+    'Feed the Clan' => 2,
+    'Back to Nature' => 2,
+    'High Tide' => 1,
+    'Engulf the Shore' => 2,
+    'Unsubstantiate' => 2,
+    'Counterspell' => 4,
+    'Condescend' => 4,
+    'Thing in the Ice' => 1,
+    'Vesuvan Doppelganger' => 1,
+    'Part the Waterveil' => 1,
+    'Crush of Tentacles' => 1,
+    'Jace, Unraveler of Secrets' => 1,
+    'Nissa, Vital Force' => 1
   }
 
 end

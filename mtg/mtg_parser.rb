@@ -92,9 +92,9 @@ def useful_data deck
   end
 end
 
-# {0=>22, 1=>8, 2=>18, 3=>8, 5=>5, 6=>1, 8=>1}
-njt = Deck.new(Decks.nissa_and_jace_towers)
+# {0=>26, 1=>7, 2=>14, 3=>8, 4=>2, 5=>4, 6=>3}
+bvr = Deck.new(Decks.blue_versus_the_rats)
+useful_data bvr
+puts bvr.with_mana_cost 1
 
-puts njt.with_mana_cost 1
-useful_data njt
-
+# modify those with x to reflect x.
