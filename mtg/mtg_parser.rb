@@ -92,9 +92,22 @@ def useful_data deck
   end
 end
 
-# {0=>26, 1=>7, 2=>14, 3=>8, 4=>2, 5=>4, 6=>3}
-bvr = Deck.new(Decks.blue_versus_the_rats)
-useful_data bvr
-puts bvr.with_mana_cost 1
+def with_mana_costs deck
+  puts "\nMana Cost, Cards and Multiplicity\n"
 
-# modify those with x to reflect x.
+  (1..10).map do |t|
+    cards = deck.with_mana_cost(t)
+
+    cards.map! do |card|
+      count = deck.stack.count{|stack| stack == card}
+      "#{card}: #{count}"
+    end
+
+    puts "#{t}: #{cards}" unless cards.empty?
+  end
+end
+
+# {0=>26, 1=>7, 2=>14, 3=>8, 4=>2, 5=>4, 6=>3}
+art = Deck.new(Decks.deck_of_steel)
+useful_data art
+with_mana_costs art

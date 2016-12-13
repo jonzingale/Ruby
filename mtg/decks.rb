@@ -4,7 +4,8 @@
 module Decks
   attr_reader :deck_1, :cards_from_zeke, :corwins_fire_deck,
               :blue_creature_control, :blue_creature_control_redux,
-              :nissa_and_jace_towers, :blue_versus_the_rats
+              :nissa_and_jace_towers, :blue_versus_the_rats, :crush_of_nissa,
+              :artifactual, :venser, :crabs, :deck_of_steel, :venom
 
   @cards_from_zeke = {
     'Arcane Melee' => 1,
@@ -175,7 +176,7 @@ module Decks
     'Jace, Unraveler of Secrets' => 1
   }
 
-  @blue_versus_the_rats ={
+  @blue_versus_the_rats = {
     'Saprazzan Cove' => 2,
     'Thornwood Falls' => 1,
     'Hinterland Harbor' => 2,
@@ -209,4 +210,163 @@ module Decks
     'Nissa, Vital Force' => 1
   }
 
+  @crush_of_nissa = { # 62
+    'Hinterland Harbor' => 2,
+    'Island' => 9,
+    'Forest' => 4,
+    'Saprazzan Cove' => 2,
+    'Inventors\' Fair' => 4,
+    'Counterspell' => 4,
+    'Condescend' => 4,
+    'Omniscience' => 1,
+    'Part the Waterveil' => 2,
+    'Crush of Tentacles' => 2,
+    'Empyreal Voyager' => 2,
+    'Fog Bank' => 2,
+    'Echo Mage' => 2,
+    'Vesuvan Doppelganger' => 1,
+    'Thing in the Ice' => 2,
+    'Unsubstantiate' => 2,
+    'Tireless Tracker' => 1,
+    'Rites of Flourishing' => 1,
+    'Howling Mine' => 2,
+    'Hangarback Walker' => 1,
+    'Dynavolt Tower' => 4,
+    'Scuttling Doom Engine' => 1,
+    'Sol Ring' => 2,
+    'Skysovereign, Consul Flagship' => 1,
+    'Crawlspace' => 1,
+    'Jace, Unraveler of Secrets' => 1,
+    'Nissa, Vital Force' => 1,
+    'Ugin, the Spirit Dragon' => 1
+  }
+
+  @artifactual = { # 61
+    'Hinterland Harbor' => 2,
+    'Island' => 10,
+    'Forest' => 7,
+    'Saprazzan Cove' => 1,
+    'Inventors\' Fair' => 2,
+    'Relic of Progenitus' => 1,
+    'Sol Ring' => 2,
+    'Crawlspace' => 1,
+    'Animation Module' => 2,
+    'Darksteel Forge' => 1,
+    'Steel Overseer' => 1,
+    'Hangarback Walker' => 3,
+    'Elixir of Immortality' => 2,
+    'Part the Waterveil' => 2,
+    'Counterspell' => 4,
+    'Force Spike' => 2,
+    'Condescend' => 3,
+    'Breakthrough' => 2,
+    'Leyline of Anticipation' => 1,
+    'Fog Bank' => 2,
+    'Aethersnatch' => 2,
+    'Gigantomancer' => 1,
+    'Lure' => 2,
+    'Scavenging Ooze' => 1,
+    'Tireless Tracker' => 2,
+    'Jace, Unraveler of Secrets' => 1,
+    'Nissa, Vital Force' => 1,
+  }
+
+  @venser = {
+    'Celestial Colonnade' => 4,
+    'Glacial Fortress' => 2,
+    'Temple of Enlightenment' => 2,
+    'Island' => 4,
+    'Plains' => 3,
+    'Tectonic Edge' => 2,
+    'Spirebluff Canal' => 4,
+    'Inspiring Vantage' => 4,
+    'Sun Titan' => 1,
+    'Wall of Omens' => 2,
+    'Sea Gate Oracle' => 2,
+    'Blade Splicer' => 3,
+    'Stonehorn Dignitary' => 2,
+    'Restoration Angel' => 4,
+    'Kiki-Jiki, Mirror Breaker' => 2,
+    'Spellskite' => 1,
+    'Keranos, God of Storms' => 1,
+    'Detention Sphere' => 2,
+    'Grafdigger\'s Cage' => 1,
+    'Counterspell' => 4,
+    'Swords to Plowshares' => 2,
+    'Ponder' => 4,
+    'Venser, the Sojourner' => 3,
+    'Jace, Unraveler of Secrets' => 1
+  }
+
+  @crabs = {
+    'Island' => 20,
+    'Counterspell' => 4,
+    'Muddle the Mixture' => 2,
+    'Negate' => 4,
+    'Quash' => 4,
+    'Gilded Drake' => 4,
+    'Horseshoe Crab' => 4,
+    'Prodigal Sorcerer' => 4,
+    'Arcane Laboratory' => 4,
+    'Curiosity' => 2,
+    'Hermetic Study' => 4,
+    'Sigil of Sleep' => 4
+  }
+
+  @venom = {
+     'Contaminated Ground' => 4,
+     'Pooling Venom' => 4,
+     'Psychic Venom' => 4,
+     'Rhystic Study' => 2,
+     'Propaganda' => 2,
+     'Arcane Laboratory' => 2,
+     'Mind Whip' => 2,
+     'Stab Wound' => 2,
+     'Mana Web' => 2,
+     'Isochron Scepter' => 1,
+     'Icy Manipulator' => 1,
+     'Early Frost' => 2,
+     'Doom Blade' => 3,
+     'Counterspell' => 3,
+     'Fatestitcher' => 2,
+     'Fog Bank' => 2,
+     'Mundungu' => 2,
+     'Island' => 10,
+     'Swamp' => 10
+  }
+
+  @deck_of_steel = {
+    'Hinterland Harbor' => 2,
+    'Island' => 5,
+    'Forest' => 4,
+    'Inventors\' Fair' => 2,
+    'Tolarian Academy' => 1,
+    'Academy Ruins' => 1,
+    'Halimar Depths' => 1,
+    'Reliquary Tower' => 1,
+    'Botanical Sanctum' => 3,
+    'Sol Ring' => 2,
+    'Spellskite' => 2,
+    'Scuttling Doom Engine' => 2,
+    'Nevinyrral\'s Disk' => 2,
+    'Elixir of Immortality' => 2,
+    'Time Sieve' => 1,
+    'Animation Module' => 2,
+    'Darksteel Forge' => 1,
+    'Steel Overseer' => 1,
+    'Hangarback Walker' => 4,
+    'Elixir of Immortality' => 2,
+    'Crush of Tentacles' => 2,
+    'Counterspell' => 4,
+    'Negate' => 1,
+    'Condescend' => 3,
+    'Leyline of Anticipation' => 1,
+    'Gigantomancer' => 1,
+    'Scavenging Ooze' => 2,
+    'Tireless Tracker' => 2,
+    'Birds of Paradise' => 2,
+    'Oviya Pashiri, Sage Lifecrafter' => 1,
+    'Nissa, Vital Force' => 1,
+    'Tamiyo, the Moon Sage' => 1
+  }
 end
