@@ -34,7 +34,12 @@
 		
 		def id(object) ; object ; end # :: a -> a
 		def to_f(obj,sym); 	obj.send(sym);end# :: a x Method(Symbol) -> ( a -> b ) 
-		
+
+# with include Math
+	# def trigs(theta) # :: Theta -> Pair[Real]
+	  # %w(sin cos).map { |s| send(s, theta) }
+	# end
+
 		def trigs(theta)#:: Theta -> Pair[Real]
 		  @cos,@sin = %w(sin cos).map{|s| Math.send(s,theta)}
 		end
