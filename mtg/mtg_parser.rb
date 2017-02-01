@@ -111,3 +111,5 @@ end
 art = Deck.new(Decks.deck_of_steel)
 useful_data art
 with_mana_costs art
+
+byebug ; 4
