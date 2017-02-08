@@ -1,5 +1,23 @@
 require 'byebug'
 
+OurStats = {'Mortekai' => [1 ,2, 2, 3 ,2 ,4, 13, 14, [2, 8], 6],
+            'Roen' => [3, 1, 3, 2, 4, 1, 12, 14, [2, 8], 6],
+            'Sam' => [0, 3, 3, 1, 2, 4, 12, 14, [2, 6], 6],
+            'Douglas' => [5, 0, 3, 1, 2, 3, 16, 13, [1, 10], 0],
+            'Sven' => [2, 4, 0, -1, 2, 0, 15, 12, [2, 10], 4],
+            'Everstrong' => [3, 2, 3, 1, 1, 0, 16, 0, [2, 10], 0]
+           }
+
+StatsValues = %w(strength dexterity constitution intelligence wisdom
+                 charisma ac dc hit_dice spell_bonus)
+
+def hashed_stats name
+  values = OurStats[name]
+  StatsValues.zip(values).inject({}) { |hash, (k, v)| hash.merge({k=>v}) }
+end
+
+byebug
+
 # Calculating Expectations for rolls.
 weapons = [ # weapon, onehand, twohand, type, proficiency.
             ['rapier', 8, 8, 'piercing', true], # piercing, bludgeoning, slashing.
