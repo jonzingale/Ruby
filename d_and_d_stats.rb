@@ -16,8 +16,6 @@ def hashed_stats name
   StatsValues.zip(values).inject({}) { |hash, (k, v)| hash.merge({k=>v}) }
 end
 
-byebug
-
 # Calculating Expectations for rolls.
 weapons = [ # weapon, onehand, twohand, type, proficiency.
             ['rapier', 8, 8, 'piercing', true], # piercing, bludgeoning, slashing.
