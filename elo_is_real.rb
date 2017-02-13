@@ -49,8 +49,8 @@ end
 
 def it # ~ 1500?
   num_p = 50
-  players = (1..num_p).map{ Player.new }
-  10000.times do
+  players = (1..num_p).map { Player.new }
+  1000.times do
     ranks = players.map(&:rank).map(&:floor)
     return if players.count == 1
 
