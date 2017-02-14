@@ -29,7 +29,6 @@ end
 
 class Player
   attr_accessor :rank
-  # (836.6 - 854.7) / (0.14497041420118342 - 0.572167830750978) = K
   K = 32 # 42.369 I suspect for 13 x 13
 
   def initialize
