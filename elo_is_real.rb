@@ -13,6 +13,16 @@
 # Therefore, the player's new rating is (1613 + 32×(2.5 − 2.867)) = 1601,
 # assuming that a K-factor of 32 is used.
 
+# score = 25.5
+# gshoa = [847, 822] # 25
+# me = [729, 756] # 27
+# exp = 0.33642590195870453 # i have a 1/3 chance of winning.
+# real = 1
+
+# new_rank = rank + K * (real_score - expected_score)
+# 756 = 729 + K * (0.6635740980412954)
+# (756 - 729) / 0.6635740980412954  = K
+
 require 'byebug'
 
 def bout player_a, player_b
@@ -31,8 +41,8 @@ class Player
   attr_accessor :rank
   K = 32 # 42.369 I suspect for 13 x 13
 
-  def initialize
-    @rank = rand(400) + 600
+  def initialize(rank=nil)
+    @rank = rank || rand(400) + 600
   end
 
   def expectation(oppenent_rank)
@@ -64,5 +74,5 @@ def it # ~ 1500?
 end
 
 it
-# byebug ; 1
+byebug ; 1
 
