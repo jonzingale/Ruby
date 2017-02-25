@@ -6,6 +6,7 @@ OurStats = {'Mortekai' => [1 ,2, 2, 3 ,2 ,4, 13, 14, [2, 8], 6],
             'Douglas' => [5, 0, 3, 1, 2, 3, 16, 13, [1, 10], 0],
             'Sven' => [2, 4, 0, -1, 2, 0, 15, 12, [2, 10], 4],
             'Everstrong' => [3, 2, 3, 1, 1, 0, 16, 0, [2, 10], 0]
+            'Tim' => [0, 3, 2, -1, 2, -1, 15, 12, [1, 8], 4]
            }
 
 StatsValues = %w(strength dexterity constitution intelligence wisdom
