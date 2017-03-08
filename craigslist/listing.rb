@@ -1,5 +1,3 @@
-	require 'active_support/core_ext/object/blank'
-	require 'active_support'
 	require 'geocoder'
 	# better might be to call this Apartment
 	# or HouseListing or Rentals, so that
@@ -7,22 +5,20 @@
 	# on craigslist free or something else.
 
 	class Listing
+		PRICE_SEL = './/span[@class="price" or @class="result-price"]'.freeze
+		LOCATION_SEL = './/span[@class="pnr"]/small'.freeze
+		HOUSING_SEL = './/span[@class="housing"]'.freeze
 		ADDRESS_REGEX = /\d{3,} (\w+| )+/.freeze
 		NOT_ADDRESS_REGEX = /(SQ|FT)/i.freeze
 
-		LOCATION_SEL = './/span[@class="pnr"]/small'.freeze
-		HOUSING_SEL = './/span[@class="housing"]'.freeze
-		PRICE_SEL = './/span[@class="price"]'.freeze
-
-		def initialize(noko_elem)
+		def initialize(elem)
 			data = Hash.new
-			beds, footage = noko_elem.at(HOUSING_SEL).text.scan(/\d+/)
-			location = /\((.+)\)/.match(noko_elem.at(LOCATION_SEL))
-			price = /\d+/.match(noko_elem.at(PRICE_SEL).text)
-			summary = noko_elem.at('.//a')
-
-			data['id'] = noko_elem.at('.//a')['data-id']
-			data['date'] = Date.parse(noko_elem.at('.//time')['datetime'])
+			beds, footage = elem.at(HOUSING_SEL).text.scan(/\d+/)
+			location = /\((.+)\)/.match(elem.at(LOCATION_SEL))
+			price = /\d+/.match(elem.at(PRICE_SEL).text)
+			summary = elem.at('.//a')
+			data['id'] = elem.search('.//a[@data-id]')[0]['data-id']
+			data['date'] = Date.parse(elem.at('.//time')['datetime'])
 			data['summary'] = summary.text unless summary.nil?
 			data['loc'] = location[1] unless location.nil?
 			data['coords'] = {'lat' => nil,'lng' => nil}
@@ -63,7 +59,7 @@
 			end
 
 			# sets coords manually.
-			if @listing['coords'][:lat].nil? && lat.present?
+			if @listing['coords'][:lat].nil? && lat
 				@listing['coords'] = {"lat"=>lat, "lng"=>lng}
 			end
 
