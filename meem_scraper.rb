@@ -213,7 +213,7 @@ def should_i_run?
 end
 
 # Uncomment when Card is renewed.
-# if should_i_run? && check_today
-# 	puts "I should run"
-# 	process
-# end
+if should_i_run? && check_today
+	puts "I should run"
+	process
+end
