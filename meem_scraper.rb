@@ -33,6 +33,7 @@ TITLE_SEL = './/a[@class="mediumBoldAnchor"]'.freeze
 RENEW_KEYS = './/input[@name="renewitemkeys"]'.freeze
 BOOKDATA_SEL = %w(book author due renewed).freeze
 AUTHOR_REGEX = /by (.+), \d*/.freeze
+EDITOR_REGEX = /by\] (.+) \;/.freeze
 
 # a source directory off of crude. --untracked.
 FILES_PATH = File.expand_path('./../../src/meem_library', __FILE__).freeze
@@ -47,10 +48,18 @@ class Book
 	def initialize(record)
 		@book_data = record.search('.//a').map(&:text)
 		@title, @author, @id, @check_out, @due, @renewed = @book_data
-		@author = AUTHOR_REGEX.match(@author)[1] unless @author.nil?
+		if @author.ord == 160
+			@author = EDITOR_REGEX.match(record.text)[1]
+		else
+			@author = (AUTHOR_REGEX.match(@author)).nil? ? '' : $1
+		end
 		key_cond = (rk = record.at(RENEW_KEYS)).nil?
 		@renew_key = rk['value'] unless key_cond
 	end
+end
+
+def clean_string(string)
+	string.split.select{|t|t.ascii_only?}.join(' ')
 end
 
 def get_book_data(page)
