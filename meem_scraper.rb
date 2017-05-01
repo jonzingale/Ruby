@@ -207,7 +207,7 @@ def process
 	page = form.submit
 
 	# email
-	email_builder
+	# email_builder
 end
 
 def check_today
