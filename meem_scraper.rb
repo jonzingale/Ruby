@@ -10,13 +10,14 @@ require 'net/smtp'
 
 require 'active_support'
 # TODO: 
-# Bibliography ; Ralf's app?
 # Extend this to handle my own books as well.
+# The refactoring includes extending meem_inits to include data_cache.
 
 # who was renewed?
 # who wasn't?
 
-DUE_WINDOW = 5.freeze
+
+DUE_WINDOW = 7.freeze
 NOW = Date.today.freeze
 BASE_URL = 'http://stjohnsnm.ipac.dynixasp.com/ipac20/ipac.jsp?profile=meem'.freeze
 SESSION_URL =(BASE_URL+"&session=%s&menu=account").freeze
@@ -26,8 +27,10 @@ BOOKINFO_INIT = "\nCurrently, the following items are out:".freeze
 EXPIRATION_COL_SEL = './/a[@class="normalBlackFont2"]/parent::td'.freeze
 BOOK_SEL = './/table[@class="tableBackgroundHighlight"]//table[@class="tableBackground"]/parent::td/parent::tr'.freeze
 BOOK_HEADERS = %w(renew_key book author library_of_congress checked_out due renewed).freeze
-DATA_HEADERS = %w(CARD_EXPIRATION NEXT_DUE CHECK_TODAY).freeze
-DATA_KEYS = [:expiration, :next_due, :check_today]
+DATA_HEADERS = %w(ACCOUNT,EMAIL,EXPIRATION,NEXT_DUE,CHECK_TODAY).freeze
+KEYS = [:borrower_id, :email1, :expiration, :next_due, :check_today].freeze
+
+# DATA_KEYS = [:expiration, :next_due, :check_today]
 RENEW_TEXT = "\nYour books have %sbeen renewed".freeze
 TITLE_SEL = './/a[@class="mediumBoldAnchor"]'.freeze
 RENEW_KEYS = './/input[@name="renewitemkeys"]'.freeze
@@ -38,8 +41,18 @@ EDITOR_REGEX = /by\] (.+) \;/.freeze
 # a source directory off of crude. --untracked.
 FILES_PATH = File.expand_path('./../../src/meem_library', __FILE__).freeze
 
-csv = CSV.read("#{FILES_PATH}/meem_inits.csv") ; keys = [:borrower_id, :email1, :email2]
-INITS_HASH = keys.zip(csv.last).inject({}){|h,kv| h.merge({kv[0] => kv[1]}) }.freeze
+# csv = CSV.read("#{FILES_PATH}/meem_inits.csv")
+FAR_FUTURE = '01/01/2030'.freeze
+
+def initialize_data
+	inits_ary = []
+	CSV.foreach("#{FILES_PATH}/meem_inits.csv") do |row|
+		inits_ary << KEYS.zip(row).inject({}){|h, kv| h.merge({kv[0] => kv[1]})}
+	end
+	inits_ary
+end
+
+INITS_HASH = initialize_data.freeze
 
 class Book
 	attr_reader :renew_key, :title, :author, :id,
@@ -74,30 +87,33 @@ def get_book_data(page)
 end
 
 def str_to_date(date)
-	date_str = date.is_a?(Array) ? date.flatten[0] : date
+	date_str = date.is_a?(Array) ? date.flatten[0] : date.strip
+	next_due = date.empty? ? FAR_FUTURE : date
 	Date.strptime(date_str, '%m/%d/%Y')
 end
 
-def email_builder
-	file = File.open(FILES_PATH+'/library_notification_template.txt')
-	message = '' ; file.each { |line| message << line }
+# INITS_HASH is now an array and merged with data_cache.
+# This method has not been refactored accordingly.
+# def email_builder
+# 	file = File.open(FILES_PATH+'/library_notification_template.txt')
+# 	message = '' ; file.each { |line| message << line }
 
-	cache_data = read_csv('data_cache.csv', DATA_KEYS).values.flatten
-	date_info = "\nexpiration: %s    next_due: %s\n" % (cache_data[0..1])
+# 	cache_data = read_csv('data_cache.csv', DATA_KEYS).values.flatten
+# 	date_info = "\nexpiration: %s    next_due: %s\n" % (cache_data[0..1])
 
-	books = read_csv('items_out.csv', BOOK_HEADERS)
-	book_data = BOOKDATA_SEL.map{|k| books[k]}.compact.map(&:flatten)
- 	book_info = book_data.inject(''){|s,b| s += ("\n'%s' '%s' %s %s"  % b) }
+# 	books = read_csv('items_out.csv', BOOK_HEADERS)
+# 	book_data = BOOKDATA_SEL.map{|k| books[k]}.compact.map(&:flatten)
+#  	book_info = book_data.inject(''){|s,b| s += ("\n'%s' '%s' %s %s"  % b) }
 
-	content = "%s%s%s" % [RENEW_TEXT % @renew_msg, @exp_msg, date_info]
-	books_out = BOOKINFO_INIT + book_info + "\n\n"
+# 	content = "%s%s%s" % [RENEW_TEXT % @renew_msg, @exp_msg, date_info]
+# 	books_out = BOOKINFO_INIT + book_info + "\n\n"
 
-	message = message % (content + books_out)
+# 	message = message % (content + books_out)
 
-	[:email1,:email2].each do |email_key| # port 25 is likely blocked :(
-		%x(echo "#{message}" | mail -s 'meem_notifier' #{INITS_HASH[email_key]})
-	end
-end
+# 	[:email1, :email2].each do |email_key| # port 25 is likely blocked :(
+# 		%x(echo "#{message}" | mail -s 'meem_notifier' #{INITS_HASH[email_key]})
+# 	end
+# end
 
 # csv handling
 def hash_to_csv(file_name, key_values, headers)
@@ -132,7 +148,7 @@ def expiration_path(next_expires,page,data_cache)
 		@exp_msg = expire_msg_cond ? "\nyour card is sooooo expired" : ''
 
 		data_cache[:expiration] = next_expires
-		data_cache = hash_to_csv('data_cache.csv', [data_cache], DATA_HEADERS)
+		data_cache = hash_to_csv('meem_inits.csv', [data_cache], DATA_HEADERS)
 	end
 end
 
@@ -170,33 +186,35 @@ def renewal_path(next_due,page,data_cache)
 			@renew_msg = RENEW_TEXT % (renew_msg_cond ? 'not' : '')
 		end
 
-		data_cache = hash_to_csv('data_cache.csv', [data_cache], DATA_KEYS)
+		data_cache = hash_to_csv('meem_inits.csv', [data_cache], KEYS)
 	end
 end
 
-def land_meem_library
+def land_meem_library # This is a test method.
 	agent = Mechanize.new
 	landing_page = agent.get(BASE_URL)
 	session = URI.encode(landing_page.at(SESSION_SEL)['value'])
 
 	form = agent.get(session_url = SESSION_URL % session).forms.first
-	form['sec1'] = INITS_HASH[:borrower_id]
+	form['sec1'] = INITS_HASH.first[:borrower_id]
 	page = form.submit
 end
 
-def process
+def process(record)
+	borrower_id, email, expires, due, today = record.values
+
 	agent = Mechanize.new
 	landing_page = agent.get(BASE_URL)
 	session = URI.encode(landing_page.at(SESSION_SEL)['value'])
 	form = agent.get(session_url = SESSION_URL % session).forms.first
-	form['sec1'] = INITS_HASH[:borrower_id]
+	form['sec1'] = borrower_id
 	page = form.submit
 
-	data_cache = read_csv('data_cache.csv', DATA_KEYS)
+	# data_cache = read_csv('data_cache.csv', DATA_KEYS)
 
  	# expiration
-	next_expires = str_to_date(data_cache[:expiration])
-	expiration_path(next_expires,page,data_cache)
+	next_expires = str_to_date(expires)
+	expiration_path(next_expires, page, data_cache)
 
 	# renew conditions
 	next_due = str_to_date(data_cache[:next_due])
@@ -210,19 +228,23 @@ def process
 	# email_builder
 end
 
-def check_today
-	data_cache = read_csv('data_cache.csv', DATA_KEYS)
-	str_to_date(data_cache[:check_today]) < Date.today
+def check_today?(record)
+	str_to_date(record[:check_today]) < Date.today
 end
 
-def should_i_run?
-	data_cache = read_csv('data_cache.csv', DATA_KEYS)
-	next_expires, next_due, no = DATA_KEYS.map{|k|str_to_date(data_cache[k][0])}
+def should_i_run?(record)
+	b_id, email, expires, due, today = record.values
+	next_expires = str_to_date(expires)
+	next_due = str_to_date(due)
+
 	next_expires <= NOW + 3 || NOW > next_due - DUE_WINDOW
 end
 
 # Uncomment when Card is renewed.
-# if should_i_run? && check_today
-# 	puts "I should run"
-# 	process
-# end
+# Check each Account and Renew if Necessary.
+INITS_HASH.drop(1).each do |record|
+	if should_i_run?(record) && check_today?(record)
+		puts "I should run"
+	# 	process(record)
+	end
+end
