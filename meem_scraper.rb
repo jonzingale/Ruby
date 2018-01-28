@@ -92,48 +92,26 @@ def str_to_date(date)
 	Date.strptime(date_str, '%m/%d/%Y')
 end
 
-# INITS_HASH is now an array and merged with data_cache.
-# This method has not been refactored accordingly.
-# def email_builder
-# 	file = File.open(FILES_PATH+'/library_notification_template.txt')
-# 	message = '' ; file.each { |line| message << line }
-
-# 	cache_data = read_csv('data_cache.csv', DATA_KEYS).values.flatten
-# 	date_info = "\nexpiration: %s    next_due: %s\n" % (cache_data[0..1])
-
-# 	books = read_csv('items_out.csv', BOOK_HEADERS)
-# 	book_data = BOOKDATA_SEL.map{|k| books[k]}.compact.map(&:flatten)
-#  	book_info = book_data.inject(''){|s,b| s += ("\n'%s' '%s' %s %s"  % b) }
-
-# 	content = "%s%s%s" % [RENEW_TEXT % @renew_msg, @exp_msg, date_info]
-# 	books_out = BOOKINFO_INIT + book_info + "\n\n"
-
-# 	message = message % (content + books_out)
-
-# 	[:email1, :email2].each do |email_key| # port 25 is likely blocked :(
-# 		%x(echo "#{message}" | mail -s 'meem_notifier' #{INITS_HASH[email_key]})
-# 	end
-# end
-
 # csv handling
 def hash_to_csv(file_name, key_values, headers)
 	file = "#{FILES_PATH}/#{file_name}" # :: String x [Hash] x [String] -> [Hash]
   CSV.open(file, 'w'){|csv| csv << headers.map(&:upcase) }
 
 	CSV.open(file, 'a') do |csv|
-		data_type = key_values.first.class == Book ? :book_data : :values
-		key_values.map(&data_type).each {|line| csv << [line].flatten}
+		key_values.first.class == Book ?
+			key_values.book_data.transpose.each {|line| csv << line} :
+				key_values.values.transpose.each {|line| csv << line}
 	end
 end
 
 def read_csv(file_name, keys)# :: String x [Symbol] -> [Hash]
 	csv = CSV.read("#{FILES_PATH}/#{file_name}")
-  keys.zip(csv.drop(1).transpose).inject({}){|h,kv| h.merge({kv[0] => kv[1]}) }
+  keys.zip(csv.drop(1).transpose).inject({}){|h, kv| h.merge({kv[0] => kv[1]}) }
 end
 # #
 
 # we enter this loop if expiration date is passed
-def expiration_path(next_expires,page,data_cache)
+def expiration_path(next_expires, page, data_cache)
 	if (expires_cond = next_expires <= NOW + 3)
 		puts "\n\nEXPIRATION PATH\n\n"
 		# info_page =	Nokogiri::HTML(open("#{FILES_PATH}/info.html"))
@@ -147,8 +125,11 @@ def expiration_path(next_expires,page,data_cache)
 		expire_msg_cond = next_expires == data_cache[:expiration]
 		@exp_msg = expire_msg_cond ? "\nyour card is sooooo expired" : ''
 
+
+		# This is where things go wrong because
+		# next_expires ought to be an array by now but isn't.
 		data_cache[:expiration] = next_expires
-		data_cache = hash_to_csv('meem_inits.csv', [data_cache], DATA_HEADERS)
+		data_cache = hash_to_csv('meem_inits.csv', data_cache, DATA_HEADERS)
 	end
 end
 
@@ -186,7 +167,7 @@ def renewal_path(next_due,page,data_cache)
 			@renew_msg = RENEW_TEXT % (renew_msg_cond ? 'not' : '')
 		end
 
-		data_cache = hash_to_csv('meem_inits.csv', [data_cache], KEYS)
+		data_cache = hash_to_csv('meem_inits.csv', data_cache, KEYS)
 	end
 end
 
@@ -202,6 +183,7 @@ end
 
 def process(record)
 	borrower_id, email, expires, due, today = record.values
+	data_cache = read_csv('meem_inits.csv', KEYS)
 
 	agent = Mechanize.new
 	landing_page = agent.get(BASE_URL)
@@ -209,8 +191,6 @@ def process(record)
 	form = agent.get(session_url = SESSION_URL % session).forms.first
 	form['sec1'] = borrower_id
 	page = form.submit
-
-	# data_cache = read_csv('data_cache.csv', DATA_KEYS)
 
  	# expiration
 	next_expires = str_to_date(expires)
@@ -223,9 +203,6 @@ def process(record)
 	# log out
 	form['logout'] = 'true'
 	page = form.submit
-
-	# email
-	# email_builder
 end
 
 def check_today?(record)
@@ -243,8 +220,8 @@ end
 # Uncomment when Card is renewed.
 # Check each Account and Renew if Necessary.
 INITS_HASH.drop(1).each do |record|
-	if should_i_run?(record) && check_today?(record)
+	# if check_today?(record) && should_i_run?(record)
 		puts "I should run"
-	# 	process(record)
-	end
+		process(record)
+	# end
 end
