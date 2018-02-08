@@ -28,7 +28,7 @@ EXPIRATION_COL_SEL = './/a[@class="normalBlackFont2"]/parent::td'.freeze
 BOOK_SEL = './/table[@class="tableBackgroundHighlight"]//table[@class="tableBackground"]/parent::td/parent::tr'.freeze
 BOOK_HEADERS = %w(renew_key book author library_of_congress checked_out due renewed).freeze
 DATA_HEADERS = %w(ACCOUNT,EMAIL,EXPIRATION,NEXT_DUE,CHECK_TODAY).freeze
-KEYS = [:borrower_id, :email1, :expiration, :next_due, :check_today].freeze
+KEYS = [:borrower_id, :expiration, :next_due, :check_today].freeze
 
 # DATA_KEYS = [:expiration, :next_due, :check_today]
 RENEW_TEXT = "\nYour books have %sbeen renewed".freeze
@@ -182,7 +182,7 @@ def land_meem_library # This is a test method.
 end
 
 def process(record)
-	borrower_id, email, expires, due, today = record.values
+	borrower_id, expires, due, today = record.values
 	data_cache = read_csv('meem_inits.csv', KEYS)
 
 	agent = Mechanize.new
@@ -210,7 +210,7 @@ def check_today?(record)
 end
 
 def should_i_run?(record)
-	b_id, email, expires, due, today = record.values
+	b_id, expires, due, today = record.values
 	next_expires = str_to_date(expires)
 	next_due = str_to_date(due)
 
@@ -222,6 +222,6 @@ end
 INITS_HASH.drop(1).each do |record|
 	# if check_today?(record) && should_i_run?(record)
 		puts "I should run"
-		process(record)
+		# process(record)
 	# end
 end
