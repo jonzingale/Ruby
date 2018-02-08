@@ -1,58 +1,45 @@
 # !/usr/bin/env ruby
-require 'byebug'
-require 'csv'
+require 'active_support'
 require 'mechanize'
 require 'nokogiri'
 require 'open-uri'
+require 'byebug'
 require 'date'
-require 'net/smtp'
-# Look in to postfix
-
-require 'active_support'
-# TODO: 
-# Extend this to handle my own books as well.
-# The refactoring includes extending meem_inits to include data_cache.
-
-# who was renewed?
-# who wasn't?
-
+require 'csv'
 
 DUE_WINDOW = 7.freeze
 NOW = Date.today.freeze
+FAR_FUTURE = '01/01/2030'.freeze
+
 BASE_URL = 'http://stjohnsnm.ipac.dynixasp.com/ipac20/ipac.jsp?profile=meem'.freeze
 SESSION_URL =(BASE_URL+"&session=%s&menu=account").freeze
 SESSION_SEL = './/input[@name="session"]'.freeze
 
-BOOKINFO_INIT = "\nCurrently, the following items are out:".freeze
 EXPIRATION_COL_SEL = './/a[@class="normalBlackFont2"]/parent::td'.freeze
 BOOK_SEL = './/table[@class="tableBackgroundHighlight"]//table[@class="tableBackground"]/parent::td/parent::tr'.freeze
-BOOK_HEADERS = %w(renew_key book author library_of_congress checked_out due renewed).freeze
-DATA_HEADERS = %w(ACCOUNT,EMAIL,EXPIRATION,NEXT_DUE,CHECK_TODAY).freeze
-KEYS = [:borrower_id, :expiration, :next_due, :check_today].freeze
 
-# DATA_KEYS = [:expiration, :next_due, :check_today]
-RENEW_TEXT = "\nYour books have %sbeen renewed".freeze
-TITLE_SEL = './/a[@class="mediumBoldAnchor"]'.freeze
+DATA_HEADERS = %w(ACCOUNT EXPIRATION NEXT_DUE CHECK_TODAY ACTIVE).freeze
+KEYS = [:borrower_id, :expiration, :next_due, :check_today, :active].freeze
+
 RENEW_KEYS = './/input[@name="renewitemkeys"]'.freeze
-BOOKDATA_SEL = %w(book author due renewed).freeze
 AUTHOR_REGEX = /by (.+), \d*/.freeze
 EDITOR_REGEX = /by\] (.+) \;/.freeze
 
 # a source directory off of crude. --untracked.
 FILES_PATH = File.expand_path('./../../src/meem_library', __FILE__).freeze
+MEEM_INITS = "#{FILES_PATH}/meem_inits.csv".freeze
 
-# csv = CSV.read("#{FILES_PATH}/meem_inits.csv")
-FAR_FUTURE = '01/01/2030'.freeze
+class USER
+	attr_accessor :id, :expiration, :next_due, :check_today, :active
 
-def initialize_data
-	inits_ary = []
-	CSV.foreach("#{FILES_PATH}/meem_inits.csv") do |row|
-		inits_ary << KEYS.zip(row).inject({}){|h, kv| h.merge({kv[0] => kv[1]})}
+	def initialize(user_data)
+		@id = user_data[:borrower_id]
+		@expiration = user_data[:expiration]
+		@next_due = user_data[:next_due]
+		@check_today = user_data[:check_today]
+		@active = user_data[:active]
 	end
-	inits_ary
 end
-
-INITS_HASH = initialize_data.freeze
 
 class Book
 	attr_reader :renew_key, :title, :author, :id,
@@ -76,7 +63,7 @@ def clean_string(string)
 end
 
 def get_book_data(page)
-	# items_page =	Nokogiri::HTML(open("#{FILES_PATH}/items_out.html"))
+	# items_page =	Nokogiri::HTML(open("#{FILES_PATH}/items_out.html")) # for testing
 	ts = /ts=(\d+)/.match(page.at('.//a[@title="Checked Out"]')['href'])[1]
 	form = page.forms.first
 	form['submenu'] = 'itemsout'
@@ -91,53 +78,44 @@ def str_to_date(date)
 	next_due = date.empty? ? FAR_FUTURE : date
 	Date.strptime(date_str, '%m/%d/%Y')
 end
-
-# csv handling
-def hash_to_csv(file_name, key_values, headers)
-	file = "#{FILES_PATH}/#{file_name}" # :: String x [Hash] x [String] -> [Hash]
-  CSV.open(file, 'w'){|csv| csv << headers.map(&:upcase) }
-
-	CSV.open(file, 'a') do |csv|
-		key_values.first.class == Book ?
-			key_values.book_data.transpose.each {|line| csv << line} :
-				key_values.values.transpose.each {|line| csv << line}
-	end
-end
-
-def read_csv(file_name, keys)# :: String x [Symbol] -> [Hash]
-	csv = CSV.read("#{FILES_PATH}/#{file_name}")
-  keys.zip(csv.drop(1).transpose).inject({}){|h, kv| h.merge({kv[0] => kv[1]}) }
-end
 # #
 
-# we enter this loop if expiration date is passed
-def expiration_path(next_expires, page, data_cache)
+# we enter this loop if expiration date has passed
+def expiration_path(page, user)
+	next_expires = str_to_date(user.expiration)
+
 	if (expires_cond = next_expires <= NOW + 3)
 		puts "\n\nEXPIRATION PATH\n\n"
-		# info_page =	Nokogiri::HTML(open("#{FILES_PATH}/info.html"))
+
 		session = /ts=(\d+)/.match(page.at('.//a[@title="Profile"]')['href'])[1]
 		form = page.forms.first ; form['submenu'] = 'info' ; form['ts'] = session
 		info_page = form.submit
+		# info_page =	Nokogiri::HTML(open("#{FILES_PATH}/expiration.html")) # for testing.
 
 		expires_td = info_page.search(EXPIRATION_COL_SEL).detect{|a|a.text =~/expires/i}
-		next_expires = [expires_td.at('.//following-sibling::td').text]
+		user.expiration = expires_td.at('.//following-sibling::td').text
 
-		expire_msg_cond = next_expires == data_cache[:expiration]
-		@exp_msg = expire_msg_cond ? "\nyour card is sooooo expired" : ''
-
-
-		# This is where things go wrong because
-		# next_expires ought to be an array by now but isn't.
-		data_cache[:expiration] = next_expires
-		data_cache = hash_to_csv('meem_inits.csv', data_cache, DATA_HEADERS)
+		expire_msg_cond = str_to_date(user.expiration) < NOW
+		print(expire_msg_cond ? "\nCheck your expiration date!!" : '')
 	end
 end
 
-def renewal_path(next_due,page,data_cache)
+def print_book_data(books, user)
+	puts "book data for user #{user.id}\n"
+	books.each do |book|
+		puts "#{book.title} by #{book.author} is due #{book.due}.\n"
+		puts "The book has been renewed #{book.renewed} times.\n\n"
+	end
+end
+
+def renewal_path(page, user)
+	next_due = str_to_date(user.next_due)
+
 	if (renew_cond = NOW > next_due - DUE_WINDOW)
 		puts "\n\nRENEW PATH\n\n"
 
 		book_data = get_book_data(page)
+
 		# renew loop: get renew_keys for books due within the 5 days.
 		books_due = book_data.select{|book| str_to_date(book.due) - NOW < DUE_WINDOW}
 
@@ -152,76 +130,81 @@ def renewal_path(next_due,page,data_cache)
 
 		# stores new items_out
 		book_data = get_book_data(page)
-		hash_to_csv('items_out.csv',book_data, BOOK_HEADERS)
+		print_book_data(book_data, user)
 
 		# stores todays date and breaks out if book_data is empty
 		if book_data.empty?
-			data_cache[:check_today] = Date.today.strftime('%m/%d/%Y')
+			user.check_today = Date.today.strftime('%m/%d/%Y')
 		else
-			# stores new data_cache
-			next_due = book_data.min_by{|data| str_to_date(data.due)}.due
-			data_cache[:next_due] = [next_due]
+			next_due = book_data.min_by{|book| str_to_date(book_data[0].due)}.due
+			user.next_due = next_due
 
-			# renew_msg_cond == true => renew must have failed
-			renew_msg_cond = NOW > str_to_date(next_due) - DUE_WINDOW
-			@renew_msg = RENEW_TEXT % (renew_msg_cond ? 'not' : '')
+			renew_msg_cond = NOW > str_to_date(user.next_due) - DUE_WINDOW
+			@renew_msg = renew_msg_cond ? 'Renewal Failed!!' : 'Books Renewed'
 		end
-
-		data_cache = hash_to_csv('meem_inits.csv', data_cache, KEYS)
 	end
 end
 
-def land_meem_library # This is a test method.
-	agent = Mechanize.new
-	landing_page = agent.get(BASE_URL)
-	session = URI.encode(landing_page.at(SESSION_SEL)['value'])
-
-	form = agent.get(session_url = SESSION_URL % session).forms.first
-	form['sec1'] = INITS_HASH.first[:borrower_id]
-	page = form.submit
-end
-
-def process(record)
-	borrower_id, expires, due, today = record.values
-	data_cache = read_csv('meem_inits.csv', KEYS)
-
+def process(user)
 	agent = Mechanize.new
 	landing_page = agent.get(BASE_URL)
 	session = URI.encode(landing_page.at(SESSION_SEL)['value'])
 	form = agent.get(session_url = SESSION_URL % session).forms.first
-	form['sec1'] = borrower_id
-	page = form.submit
+	form['sec1'] = user.id
+	page = form.submit # overview page
+ 	# page =	Nokogiri::HTML(open("#{FILES_PATH}/info.html")) # for testing.
 
- 	# expiration
-	next_expires = str_to_date(expires)
-	expiration_path(next_expires, page, data_cache)
+ 	# check and update expiration conditions
+	expiration_path(page, user)
 
-	# renew conditions
-	next_due = str_to_date(data_cache[:next_due])
-	renewal_path(next_due,page,data_cache)
+	# check and update renewal conditions
+	renewal_path(page, user)
 
-	# log out
+	# # log out
 	form['logout'] = 'true'
 	page = form.submit
 end
 
-def check_today?(record)
-	str_to_date(record[:check_today]) < Date.today
+def updateUsers(users)
+  CSV.open(MEEM_INITS, 'w'){|csv| csv << DATA_HEADERS }
+
+  users.each do |user|
+		CSV.open(MEEM_INITS, 'a') do |csv|
+			csv << [user.id, user.expiration, user.next_due,
+							user.check_today, user.active]
+		end
+	end
 end
 
-def should_i_run?(record)
-	b_id, expires, due, today = record.values
-	next_expires = str_to_date(expires)
-	next_due = str_to_date(due)
+def check_today?(user)
+	str_to_date(user.check_today) < NOW
+end
+
+def should_i_run?(user)
+	next_expires = str_to_date(user.expiration)
+	next_due = str_to_date(user.next_due)
 
 	next_expires <= NOW + 3 || NOW > next_due - DUE_WINDOW
 end
 
-# Uncomment when Card is renewed.
-# Check each Account and Renew if Necessary.
-INITS_HASH.drop(1).each do |record|
-	# if check_today?(record) && should_i_run?(record)
-		puts "I should run"
-		# process(record)
-	# end
+def read_csv(file_name)# :: CSV -> [{UserData}]
+	csv = CSV.read("#{FILES_PATH}/#{file_name}")
+  csv.drop(1).map do |user_data|
+  	KEYS.zip(user_data).inject({}) do |h, kv|
+  		h.merge({kv[0] => kv[1]})
+  	end
+  end
+end
+
+def meem_library_main # Check each Account and Renew if Necessary.
+	users = read_csv('meem_inits.csv').map { |record| USER.new(record) }
+
+	users.each do |user|
+		if check_today?(user) && should_i_run?(user) && user.active.strip == 'true'
+			puts "I should run"
+			process(user)
+		end
+	end
+
+	updateUsers(users)
 end
