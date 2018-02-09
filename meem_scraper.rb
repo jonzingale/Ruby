@@ -188,7 +188,7 @@ def should_i_run?(user)
 end
 
 def read_csv(file_name)# :: CSV -> [{UserData}]
-	csv = CSV.read("#{FILES_PATH}/#{file_name}")
+	csv = CSV.read(MEEM_INITS)
   csv.drop(1).map do |user_data|
   	KEYS.zip(user_data).inject({}) do |h, kv|
   		h.merge({kv[0] => kv[1]})
@@ -198,7 +198,7 @@ end
 
 def meem_library_main # Check each Account and Renew if Necessary.
 	users = read_csv('meem_inits.csv').map { |record| USER.new(record) }
-
+byebug
 	users.each do |user|
 		if check_today?(user) && should_i_run?(user) && user.active.strip == 'true'
 			puts "I should run"
