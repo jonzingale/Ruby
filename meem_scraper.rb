@@ -198,7 +198,7 @@ end
 
 def meem_library_main # Check each Account and Renew if Necessary.
 	users = read_csv('meem_inits.csv').map { |record| USER.new(record) }
-byebug
+
 	users.each do |user|
 		if check_today?(user) && should_i_run?(user) && user.active.strip == 'true'
 			puts "I should run"
