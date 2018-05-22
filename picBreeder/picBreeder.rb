@@ -12,6 +12,9 @@ FILES_PATH = File.expand_path('./../', __FILE__).freeze
 BREEDER_INITS = "#{FILES_PATH}/data.csv".freeze
 
 SEARCH_URL = "http://picbreeder.org/search/search.php"
+SCRATCH_URL = "http://picbreeder.org/user/editgenome.php?sid=-1&pid=-1"
+
+SOAP_URL = "http://www.picbreeder.org:8080/axis/services/WebNeatClient?wsdl"
 
 class USER
   attr_accessor :username, :password
@@ -36,13 +39,18 @@ end
 
 def searchImages
   agent = Mechanize.new
-  landing_page = agent.get(SEARCH_URL)
-
-byebug
-
+  page = agent.get(SEARCH_URL)
+  # From here one can choose categories
 end
+
+def fromScratch
+  agent = Mechanize.new
+  page = agent.get(SCRATCH_URL)
+  byebug
+end
+
 
 # user = USER.new
 # process user
 
-searchImages
+fromScratch
