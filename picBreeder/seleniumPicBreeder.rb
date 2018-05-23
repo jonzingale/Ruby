@@ -14,6 +14,7 @@ class Agent
   attr_accessor :driver
 
   def initialize
+    # @mouse = Selenium::WebDriver.mouse
     @driver = Selenium::WebDriver.for :safari
     driver.manage.window.maximize
     get(SCRATCH_URL)
@@ -45,7 +46,6 @@ agent = Agent.new
 elem1 = agent.driver.find_element(:xpath, "//applet")
 puts agent.driver.find_element(:xpath => "//body").text
 
-# agent.driver.find_elements(:xpath, "//script")
 byebug
+Selenium::WebDriver::Mouse.send(:move_by,10,10)
 
-4
