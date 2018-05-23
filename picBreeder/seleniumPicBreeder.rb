@@ -47,5 +47,5 @@ elem1 = agent.driver.find_element(:xpath, "//applet")
 puts agent.driver.find_element(:xpath => "//body").text
 
 byebug
-Selenium::WebDriver::Mouse.send(:move_by,10,10)
+Selenium::WebDriver::Mouse.new(agent.driver.mouse).send(:move_by,10,10)
 
