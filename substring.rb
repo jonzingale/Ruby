@@ -6,7 +6,7 @@ ptn = "abccb"
 str2 = "redblueredblue"
 ptn2 = 'abab'
 
-def getR pt
+def genRegex pt
   pt.chars.inject("") {|acc, c| acc + '(\w{%d})'}
 end
 
@@ -33,8 +33,9 @@ def allValid (ptn, str)
   strL = str.length # initializes string length lookup
   ms = (strL ** (ps-1)...strL ** ps).inject([]) do |acc, i|
     vs = baseK(strL, i) # n-ary reps
-    cond = vs.all? {|t| t > 0} && # no patterns should be empty
-           innerProd(poly, vs) == strL # solves polynomial
+    
+    # no empty patterns && solves polynomial at string length
+    cond = vs.all? {|t| t > 0} && innerProd(poly, vs) == strL
     cond ? acc << vs : acc
   end
 end
@@ -47,7 +48,7 @@ def splittings (ptn, str)
       p = p.gsub(pu, v.to_s)
     end.split('').map(&:to_i)
 
-    str.match(getR(ptn) % ary)[1..ptn.length]
+    str.match(genRegex(ptn) % ary)[1..ptn.length]
   end
 end
 
