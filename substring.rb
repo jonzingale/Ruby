@@ -45,8 +45,8 @@ def splittings (ptn, str)
   ptnU = ptn.split('').uniq
 
   allValid(ptn, str).map do |kv|
-    ary = ptnU.zip(kv).inject(ptn) do |p, (pu, v)|
-      p = p.gsub(pu, v.to_s)
+    ary = ptnU.zip(kv).inject(ptn) do |pt, (pu, v)|
+      pt = pt.gsub(pu, v.to_s)
     end.split('').map(&:to_i)
 
     str.match(genRegex(ptn) % ary)[1..ptn.length]
