@@ -30,10 +30,11 @@ def allValid (ptn, str)
   ptns = ptn.split('')
   ps = ptns.uniq.length # number of unique pattern types
   poly = counts ptns # number of pattern multiplicities
-  ms = (str.length ** (ps-1)...str.length ** ps).inject([]) do |acc, i|
-    vs = baseK(str.length, i) # n-ary reps
+  strL = str.length # initializes string length lookup
+  ms = (strL ** (ps-1)...strL ** ps).inject([]) do |acc, i|
+    vs = baseK(strL, i) # n-ary reps
     cond = vs.all? {|t| t > 0} && # no patterns should be empty
-           innerProd(poly, vs) == str.length # solves polynomial
+           innerProd(poly, vs) == strL # solves polynomial
     cond ? acc << vs : acc
   end
 end
