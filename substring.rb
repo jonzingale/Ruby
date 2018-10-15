@@ -19,19 +19,19 @@ def innerProd (ary, bry)
 end
 
 def counts (ary)
-  if ary == [] ; []
-  else
-    (hh,tt) = ary.partition {|a| a == ary[0]}
+  if ary == [] ; [] else
+    hh, tt = ary.partition {|a| a == ary[0]}
     counts(tt).unshift(hh.length)
   end
 end
 
 def allValid (ptn, str)
-  ptns = ptn.split('')
-  ps = ptns.uniq.length # number of unique pattern types
-  poly = counts ptns # number of pattern multiplicities
+  ptns = ptn.split('') # tokenize pattern
+  ps = ptns.uniq.length # number of unique tokens
+  poly = counts ptns # number of token multiplicities
   strL = str.length # initializes string length lookup
-  ms = (strL ** (ps-1)...strL ** ps).inject([]) do |acc, i|
+
+  (strL ** (ps-1)...strL ** ps).inject([]) do |acc, i|
     vs = baseK(strL, i) # n-ary reps
     
     # no empty patterns && solves polynomial at string length
@@ -55,7 +55,7 @@ end
 def hasPattern? (ptn, str)
   ptV = splittings(ptn,str).any? do |ss|
     ss, pt = ss.uniq, ptn
-    while (!pt.nil? && !pt.empty?)
+    while !(pt.nil? || pt.empty?)
       pt = pt.delete(pt[0])
       ss.shift
     end
