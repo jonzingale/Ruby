@@ -1,13 +1,13 @@
 require 'byebug'
 
-str = "redbluegreengreenblue"
-ptn = "abccb"
+str = 'redbluegreengreenblue'
+ptn = 'abccb'
 
-str2 = "redblueredblue"
+str2 = 'redblueredblue'
 ptn2 = 'abab'
 
 def genRegex pt
-  pt.chars.inject("") {|acc, c| acc + '(\w{%d})'}
+  pt.chars.inject('') {|acc, c| acc + '(\w{%d})'}
 end
 
 def baseK (k, n)
