@@ -30,8 +30,9 @@ def allValid (ptn, str)
   ps = ptns.uniq.length # number of unique tokens
   poly = counts ptns # number of token multiplicities
   strL = str.length # initializes string length lookup
+  wordLenRange = strL ** (ps-1)...strL ** ps
 
-  (strL ** (ps-1)...strL ** ps).inject([]) do |acc, i|
+  wordLenRange.inject([]) do |acc, i|
     vs = baseK(strL, i) # n-ary reps
     
     # no empty patterns && solves polynomial at string length
