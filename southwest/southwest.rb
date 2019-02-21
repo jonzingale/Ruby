@@ -50,6 +50,7 @@ class Itinerary
     msg1 = "Presently you can book flights through #{bookable[0]}.\n"
     msg2 = "On #{bookable[2]} you can book flights through #{bookable[1]}.\n"
     f.write(msg1+msg2)
+    %x(open bookable.txt)
   end
 
   def myItinerary
