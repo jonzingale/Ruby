@@ -3,6 +3,13 @@ require 'json'
 =begin
 url : https://www.dndbeyond.com/profile/Mortekai/characters/3641195/json
 
+THE USEFUL DATA:
+https://www.dndbeyond.com/api/config/json?v=2.5.1
+will need to sign in with username and password
+consider curl and/or mechanize. Zeke thinks it
+should be possible.
+
+
 puts json['character']['notes']['personalPossessions']
 
 json['character']['inventory'].map{|j| j}
