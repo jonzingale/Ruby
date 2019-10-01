@@ -1,3 +1,4 @@
 *.json
 dndScraperNotes
 secrets
+.byebug_history
