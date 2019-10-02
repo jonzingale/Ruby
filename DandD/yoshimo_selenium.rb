@@ -5,7 +5,7 @@ require 'json'
 Yoshimo_Login = 'https://www.dndbeyond.com/profile/Mortekai/characters/3641195'
 
 AbilityFields = %w(strength dexterity constitution intelligence wisdom charisma)
-AbilitySel = "//div[@class='ct-quick-info__abilities']//div[%i]//div[@class='ct-ability-summary__primary']"
+AbilitySel = "//div[@class='ct-ability-summary__primary']"
 
 PassivityFields = %w(perception investigation insight)
 PassiveSel = "//div[@class='ct-senses__callout-value']"
@@ -90,22 +90,23 @@ class Character
     end
   end
 
-  def get_passives # perhaps generalize and include passives and abilities
+  def get_passives
     passives = @page.find_elements(xpath: PassiveSel)
 
-    passives.each_with_index do |st, i|
-      @passives[PassivityFields[i]] = st.text.gsub("\n",'')
+    passives.each_with_index do |ps, i|
+      @passives[PassivityFields[i]] = ps.text.gsub("\n",'')
     end
   end
 
   def get_abilities
-    AbilityFields.each_with_index do |a, i|
-      @abilities[a] = get_text(AbilitySel % (i+1), 'x')
+    abilities = @page.find_elements(xpath: AbilitySel)
+
+    abilities.each_with_index do |ab, i|
+      @abilities[AbilityFields[i]] = ab.text.gsub("\n",'')
     end
   end
 
 end
-
 
 def process
   agent = Agent.new
