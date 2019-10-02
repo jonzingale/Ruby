@@ -4,6 +4,13 @@ require 'json'
 
 Yoshimo_Login = 'https://www.dndbeyond.com/profile/Mortekai/characters/3641195'
 
+AbilityFields = %w(strength dexterity constitution intelligence wisdom charisma)
+AbilitySel = "div[%i]//div[@class='ct-ability-summary__primary']"
+AllAbilitySel = '//div[@class="ct-quick-info__abilities"]'
+
+NameSel = "ct-character-tidbits__name"
+LevelSel = "ct-character-tidbits__xp-level"
+ACSel = "ct-armor-class-box__value"
 class Agent
   attr_accessor :driver, :options, :page, :wait
 
@@ -27,43 +34,36 @@ class Agent
 end
 
 class Character
-  attr_accessor :name, :level, :abilities, :armor_class
+  attr_accessor :name, :level, :armor_class, :abilities
 
-  def initialize(page, wait)
+  # Perhaps use a Struct.new so that all stats are hashes
+  # and a Json can be built up.
+
+  def initialize(page)
     @page = page
+    @name = page.find_element(class: NameSel).text
+    @level = page.find_element(class: LevelSel).text
+    @armor_class = page.find_element(class: ACSel).text
     @abilities = get_abilities
-
-    byebug
-
-    @name = page.find_element(:class,"ct-character-tidbits__name").text
-    @level = page.find_element(:class,"ct-character-tidbits__xp-level").text
-    @armor_class = page.find_element(:class, "ct-armor-class-box__value").text
-
   end
 
-  def sheet_node
-    @page.find_element(:xpath, "//div[@class='ct-character-sheet__inner']/div")
-  end
+  def get_abilities(abHash={})
+    elem = @page.find_element(xpath: AllAbilitySel)
 
-  def get_abilities
-    abilities = @page.find_element(xpath: '//div[@class="ct-quick-info__abilities"]')
-
-    abils = %w(strength dexterity constitution intelligence wisdom charisma)
-    ab_hash = {}
-
-    abils.each_with_index do |a, i|
-      ab_hash[a] = abilities.find_element(xpath: "div[#{i+1}]//div[@class='ct-ability-summary__primary']").text
+    AbilityFields.each_with_index do |a, i|
+       abScore = elem.find_element(xpath: AbilitySel % (i+1)).text
+       abHash[a] = abScore.gsub("\n", '')
     end
 
-    ab_hash
+    abHash
   end
 end
 
 
 def process
   agent = Agent.new
-  yoshimo = Character.new(agent.page, agent.wait)
-  puts [:name, :level, :armor_class].map {|sym| yoshimo.send(sym).to_s}
+  yoshimo = Character.new(agent.page)
+  puts [:name, :level, :armor_class, :abilities].map {|sym| yoshimo.send(sym).to_s}
   agent.quit
 end
 
