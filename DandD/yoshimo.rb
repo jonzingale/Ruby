@@ -1,4 +1,5 @@
 require 'selenium-webdriver'
+require_relative 'agent'
 require 'byebug'
 require 'json'
 require 'csv'
@@ -6,20 +7,8 @@ require 'csv'
 Yoshimo_Login = 'https://www.dndbeyond.com/profile/Mortekai/characters/3641195'
 
 AbilityFields = %w(strength dexterity constitution intelligence wisdom charisma)
-AbilitySel = "//div[@class='ct-ability-summary__primary']"
-
 PassivityFields = %w(perception investigation insight)
-PassiveSel = "//div[@class='ct-senses__callout-value']"
-
 SavingThrowsFields = %w(strength dexterity constitution intelligence wisdom charisma)
-SavingThrowsSel = "//div[@class='ct-saving-throws-summary__ability-modifier']"
-
-ProficiencySel = "ct-proficiency-bonus-box__value"
-NameSel = "ct-character-tidbits__name"
-LevelSel = "ct-character-tidbits__xp-level"
-ACSel = "ct-armor-class-box__value"
-WalkingSel = 'ct-speed-box__box-value'
-MaxXP = "ct-health-summary__hp-number"
 
 SelStub = "//div[@class='%s']"
 
@@ -27,29 +16,6 @@ SelStub = "//div[@class='%s']"
 # BUILD AS AN API, THINK ABOUT STRUCTURING AS JSON
 # Perhaps use a Struct.new so that all stats are hashes
 # and a Json can be built up.
-# Customer = Struct.new(:name, :address) do
-
-class Agent
-  attr_accessor :driver, :options, :page, :wait
-
-  def initialize
-    @options = Selenium::WebDriver::Chrome::Options.new(args: ['headless'])
-    @driver  = Selenium::WebDriver.for(:chrome, options: options)
-    @wait = Selenium::WebDriver::Wait.new(:timeout => 15)
-    @driver.manage.window.resize_to(1440, 1080)
-    @page = get_page
-  end
-
-  def quit
-    driver.quit
-  end
-
-  def get_page
-    driver.get(Yoshimo_Login)
-    sleep(1)
-    driver
-  end
-end
 
 class Character
   attr_accessor :name, :level, :armor_class, :abilities, :proficiency,
@@ -79,10 +45,8 @@ class Character
 
   def get_texts(fields, selector, data={})
     elems = @page.find_elements(xpath: selector)
-
-    elems.each_with_index do |ps, i|
-      data[fields[i]] = ps.text.gsub("\n",'')
-    end ; data
+    elems.each_with_index {|ps, i| data[fields[i]] = ps.text.gsub("\n",'') }
+    data
   end
 end
 
