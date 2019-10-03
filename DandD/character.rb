@@ -8,7 +8,6 @@ SkillFields = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deceptio
 AbilityFields = %w(strength dexterity constitution intelligence wisdom charisma)
 PassivityFields = %w(perception investigation insight)
 ItemsFields = %w(armor weapons tools languages)
-Yoshimo_Id = '3641195'
 
 # TODO:
 # BUILD AS AN API, THINK ABOUT STRUCTURING AS JSON
@@ -78,15 +77,12 @@ def parse_csv
 end
 
 def process
-  agent = Agent.new(Yoshimo_Id)
+  csv = parse_csv
+  agent = Agent.new(csv[:sebastian])
   yoshimo = Character.new(agent.page)
 
-  values = parse_csv.keys
-  puts values.map {|sym| [sym, yoshimo.send(sym)].to_s}
+  puts csv.keys.map {|sym| [sym, yoshimo.send(sym)].to_s}
 
-  odd_balls = [:skills, :attacks]
-  # puts yoshimo.skills
-  # puts yoshimo.attacks
   agent.quit
 end
 
