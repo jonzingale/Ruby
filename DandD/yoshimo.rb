@@ -29,22 +29,30 @@ class Character
     data = parse_csv
 
     @page = page
-    @abilities = get_texts(AbilityFields, data[:abilities])
-    @saving_throws = get_texts(AbilityFields, data[:saving_throws])
-    @passives = get_texts(PassivityFields, data[:passives])
-    @items = get_texts(ItemsFields, data[:items])
+    # @abilities = get_texts(AbilityFields, data[:abilities])
+    # @saving_throws = get_texts(AbilityFields, data[:saving_throws])
+    # @passives = get_texts(PassivityFields, data[:passives])
+    # @items = get_texts(ItemsFields, data[:items])
 
-    @name = get_text(data[:name])
-    @level = get_text(data[:level])
-    @armor_class = get_text(data[:armor_class])
-    @proficiency = get_text(data[:proficiency])
-    @walking_speed = get_text(data[:walking_speed])
-    @max_xp = get_text(data[:max_xp])
+    # @name = get_text(data[:name])
+    # @level = get_text(data[:level])
+    # @armor_class = get_text(data[:armor_class])
+    # @proficiency = get_text(data[:proficiency])
+    # @walking_speed = get_text(data[:walking_speed])
+    # @max_xp = get_text(data[:max_xp])
 
-    @skills = get_skills # odd guy out
+    @attack = get_attack
 
+    # @skills = get_skills # odd guy out
+  end
 
-    # byebug
+  def get_attack # TODO: how should i format this? CSV style?
+    byebug
+    attacks = @page.find_elements(xpath: "//div[@class='ct-attack-table__content']/div")
+    attacks.map {|attack| attack.text.gsub("\n",' ')}
+    # attacks.map do |attack|
+    #   attack.text.gsub("\n",' ')
+    # end
   end
 
   def get_skills # TODO: How will i integrate this into the csv????
