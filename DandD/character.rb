@@ -4,6 +4,7 @@ require 'byebug'
 require 'json'
 require 'csv'
 
+DndStub = 'https://www.dndbeyond.com/profile/Mortekai/characters/'
 SkillFields = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival']
 AbilityFields = %w(strength dexterity constitution intelligence wisdom charisma)
 PassivityFields = %w(perception investigation insight)
@@ -19,38 +20,45 @@ class Character
     :skill_proficiency, :walking_speed, :max_xp, :passives, :saving_throws,
     :skills, :items, :attacks
 
-  def initialize(page)
-    data = parse_csv
+  def initialize(character)
+    character_id = parse_csv('character_ids.csv')[character]
+    agent = Agent.new(DndStub + character_id)
+    @page = agent.page
 
-    @page = page
-    @abilities = get_texts(AbilityFields, data[:abilities])
-    @saving_throws = get_texts(AbilityFields, data[:saving_throws])
-    @passives = get_texts(PassivityFields, data[:passives])
-    @items = get_texts(ItemsFields, data[:items])
+    @csv = parse_csv('character.csv')
+    @abilities = get_texts(AbilityFields, @csv[:abilities])
+    @saving_throws = get_texts(AbilityFields, @csv[:saving_throws])
+    @passives = get_texts(PassivityFields, @csv[:passives])
+    @items = get_texts(ItemsFields, @csv[:items])
 
-    @name = get_text(data[:name])
-    @level = get_text(data[:level])
-    @armor_class = get_text(data[:armor_class])
-    @proficiency = get_text(data[:proficiency])
-    @walking_speed = get_text(data[:walking_speed])
-    @max_xp = get_text(data[:max_xp])
+    @name = get_text(@csv[:name])
+    @level = get_text(@csv[:level])
+    @armor_class = get_text(@csv[:armor_class])
+    @proficiency = get_text(@csv[:proficiency])
+    @walking_speed = get_text(@csv[:walking_speed])
+    @max_xp = get_text(@csv[:max_xp])
 
     # odd guys
-    @skills = get_skills(data)
-    @attacks = get_attack(data)
+    @skills = get_skills
+    @attacks = get_attack
 
+    agent.quit
   end
 
-  def get_attack(data) # TODO: how should i format this? CSV style?
-    attacks = @page.find_elements(xpath: data[:attacks])
+  def display
+    puts @csv.keys.map {|sym| [sym, self.send(sym)].to_s}
+  end
+
+  def get_attack # TODO: needs formatting
+    attacks = @page.find_elements(xpath: @csv[:attacks])
     attacks.map! {|attack| attack.text.gsub("\n",' ')} ; attacks
   end
 
-  def get_skills(data, skill_data={}) # TODO: How will i integrate this into the csv????
-    skill_proficiency = @page.find_elements(xpath: data[:skill_proficiency])
+  def get_skills(skill_data={})
+    skill_proficiency = @page.find_elements(xpath: @csv[:skill_proficiency])
     skill_proficiency.map! {|pr| pr.attribute('data-original-title') }
 
-    skills = @page.find_elements(xpath: data[:skills])
+    skills = @page.find_elements(xpath: @csv[:skills])
     skills.map! {|sk| sk.text.gsub("\n",'') }
 
     SkillFields.each_with_index do |skill, i|
@@ -71,19 +79,14 @@ class Character
   end
 end
 
-def parse_csv
-  file = CSV.read('character.csv')
+def parse_csv(file)
+  file = CSV.read(file)
   file.inject({}) {|hh, (k, sel)| hh[k.to_sym] = sel ; hh }
 end
 
 def process
-  csv = parse_csv
-  agent = Agent.new(csv[:sebastian])
-  yoshimo = Character.new(agent.page)
-
-  puts csv.keys.map {|sym| [sym, yoshimo.send(sym)].to_s}
-
-  agent.quit
+  yoshimo = Character.new(:yoshimo)
+  yoshimo.display
 end
 
 process
