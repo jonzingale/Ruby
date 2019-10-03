@@ -4,11 +4,11 @@ require 'byebug'
 require 'json'
 require 'csv'
 
-Yoshimo_Login = 'https://www.dndbeyond.com/profile/Mortekai/characters/3641195'
+DndStub = 'https://www.dndbeyond.com/profile/Mortekai/characters/'
+Yoshimo_Login = DndStub + '3641195'
 
 AbilityFields = %w(strength dexterity constitution intelligence wisdom charisma)
 PassivityFields = %w(perception investigation insight)
-SavingThrowsFields = %w(strength dexterity constitution intelligence wisdom charisma)
 
 SelStub = "//div[@class='%s']"
 
@@ -26,8 +26,8 @@ class Character
 
     @page = page
     @abilities = get_texts(AbilityFields, data[:abilities])
+    @saving_throws = get_texts(AbilityFields, data[:saving_throws])
     @passives = get_texts(PassivityFields, data[:passives])
-    @saving_throws = get_texts(SavingThrowsFields, data[:saving_throws])
 
     @name = get_text(data[:name])
     @level = get_text(data[:level])
