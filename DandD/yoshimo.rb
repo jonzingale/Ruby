@@ -1,6 +1,7 @@
 require 'selenium-webdriver'
 require 'byebug'
 require 'json'
+require 'csv'
 
 Yoshimo_Login = 'https://www.dndbeyond.com/profile/Mortekai/characters/3641195'
 
@@ -19,6 +20,8 @@ LevelSel = "ct-character-tidbits__xp-level"
 ACSel = "ct-armor-class-box__value"
 WalkingSel = 'ct-speed-box__box-value'
 MaxXP = "ct-health-summary__hp-number"
+
+SelStub = "//div[@class='%s']"
 
 # TODO:
 # BUILD AS AN API, THINK ABOUT STRUCTURING AS JSON
@@ -50,73 +53,52 @@ end
 
 class Character
   attr_accessor :name, :level, :armor_class, :abilities, :proficiency,
-    :walking_speed, :maxXP, :passives, :saving_throws
+    :walking_speed, :max_xp, :passives, :saving_throws
 
   def initialize(page)
+    data = parse_csv
+
     @page = page
-    @abilities = {}
-    @passives = {}
-    @saving_throws = {}
+    @abilities = get_texts(AbilityFields, data[:abilities])
+    @passives = get_texts(PassivityFields, data[:passives])
+    @saving_throws = get_texts(SavingThrowsFields, data[:saving_throws])
 
-    @name = get_text(NameSel)
-    @level = get_text(LevelSel)
-    @armor_class = get_text(ACSel)
-    @proficiency = get_text(ProficiencySel)
-    @walking_speed = get_text(WalkingSel)
-    @maxXP = get_text(MaxXP)
+    @name = get_text(data[:name])
+    @level = get_text(data[:level])
+    @armor_class = get_text(data[:armor_class])
+    @proficiency = get_text(data[:proficiency])
+    @walking_speed = get_text(data[:walking_speed])
+    @max_xp = get_text(data[:max_xp])
 
-    get_abilities
-    get_passives
-    get_saving_throws
     # byebug
   end
 
-  def get_text(selector, type='c')
-    case type
-    when 'c'
-      @page.find_element(class: selector).text.gsub("\n", '')
-    when 'x'
-      @page.find_element(xpath: selector).text.gsub("\n", '')
-    else
-      'Error Bad Selector Type for get_text'
-    end
+  def get_text(selector)
+    @page.find_element(xpath: selector).text.gsub("\n", '')
   end
 
-  def get_saving_throws # perhaps generalize and include passives and abilities
-    saving_throws = @page.find_elements(xpath: SavingThrowsSel)
+  def get_texts(fields, selector, data={})
+    elems = @page.find_elements(xpath: selector)
 
-    saving_throws.each_with_index do |st, i|
-      @saving_throws[SavingThrowsFields[i]] = st.text.gsub("\n",'')
-    end
+    elems.each_with_index do |ps, i|
+      data[fields[i]] = ps.text.gsub("\n",'')
+    end ; data
   end
+end
 
-  def get_passives
-    passives = @page.find_elements(xpath: PassiveSel)
-
-    passives.each_with_index do |ps, i|
-      @passives[PassivityFields[i]] = ps.text.gsub("\n",'')
-    end
-  end
-
-  def get_abilities
-    abilities = @page.find_elements(xpath: AbilitySel)
-
-    abilities.each_with_index do |ab, i|
-      @abilities[AbilityFields[i]] = ab.text.gsub("\n",'')
-    end
-  end
-
+def parse_csv
+  file = CSV.read('character.csv')
+  file.inject({}) {|hh, (k, sel)| hh[k.to_sym] = SelStub % sel ; hh }
 end
 
 def process
   agent = Agent.new
   yoshimo = Character.new(agent.page)
 
-  values = [:name, :level, :armor_class, :proficiency,
-    :walking_speed, :maxXP, :passives, :saving_throws, :abilities]
-
-  puts values.map {|sym| yoshimo.send(sym).to_s}
+  values = parse_csv.keys
+  puts values.map {|sym| [sym, yoshimo.send(sym)].to_s}
   agent.quit
 end
 
 process
+# puts parse_csv

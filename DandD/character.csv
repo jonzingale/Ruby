@@ -1,0 +1,9 @@
+abilities,ct-ability-summary__primary
+passives,ct-senses__callout-value
+saving_throws,ct-saving-throws-summary__ability-modifier
+proficiency,ct-proficiency-bonus-box__value
+name,ct-character-tidbits__name
+level,ct-character-tidbits__xp-level
+armor_class,ct-armor-class-box__value
+walking_speed,ct-speed-box__box-value
+max_xp,ct-health-summary__hp-number
