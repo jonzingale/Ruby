@@ -7,10 +7,13 @@ require 'csv'
 DndStub = 'https://www.dndbeyond.com/profile/Mortekai/characters/'
 Yoshimo_Login = DndStub + '3641195'
 
+SkillFields = ['Acrobatics', 'Animal Handling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival']
 AbilityFields = %w(strength dexterity constitution intelligence wisdom charisma)
 PassivityFields = %w(perception investigation insight)
+ItemsFields = %w(armor weapons tools languages)
 
-SelStub = "//div[@class='%s']"
+# ProficiencySel = '//div[@class="ct-skills__list"]/div["ct-skills__item"]/div[@class="ct-skills__col--proficiency"]/span'
+# SkillSel = '//div[@class="ct-skills__list"]/div["ct-skills__item"]/div[@class="ct-skills__col--modifier"]'
 
 # TODO:
 # BUILD AS AN API, THINK ABOUT STRUCTURING AS JSON
@@ -19,7 +22,8 @@ SelStub = "//div[@class='%s']"
 
 class Character
   attr_accessor :name, :level, :armor_class, :abilities, :proficiency,
-    :walking_speed, :max_xp, :passives, :saving_throws
+    :skill_proficiency, :walking_speed, :max_xp, :passives, :saving_throws,
+    :skills, :items
 
   def initialize(page)
     data = parse_csv
@@ -28,6 +32,7 @@ class Character
     @abilities = get_texts(AbilityFields, data[:abilities])
     @saving_throws = get_texts(AbilityFields, data[:saving_throws])
     @passives = get_texts(PassivityFields, data[:passives])
+    @items = get_texts(ItemsFields, data[:items])
 
     @name = get_text(data[:name])
     @level = get_text(data[:level])
@@ -36,7 +41,23 @@ class Character
     @walking_speed = get_text(data[:walking_speed])
     @max_xp = get_text(data[:max_xp])
 
+    @skills = get_skills # odd guy out
+
+
     # byebug
+  end
+
+  def get_skills # TODO: How will i integrate this into the csv????
+    sels = parse_csv
+    skill_proficiency = @page.find_elements(xpath: sels[:skill_proficiency])
+    skill_proficiency.map! {|pr| pr.attribute('data-original-title') }
+
+    skills = @page.find_elements(xpath: sels[:skills])
+    skills.map! {|sk| sk.text.gsub("\n",'') }
+
+    data = {} ; SkillFields.each_with_index do |skill, i|
+      data[skill] = {proficiency: skill_proficiency[i], value: skills[i]}
+    end ; data
   end
 
   def get_text(selector)
@@ -52,7 +73,7 @@ end
 
 def parse_csv
   file = CSV.read('character.csv')
-  file.inject({}) {|hh, (k, sel)| hh[k.to_sym] = SelStub % sel ; hh }
+  file.inject({}) {|hh, (k, sel)| hh[k.to_sym] = sel ; hh }
 end
 
 def process
@@ -61,6 +82,7 @@ def process
 
   values = parse_csv.keys
   puts values.map {|sym| [sym, yoshimo.send(sym)].to_s}
+  puts yoshimo.skills
   agent.quit
 end
 
