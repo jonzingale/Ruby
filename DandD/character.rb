@@ -10,6 +10,9 @@ AbilityFields = %w(strength dexterity constitution intelligence wisdom charisma)
 PassivityFields = %w(perception investigation insight)
 ItemsFields = %w(armor weapons tools languages)
 
+Spells_Tab_Sel = "//div[@class='ct-primary-box__tab--spells ct-tab-list__nav-item']"
+Spells_By_Level_SEl = "//div[@class='ct-tab-options__content ']/div[@class='ct-content-group']"
+
 # TODO:
 # BUILD AS AN API, THINK ABOUT STRUCTURING AS JSON
 # Perhaps use a Struct.new so that all stats are hashes
@@ -22,8 +25,8 @@ class Character
 
   def initialize(character)
     character_id = parse_csv('character_ids.csv')[character]
-    agent = Agent.new(DndStub + character_id)
-    @page = agent.page
+    @agent = Agent.new(DndStub + character_id)
+    @page = @agent.page
 
     @csv = parse_csv('character.csv')
     @abilities = get_texts(AbilityFields, @csv[:abilities])
@@ -42,11 +45,43 @@ class Character
     @skills = get_skills
     @attacks = get_attack
 
-    agent.quit
+    # modifies window
+    @spells = get_spells
+    display_spells
+
+    @agent.quit
   end
 
   def display
     puts @csv.keys.map {|sym| [sym, self.send(sym)].to_s}
+  end
+
+  def display_spells
+    @spells.each do |k, v|
+      puts "\n#{k}\n"
+      v.each {|spell| puts spell}
+    end
+  end
+
+  def get_spells # TODO: CLEAN UP THIS CODE
+    begin
+      spell_tab = @page.find_element(xpath: Spells_Tab_Sel)
+      spell_tab.click
+      spells_by_level = @page.find_elements(xpath: Spells_By_Level_SEl)
+
+      all_spells = spells_by_level.inject({}) do |accum, elem|
+        header_path = "\div[@class='ct-content-group__header']"
+        spell_level = elem.find_element(xpath: header_path).text.split("\n")[0]
+
+        spell_sel = "div[@class='ct-content-group__content']//div[@class=' ct-spells-spell']"
+        spells = elem.find_elements(xpath: spell_sel)
+        spells.map! {|spell| spell.text.gsub("\n",' ').gsub('CAST','')}
+        accum[spell_level] = spells
+        accum
+      end
+    rescue
+      all_spells = []
+    end
   end
 
   def get_attack # TODO: needs formatting
@@ -85,8 +120,8 @@ def parse_csv(file)
 end
 
 def process
-  yoshimo = Character.new(:yoshimo)
-  yoshimo.display
+  character = Character.new(:yoshimo)
+  character.display
 end
 
 process
