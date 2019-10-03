@@ -10,3 +10,4 @@ level,//div[@class='ct-character-tidbits__xp-level']
 armor_class,//div[@class='ct-armor-class-box__value']
 walking_speed,//div[@class='ct-speed-box__box-value']
 max_xp,//div[@class='ct-health-summary__hp-number']
+attacks,//div[@class='ct-attack-table__content']/div
