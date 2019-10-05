@@ -12,11 +12,18 @@ ItemsFields = %w(armor weapons tools languages)
 
 Spells_Tab_Sel = "//div[@class='ct-primary-box__tab--spells ct-tab-list__nav-item']"
 Spells_By_Level_SEl = "//div[@class='ct-tab-options__content ']/div[@class='ct-content-group']"
+Spell_Header_Path = "\div[@class='ct-content-group__header']"
+Spell_Sel = "div[@class='ct-content-group__content']//div[@class=' ct-spells-spell']"
 
-# TODO:
-# BUILD AS AN API, THINK ABOUT STRUCTURING AS JSON
-# Perhaps use a Struct.new so that all stats are hashes
-# and a Json can be built up.
+Spell_Sels = {
+  action: "div[@class='ct-spells-spell__action']",
+  name: "div[@class='ct-spells-spell__name']",
+  activation: "div[@class='ct-spells-spell__activation']",
+  range: "div[@class='ct-spells-spell__range']",
+  attacking: "div[@class='ct-spells-spell__attacking']",
+  damage: "div[@class='ct-spells-spell__damage']",
+  # notes: 'ct-spells-spell__notes' # not needed for my campaigns
+}
 
 class Character
   attr_accessor :name, :level, :armor_class, :abilities, :proficiency,
@@ -66,21 +73,28 @@ class Character
   def get_spells # TODO: CLEAN UP THIS CODE
     begin
       spell_tab = @page.find_element(xpath: Spells_Tab_Sel)
-      spell_tab.click
+      spell_tab.click ; sleep(2)
+
       spells_by_level = @page.find_elements(xpath: Spells_By_Level_SEl)
 
       all_spells = spells_by_level.inject({}) do |accum, elem|
-        header_path = "\div[@class='ct-content-group__header']"
-        spell_level = elem.find_element(xpath: header_path).text.split("\n")[0]
+        spell_elems = elem.find_elements(xpath: Spell_Sel)
+        spell_level_elem = elem.find_element(xpath: Spell_Header_Path)
+        spell_level = spell_level_elem.text.split("\n").first
 
-        spell_sel = "div[@class='ct-content-group__content']//div[@class=' ct-spells-spell']"
-        spells = elem.find_elements(xpath: spell_sel)
-        spells.map! {|spell| spell.text.gsub("\n",' ').gsub('CAST','')}
-        accum[spell_level] = spells
+        accum[spell_level] = spell_elems.map do |spell|
+          spell = Spell_Sels.map do |(k, val)|
+            spell.find_element(xpath: val).text
+                 .gsub(/CAST|AT WILL/,'   ')
+                 .gsub(/\n.+/,' ')
+                 .gsub(/--/,'')
+          end.join(' ')
+        end
+
         accum
       end
     rescue
-      all_spells = []
+      all_spells = {}
     end
   end
 
@@ -120,7 +134,7 @@ def parse_csv(file)
 end
 
 def process
-  character = Character.new(:yoshimo)
+  character = Character.new(:sebastian)
   character.display
 end
 

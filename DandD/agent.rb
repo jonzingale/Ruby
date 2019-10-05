@@ -15,7 +15,7 @@ class Agent
 
   def get_path(path)
     driver.get(path)
-    sleep(1)
+    sleep(2)
     driver
   end
 end
