@@ -63,10 +63,17 @@ class Character
     puts @csv.keys.map {|sym| [sym, self.send(sym)].to_s}
   end
 
-  def display_spells
-    @spells.each do |k, v|
+  def display_spells # TODO: real formatting in its own file
+    @spells.each do |k, spells|
       puts "\n#{k}\n"
-      v.each {|spell| puts spell}
+      spells.each do |spell|
+        spell = spell.values.map do |val|
+          val.gsub(/CAST|AT WILL/,'   ')
+             .gsub(/\n.*/,' ')
+             .gsub(/--/,'')
+        end
+        puts spell.join(' ')
+      end
     end
   end
 
@@ -83,12 +90,10 @@ class Character
         spell_level = spell_level_elem.text.split("\n").first
 
         accum[spell_level] = spell_elems.map do |spell|
-          spell = Spell_Sels.map do |(k, val)|
-            spell.find_element(xpath: val).text
-                 .gsub(/CAST|AT WILL/,'   ')
-                 .gsub(/\n.+/,' ')
-                 .gsub(/--/,'')
-          end.join(' ')
+          spell_hash = {}
+          Spell_Sels.each do |(k, val)|
+            spell_hash[k] = spell.find_element(xpath: val).text
+          end ; spell_hash
         end
 
         accum
