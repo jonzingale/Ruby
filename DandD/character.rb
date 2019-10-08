@@ -15,6 +15,8 @@ Spells_By_Level_SEl = "//div[@class='ct-tab-options__content ']/div[@class='ct-c
 Spell_Header_Path = "\div[@class='ct-content-group__header']"
 Spell_Sel = "div[@class='ct-content-group__content']//div[@class=' ct-spells-spell']"
 
+Features_Tab_Sel = "//div[@class='ct-primary-box__tab--features ct-tab-list__nav-item']"
+
 Spell_Sels = {
   action: "div[@class='ct-spells-spell__action']",
   name: "div[@class='ct-spells-spell__name']",
@@ -28,7 +30,7 @@ Spell_Sels = {
 class Character
   attr_accessor :name, :level, :armor_class, :abilities, :proficiency,
     :skill_proficiency, :walking_speed, :max_xp, :passives, :saving_throws,
-    :skills, :items, :attacks
+    :skills, :items, :attacks, :spells, :features
 
   def initialize(character)
     character_id = parse_csv('character_ids.csv')[character]
@@ -54,6 +56,7 @@ class Character
 
     # modifies window
     @spells = get_spells
+    # @features = get_features
     display_spells
 
     @agent.quit
@@ -80,7 +83,7 @@ class Character
   def get_spells # TODO: CLEAN UP THIS CODE
     begin
       spell_tab = @page.find_element(xpath: Spells_Tab_Sel)
-      spell_tab.click ; sleep(2)
+      spell_tab.click ; sleep(1)
 
       spells_by_level = @page.find_elements(xpath: Spells_By_Level_SEl)
 
@@ -101,6 +104,18 @@ class Character
     rescue
       all_spells = {}
     end
+  end
+
+  def get_features
+    begin
+      features_tab = @page.find_element(xpath: Features_Tab_Sel)
+      features_tab.click ; sleep(1)
+
+      features = @page.find_elements(xpath: "//div[@class='ct-feature-snippet ct-feature-snippet--class']")[1]
+    rescue
+
+    end
+
   end
 
   def get_attack # TODO: needs formatting
