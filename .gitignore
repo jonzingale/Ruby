@@ -13,4 +13,6 @@ Emailer/email_template.txt
 # Can also ignore all directories and files in a directory.
 tmp/**/* 
 banking/*
+
 covid19_nm/data.csv
+library_renewal/data/
