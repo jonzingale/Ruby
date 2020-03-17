@@ -28,6 +28,12 @@ EDITOR_REGEX = /by\] (.+) \;/.freeze
 FILES_PATH = File.expand_path('./../data', __FILE__).freeze
 MEEM_INITS = "#{FILES_PATH}/meem_inits.csv".freeze
 
+# TODO: revisit when there are books and try to build MAILER
+# Here are 3 working bash examples as of 3/16/2020.
+# 	echo "Mail body" | mail -s "Mail subject" user@example.com
+# 	mail -s "Mail subject" to@example.com < body.txt
+# 	cat body.txt | mail -s "Mail subject" "to-user@example.com" -- -r "from-user@example.com"
+
 class USER
 	attr_accessor :id, :expiration, :next_due, :has_run, :active
 
@@ -171,7 +177,8 @@ end
 # TODO: rewrite with correct implementation of headers
 def updateUsers(users)
   users.each do |user|
-		CSV.open(MEEM_INITS, 'w', write_headers: HEADERS) do |csv|
+  	CSV.open(MEEM_INITS, 'w+') { |csv| csv << HEADERS }
+		CSV.open(MEEM_INITS, 'a',) do |csv|
 			csv << [user.id, user.expiration, user.next_due,
 							user.has_run, user.active]
 		end
@@ -185,15 +192,16 @@ def should_run?(user)
 	next_expires <= NOW + 3 || NOW > next_due - DUE_WINDOW
 end
 
-def read_csv(file_name)
-	csv = CSV.read(MEEM_INITS, headers: true, return_headers: false)
+def read_csv
+	csv = CSV.read(MEEM_INITS, headers: true, return_headers: true)
 end
 
 def meem_library_main # Check each Account and Renew if Necessary.
-	users = read_csv('meem_inits.csv').map { |record| USER.new(record) }
+	users = read_csv.map { |record| USER.new(record) }
+
 	users.each do |user|
 		if user.active && !user.has_run && should_run?(user)
-			puts "I should run"
+			print "Running auto renewal"
 			process(user)
 		end
 	end
