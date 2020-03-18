@@ -52,7 +52,9 @@ class Agent
 end
 
 def return_covid19_results
-  CSV.read(DATA_CSV)
+  data_csv = CSV.read(DATA_CSV)
+  county_csv = CSV.read(COUNTY_CSV)
+  [data_csv, county_csv]
 end
 
 def process
