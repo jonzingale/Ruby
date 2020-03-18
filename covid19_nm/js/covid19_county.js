@@ -1,7 +1,7 @@
 (function(){
 
-  // d3.csv("./data/county.csv", function(data) {
-  d3.csv("./data/random.csv", function(data) { // for testing
+  d3.csv("./data/county.csv", function(data) {
+  // d3.csv("./data/random.csv", function(data) { // for testing
     var svg = d3.select('#covid19-county'),
         width = +svg.attr("width"),
         height = +svg.attr("height");
