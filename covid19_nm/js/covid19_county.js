@@ -29,10 +29,10 @@
 
       var yScale = d3.scaleLinear()
         .domain([0, max_val])
-        .range([50, 0])
+        .range([60, 0])
 
       var pathData = lineGenerator(
-        timeSeries.map( (y, i) => [xScale(i), 2 + ci*24 + yScale(y)] )
+        timeSeries.map( (y, i) => [xScale(i), 10 + ci*24 + yScale(y)] )
       )
 
       var line = svg.append('g')
