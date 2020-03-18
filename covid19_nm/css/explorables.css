@@ -6,18 +6,22 @@
 
 .menu-list {
   padding-top: 150px;
-  padding-left: 100px;
-}
-
-.happiness {
-  padding-left: 20px;
-  font-size: 32px;
-  font-weight: 400;
+  padding-left: 0px;
 }
 
 .page-frame {
   padding-top: 5%;
   padding-left: 5%;
+}
+
+#covid19-county {
+  width: 720px;
+  height: 500px;
+}
+
+#covid19-totals {
+  width: 720px;
+  height: 200px;
 }
 
 .back-button {
