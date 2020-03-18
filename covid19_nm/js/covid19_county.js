@@ -1,10 +1,12 @@
 (function(){
 
-  d3.csv("./data/county.csv", function(data) {
-  // d3.csv("./data/random.csv", function(data) { // for testing
+  // d3.csv("./data/county.csv", function(data) {
+  d3.csv("./data/random.csv", function(data) { // for testing
     var svg = d3.select('#covid19-county'),
         width = +svg.attr("width"),
         height = +svg.attr("height");
+
+    var win_width = window.innerWidth
 
     var county_data = {} // make data useable
     data.columns.forEach(function(col_name) {
@@ -19,7 +21,7 @@
 
     var xScale = d3.scaleLinear()
       .domain([0, series_len])
-      .range([0, 1000])
+      .range([0, win_width])
 
     counties.forEach(function(county, ci) {
       var timeSeries = county_data[county]
@@ -27,10 +29,10 @@
 
       var yScale = d3.scaleLinear()
         .domain([0, max_val])
-        .range([10, 0])
+        .range([50, 0])
 
       var pathData = lineGenerator(
-        timeSeries.map( (y, i) => [xScale(i), 30+ ci*14 + yScale(y)] )
+        timeSeries.map( (y, i) => [xScale(i), 2 + ci*24 + yScale(y)] )
       )
 
       var line = svg.append('g')
@@ -38,10 +40,10 @@
         .selectAll('line')
         .data(timeSeries)
         .enter().append('path')
+        .attr('id', county.replace(' ','-'))
         .attr("d", pathData)
         .attr("stroke-width", 2).attr("fill", "none")
         .style('stroke', function(d, i) { // color nodes
-          // return d3.schemeBrBG[11][ci % 11]
           return d3.interpolateTurbo(ci / numNodes)
         })
     })
