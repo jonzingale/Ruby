@@ -15,4 +15,5 @@ tmp/**/*
 banking/*
 
 covid19_nm/data.csv
+covid19_nm/body_fixture.html
 library_renewal/data/
