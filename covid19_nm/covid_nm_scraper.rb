@@ -44,10 +44,6 @@ class Agent
     val == 'no' ? 0 : val.to_i
   end
 
-  def present?(val)
-    !(val.nil? || val.empty?)
-  end
-
   def get_effected_counties
     json_match = COUNTIES_REGEX.match(@body)[1]
     clean_match = json_match.gsub('""','"0"')
@@ -68,8 +64,7 @@ def process
   end
 
   CSV.open(DATA_CSV, 'a') do |csv|
-    data = [DATE, TIME, agent.total_cases, agent.deaths, agent.recoveries]
-    csv << data
+    csv << [DATE, TIME, agent.total_cases, agent.deaths, agent.recoveries]
   end
 end
 

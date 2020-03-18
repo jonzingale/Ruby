@@ -9,10 +9,9 @@
      'Rio Arriba','Roosevelt','San Juan','San Miguel','Sandoval',
      'Santa Fe','Sierra','Socorro','Taos','Torrance','Union','Valencia']
 
-  var col = d3.selectAll('.first-col').append('svg')
-               .attr('height', 1000).attr('width', 130)
-
-  var countyNames = col.selectAll("text").data(data).enter()
+  var col = d3.selectAll('.name-col').append('svg')
+               .attr('height', 1000)
+               .attr('width', 130)
 
   function highlightLine(name) {
     let svg = d3.select('#covid19-county')
@@ -25,6 +24,8 @@
     let line = svg.select(`#${name.replace(' ','-')}`)
     line.attr('stroke-width', 2)
   }
+
+  var countyNames = col.selectAll("text").data(data).enter()
 
   countyNames.append('g')
       .selectAll("circle").data(data)

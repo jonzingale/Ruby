@@ -34,6 +34,10 @@
   width: 100%;
 }
 
+.name-col {
+  /*padding-left: -20%*/
+}
+
 a {
   text-decoration: none;
 }
