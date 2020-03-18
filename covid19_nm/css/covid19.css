@@ -1,29 +1,24 @@
-.explorable_widgets {
-  display: block;
-  display: block;
-  margin: auto;
-}
-
 .page-frame {
   padding-top: 5%;
-  padding-left: 5%;
+  padding-left: 8%;
 }
 
 #covid19-county {
   margin-top: 50px;
-  width: 130%;
+  width: 90%;
   height: 850px;
 }
 
 #covid19-totals {
   margin-top: 50px;
-  width: 130%;
+  width: 90%;
   height: 200px;
 }
 
 .back-button {
   padding-top: 3%;
 }
+
 .title {
   font-size: 34px;
   font-family: 'Nunito Sans';
@@ -34,8 +29,12 @@
   width: 100%;
 }
 
-.name-col {
-  /*padding-left: -20%*/
+.svg-table {
+  width: 80%;
+}
+
+#name-col {
+  width: 10%;
 }
 
 a {

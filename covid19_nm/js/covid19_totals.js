@@ -13,7 +13,7 @@
     })
 
     var numNodes = data.length
-    var lineGenerator = d3.line()//.curve(d3.curveCardinal)
+    var lineGenerator = d3.line().curve(d3.curveCardinal)
 
     var xScale = d3.scaleLinear()
       .domain([0, numNodes])
