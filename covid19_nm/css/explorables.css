@@ -1,0 +1,52 @@
+.explorable_widgets {
+  display: block;
+  display: block;
+  margin: auto;
+}
+
+.menu-list {
+  padding-top: 150px;
+  padding-left: 100px;
+}
+
+.happiness {
+  padding-left: 20px;
+  font-size: 32px;
+  font-weight: 400;
+}
+
+.page-frame {
+  padding-top: 5%;
+  padding-left: 5%;
+}
+
+.back-button {
+  padding-top: 3%;
+}
+.explorable-title {
+  font-size: 34px;
+  font-family: 'Nunito Sans';
+}
+
+.description {
+  padding-top: 20px;
+  width: 100%;
+}
+
+a {
+  text-decoration: none;
+}
+
+html {
+  background: #fff;
+}
+
+.links line {
+  stroke: #999;
+  stroke-width: 0.9px;
+}
+
+.nodes circle {
+  stroke: #aaa;
+  stroke-width: 0.5px;
+}
