@@ -1,4 +1,4 @@
-### Covid-19 New Mexico
+## Covid-19 New Mexico
 
 The Covid-19 corona virus is expected to effect all of us.
 
