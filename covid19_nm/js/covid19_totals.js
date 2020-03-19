@@ -48,8 +48,8 @@
         .attr('class', 'label')
         .text(header)
         .attr("font-size", "20px")
-        .attr("x", 510 + ci*70 )
-        .attr("y", yScale(max_val) + 45)
+        .attr("x", 510 + ci*70 - 100 )
+        .attr("y", yScale(max_val) + 42)
     })
 
     // date info
