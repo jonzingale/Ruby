@@ -45,9 +45,11 @@
         })
 
       svg.append('text')
-        .attr('class', 'label').text(header)
-        .attr("x", 510)
-        .attr("y", yScale(max_val) + 50)
+        .attr('class', 'label')
+        .text(header)
+        .attr("font-size", "20px")
+        .attr("x", 510 + ci*70 )
+        .attr("y", yScale(max_val) + 45)
     })
 
     // date info
