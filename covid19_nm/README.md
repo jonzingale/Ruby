@@ -18,7 +18,7 @@ mkdir data
 echo 'date,time,total cases,deaths,recoveries' > data/data.csv
 echo 'Bernalillo,Catron,Chaves,Cibola,Colfax,Curry,De Baca,Doña Ana,Eddy,Grant,Guadalupe,Harding,Hidalgo,Lea,Lincoln,Los Alamos,Luna,McKinley,Mora,Otero,Quay,Rio Arriba,Roosevelt,San Juan,San Miguel,Sandoval,Santa Fe,Sierra,Socorro,Taos,Torrance,Union,Valencia' > data/county.csv
 
-python -m SimpleHTTPServer 8000`
+python -m SimpleHTTPServer 8000
 
 0 */6 * * * /Users/Jon/Desktop/crude/Ruby/covid19_nm/covid19
 
