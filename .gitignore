@@ -14,5 +14,4 @@ Emailer/email_template.txt
 tmp/**/* 
 banking/*
 
-covid19_nm/data/
 library_renewal/data/
