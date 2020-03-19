@@ -8,19 +8,9 @@ This visualizer scrapes New Mexico specific cases from
 and presents the data as a timeseries.
 
 ### SETUP
-1. create `data` directory with two csv files
-2. run local server
-3. crontab set to run every 6 hours
-4. visit endpoint
-
-```
-mkdir data
-echo 'date,time,total cases,deaths,recoveries' > data/data.csv
-echo 'Bernalillo,Catron,Chaves,Cibola,Colfax,Curry,De Baca,Doña Ana,Eddy,Grant,Guadalupe,Harding,Hidalgo,Lea,Lincoln,Los Alamos,Luna,McKinley,Mora,Otero,Quay,Rio Arriba,Roosevelt,San Juan,San Miguel,Sandoval,Santa Fe,Sierra,Socorro,Taos,Torrance,Union,Valencia' > data/county.csv
-
-python -m SimpleHTTPServer 8000
-
-0 */6 * * * /Users/Jon/Desktop/crude/Ruby/covid19_nm/covid19
-
-[`http://localhost:8000/covid19.html`](http://localhost:8000/covid19.html)
-```
+1. run local server
+  - `python -m SimpleHTTPServer 8000`
+2. crontab set to run every 6 hours
+  - `0 */6 * * * /Users/Jon/Desktop/crude/Ruby/covid19_nm/covid19`
+3. visit visualization endpoint
+  - [`http://localhost:8000/covid19.html`](http://localhost:8000/covid19.html)
