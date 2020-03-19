@@ -17,14 +17,11 @@ echo 'Bernalillo,Catron,Chaves,Cibola,Colfax,Curry,De Baca,Doña Ana,Eddy,Grant,
 ```
 
 2. run local server:
-
-  `python -m SimpleHTTPServer 8000`
+...`python -m SimpleHTTPServer 8000`
 
 
 3. crontab set to run every 6 hours:
-
-  `0 */6 * * * /Users/Jon/Desktop/crude/Ruby/covid19_nm/covid19`
+...`0 */6 * * * /Users/Jon/Desktop/crude/Ruby/covid19_nm/covid19`
 
 4. visit endpoint:
-
-  [`http://localhost:8000/covid19.html`](http://localhost:8000/covid19.html)
+...[`http://localhost:8000/covid19.html`](http://localhost:8000/covid19.html)
