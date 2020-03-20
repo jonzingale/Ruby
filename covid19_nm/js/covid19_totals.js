@@ -5,6 +5,7 @@
         height = +svg.attr("height");
 
     var win_width = window.innerWidth
+    var svg_width = svg.style('width').replace('px','')
 
     var column_data = {} // make data useable
     data.columns.forEach(function(col_name) {
@@ -17,7 +18,7 @@
 
     var xScale = d3.scaleLinear()
       .domain([0, numNodes])
-      .range([0, win_width])
+      .range([0, svg_width])
 
     const headers = ['total cases','deaths','recoveries']
 

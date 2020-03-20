@@ -1,7 +1,7 @@
 (function(){
 
 var margin = {top: 40, right: 30, bottom: 20, left: 30},
-    width = 660 - margin.left - margin.right,
+    width = 750 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
 var svg = d3.select("#covid19-ages")
