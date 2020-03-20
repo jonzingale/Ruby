@@ -13,26 +13,29 @@ var svg = d3.select("#covid19-ages")
           "translate(" + margin.left + "," + margin.top + ")");
 
   d3.csv("./data/age.csv", function(data) {
-    var bins = Object.values(data[0])
+    var ages = data.columns
+    var bins = Object.values(data.slice(-1)[0]) // last record in age.csv
+
     var x = d3.scaleLinear()
-        .domain([0, 12])
-        .range([0, width]);
+              .domain([0, 12])
+              .range([0, width]);
 
     svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        // .call(d3.axisBottom(x));
+       .attr("transform", "translate(0," + height + ")")
+       .call(d3.axisBottom(x).tickValues([]));
 
-  // svg.append("text")             
-  //     .attr("transform",
-  //           "translate(" + (width/2) + " ," + 
-  //                          (height + margin.top + 20) + ")")
-  //     .style("text-anchor", "middle")
-  //     .text("Date");
+    svg.selectAll("text")
+        .data(ages).enter()
+        .append('text')
+        .attr("font-size", "15px")
+        .attr("x", function(d, i) { return x(i) + 15 })
+        .attr("y", height + 20)
+        .text(function(d) { return d });
 
-    var y = d3.scaleLinear().range([height, 0]);
-    
-    y.domain([0, d3.max(bins, function(d) { return d })]);
-    
+    var y = d3.scaleLinear()
+              .range([height, 0])
+              .domain([0, d3.max(bins)])
+
     svg.append("g").call(d3.axisLeft(y));
 
     // append the bar rectangles to the svg element
@@ -42,7 +45,7 @@ var svg = d3.select("#covid19-ages")
         .append("rect")
           .attr("x", 1)
           .attr("transform", function(d, i) {
-            return "translate(" + x(i) + "," + y(d) + ")"; 
+            return "translate(" + x(i) + "," + y(d) + ")";
           })
           .attr("width", function(d, i) { return x(i+1) - x(i) -1 ; })
           .attr("height", function(d) { return height - y(d); })
