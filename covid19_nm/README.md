@@ -10,7 +10,7 @@ and presents the data as a timeseries.
 ### SETUP
 1. run local server
   - `python -m SimpleHTTPServer 8000`
-2. crontab set to run every 6 hours
-  - `0 */6 * * * /Users/Jon/Desktop/crude/Ruby/covid19_nm/covid19`
+2. crontab set to run at 3pm
+  - `0 15 * * * /Users/Jon/Desktop/crude/Ruby/covid19_nm/covid19`
 3. visit visualization endpoint
   - [`http://localhost:8000/covid19.html`](http://localhost:8000/covid19.html)
