@@ -4,7 +4,7 @@ The Covid-19 corona virus is expected to effect all of us.
 
 This visualizer scrapes New Mexico specific cases from
 
-[nmindepth.com](http://nmindepth.com/2020/03/13/map-new-mexico-covid-19-cases/)
+[nmindepth.com](http://nmindepth.com/interactive-map-new-mexico-covid-19-cases/)
 and presents the data as a timeseries.
 
 ### SETUP
