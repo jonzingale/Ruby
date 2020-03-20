@@ -10,7 +10,7 @@
      'Santa Fe','Sierra','Socorro','Taos','Torrance','Union','Valencia']
 
   var col = d3.selectAll('.names').append('svg')
-               .attr('height', 1000)
+               .attr('height', 1250)
                .attr('width', 200)
 
   function highlightLine(name) {
