@@ -108,12 +108,12 @@ def save_data(agent)
   end
 end
 
-def process(save = true)
-  use_fixture = false
+def process(save_records = true, use_fixture = false)
   agent = Agent.new(use_fixture)
-  save ? save_data(agent) : print(agent.ages)
+  save_records ? save_data(agent) : print(agent.ages)
 end
 
-# save = false
-process(save)
+save_records = false
+use_fixture = false
+process(save_records, use_fixture)
 # return_covid19_results
