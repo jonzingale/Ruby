@@ -9,7 +9,7 @@ TIME = DateTime.now.strftime('%I:%M %p')
 
 COVID_URL = 'https://e.infogram.com/6280a269-a8ec-4d0b-8810-363d5057e67e?parent_url=http%3A%2F%2Fnmindepth.com%2F2020%2F03%2F13%2Fmap-new-mexico-covid-19-cases%2F'
 AGES_URL = 'https://docs.google.com/spreadsheets/u/0/d/e/2PACX-1vRfslCmEsupDwXa2wGsd6AnR1i6gLEPd_nm_RUUw-M5N4rH3AbFDDQw1N5HGCKCLA/pubhtml/sheet?headers=false&gid=567443277'
-AGE_SEL = %W[00s 10s 20s 30s 40s 50s 60s 70s 80s 90s 100s N/A]
+AGE_SEL = %W[0s 10s 20s 30s 40s 50s 60s 70s 80s 90s 100s N/A]
 
 DATA_CSV = 'data/data.csv'.freeze
 COUNTY_CSV = 'data/county.csv'.freeze
@@ -73,7 +73,7 @@ class Agent
     age_array = [*0..11].map { 0 }
     table_match = TABLE_REGEX.match(@age_body)[0]
     table = Nokogiri.parse(table_match)
-    rows = table.search('.//tr')[5,40]
+    rows = table.search('.//tr').drop(5)
 
     rows.each do |tr|
       val = tr.at('./td[2]').text
@@ -81,7 +81,6 @@ class Agent
       ix = AGE_SEL.index(age)
       age_array[ix] += 1
     end
-
     age_array
   end
 
@@ -113,7 +112,7 @@ def process(save_records = true, use_fixture = false)
   save_records ? save_data(agent) : print(agent.ages)
 end
 
-save_records = false
+save_records = true
 use_fixture = false
 process(save_records, use_fixture)
 # return_covid19_results
