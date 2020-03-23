@@ -8,7 +8,7 @@ DATE = Date.today.strftime('%Y-%m-%d')
 TIME = DateTime.now.strftime('%I:%M %p')
 
 COVID_URL = 'https://e.infogram.com/6280a269-a8ec-4d0b-8810-363d5057e67e?parent_url=http%3A%2F%2Fnmindepth.com%2F2020%2F03%2F13%2Fmap-new-mexico-covid-19-cases%2F'
-AGES_URL = 'https://docs.google.com/spreadsheets/u/0/d/e/2PACX-1vRfslCmEsupDwXa2wGsd6AnR1i6gLEPd_nm_RUUw-M5N4rH3AbFDDQw1N5HGCKCLA/pubhtml/sheet?headers=false&gid=1687748110'
+AGES_URL = 'https://docs.google.com/spreadsheets/u/0/d/e/2PACX-1vRfslCmEsupDwXa2wGsd6AnR1i6gLEPd_nm_RUUw-M5N4rH3AbFDDQw1N5HGCKCLA/pubhtml/sheet?headers=false&gid=567443277'
 AGE_SEL = %W[00s 10s 20s 30s 40s 50s 60s 70s 80s 90s 100s N/A]
 
 DATA_CSV = 'data/data.csv'.freeze
@@ -90,13 +90,11 @@ end
 def return_covid19_results
   data_csv = CSV.read(DATA_CSV)
   county_csv = CSV.read(COUNTY_CSV)
-  [data_csv, county_csv]
+  ages_csv = CSV.read(AGE_CSV)
+  [data_csv, county_csv, ages_csv]
 end
 
-def process
-  use_fixture = false
-  agent = Agent.new(use_fixture)
-
+def save_data(agent)
   CSV.open(AGE_CSV, 'a') do |csv|
     csv << agent.ages
   end
@@ -110,5 +108,12 @@ def process
   end
 end
 
-process
+def process(save = true)
+  use_fixture = false
+  agent = Agent.new(use_fixture)
+  save ? save_data(agent) : print(agent.ages)
+end
+
+# save = false
+process(save)
 # return_covid19_results
