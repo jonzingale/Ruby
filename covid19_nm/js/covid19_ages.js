@@ -14,7 +14,8 @@ var svg = d3.select("#covid19-ages")
 
   d3.csv("./data/age.csv", function(data) {
     var ages = data.columns
-    var bins = Object.values(data.slice(-1)[0]) // last record in age.csv
+    var bins = Object.values(data.slice(-1)[0])
+                     .map(n => parseInt(n)) // last record in age.csv
 
     var x = d3.scaleLinear()
               .domain([0, 12])
@@ -33,8 +34,8 @@ var svg = d3.select("#covid19-ages")
         .text(function(d) { return d });
 
     var y = d3.scaleLinear()
+              .domain([0, 16]) //d3.max(bins)])
               .range([height, 0])
-              .domain([0, d3.max(bins)])
 
     svg.append("g").call(d3.axisLeft(y));
 
