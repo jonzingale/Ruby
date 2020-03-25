@@ -1,7 +1,6 @@
 (function(){
 
   d3.csv("./data/county.csv", function(data) {
-  // d3.csv("./data/test.csv", function(data) {
     var svg = d3.select('#covid19-county'),
         width = +svg.attr("width"),
         height = +svg.attr("height");
@@ -26,7 +25,7 @@
 
     counties.forEach(function(county, ci) {
       var timeSeries = county_data[county]
-      var max_val = Math.max(...timeSeries)
+      var max_val = Math.max(...county_data['Bernalillo'])
 
       var yScale = d3.scaleLinear()
         .domain([0, max_val])

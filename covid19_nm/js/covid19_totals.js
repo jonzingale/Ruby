@@ -24,7 +24,7 @@
 
     headers.forEach(function(header, ci) {
       let timeSeries = column_data[header]
-      let max_val = Math.max(...timeSeries)
+      let max_val = Math.max(...column_data['total cases'])
 
       let yScale = d3.scaleLinear()
         .domain([0, max_val])
@@ -34,41 +34,50 @@
         timeSeries.map( (y, i) => [xScale(i), 50+yScale(y)] )
       )
 
+      // line data
       var line = svg.append('g')
         .attr("class", "lines")
         .selectAll('line')
         .data(timeSeries)
         .enter().append('path')
         .attr("d", pathData)
-        .attr("stroke-width", 2).attr("fill", "none")
-        .style('stroke', function(d, i) {
-          return d3.schemeBrBG[3][ci]
+        .attr("stroke-width", function() {
+          switch(header) {
+            case 'total cases':
+              return 2
+            case 'deaths':
+              return 4
+            case 'recoveries':
+              return 1
+          }
         })
+        .style('stroke', d3.schemeSet2[ci+1])
+        .attr("fill", "none")
 
       svg.append('text')
         .attr('class', 'label')
         .text(header)
-        .attr("font-size", "20px")
-        .attr("x", 510 + ci*70 - 100 )
-        .attr("y", yScale(max_val) + 42)
+        .attr("font-size", "25px")
+        .attr('stroke', d3.schemeSet2[ci+1])
+        .attr("x", 10 + ci*150 )
+        .attr("y", 40)
     })
 
-    // date info
+    // date labels
     var dates = column_data['date']
 
     var lScale = d3.scaleLinear()
       .domain([0, dates.length + 2])
-      .range([0, 1000])
+      .range([0, 900])
 
     d3.select('#covid19-totals').append('g')
       .attr('class', 'date-label')
       .selectAll('date-labels')
       .data(dates).enter()
-      .append('text').attr('class', 'thing')
+      .append('text')
       .text(function(d) { return d })
       .attr("font-size", "10px")
       .attr("x", function(d, i) { return lScale(i) })
       .attr("y", 200)
-
   });
 })()
