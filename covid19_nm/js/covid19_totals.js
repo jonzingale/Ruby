@@ -60,7 +60,7 @@
         .attr("font-size", "25px")
         .attr('stroke', d3.schemeSet2[ci+1])
         .attr("x", 10 + ci*150 )
-        .attr("y", 40)
+        .attr("y", 70)
     })
 
     // date labels
