@@ -15,9 +15,9 @@ DATA_CSV = 'data/data.csv'.freeze
 COUNTY_CSV = 'data/county.csv'.freeze
 AGE_CSV = 'data/age.csv'.freeze
 
-CASE_REGEX = /currently (\d+|no) cases/i
-DEATH_REGEX = /(\d+|no) ?reported? deaths/i
-RECOVERY_REGEX = /(\d+|no) ?reported? recoveries/i
+CASE_REGEX = /been (\d+|no) cases/i
+DEATH_REGEX = /(\d+|no) ?reported? deaths?/i
+RECOVERY_REGEX = /(\d+|no) ?reported? recover/i
 COUNTY_DATA_REGEX = /\[\"(\w+\W?\W?\w+ ?\w*)\",\"(\d+)\"/
 COUNTIES_REGEX = /"data":\[\[(.+),\[null/
 TABLE_REGEX = /<tbody.+tbody>/
