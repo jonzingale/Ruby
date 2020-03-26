@@ -34,7 +34,7 @@ var svg = d3.select("#covid19-ages")
         .text(function(d) { return d });
 
     var y = d3.scaleLinear()
-              .domain([0, 16]) //d3.max(bins)])
+              .domain([0, d3.max(bins)])
               .range([height, 0])
 
     svg.append("g").call(d3.axisLeft(y));
