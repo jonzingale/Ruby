@@ -15,11 +15,11 @@ DATA_CSV = 'data/data.csv'.freeze
 COUNTY_CSV = 'data/county.csv'.freeze
 AGE_CSV = 'data/age.csv'.freeze
 
-CASE_REGEX = /been (\d+|no) cases/i
-DEATH_REGEX = /(\d+|no) ?reported? deaths?/i
-RECOVERY_REGEX = /(\d+|no) ?reported? recover/i
+CASE_REGEX = /been (\d,?\d*) cases/i
+DEATH_REGEX = /(\d,?\d*) ?reported? deaths?/i
+RECOVERY_REGEX = /(\d,?\d*) ?reported? recover/i
 COUNTY_DATA_REGEX = /\[\"(\w+\W?\W?\w+ ?\w*)\",\"(\d+)\"/
-COUNTIES_REGEX = /"data":\[\[(.+),\[null/
+COUNTIES_REGEX = /"data":\[\[(.+\"Valencia\"\]\]\]),/
 TABLE_REGEX = /<tbody.+tbody>/
 AGE_REGEX = /(\d+s|N\/A)/
 
@@ -60,7 +60,7 @@ class Agent
 
   def get_case_by_type(regex)
     val = regex.match(@body)[1]
-    val == 'no' ? 0 : val.to_i
+    val == 'no' ? 0 : val.gsub(',','').to_i
   end
 
   def get_effected_counties
