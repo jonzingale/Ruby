@@ -17,7 +17,9 @@ AGE_CSV = 'data/age.csv'.freeze
 
 CASE_REGEX = /been (\d,?\d*) cases/i
 DEATH_REGEX = /(\d,?\d*) ?reported? deaths?/i
+HOSPITALIZED_REGEX = /(\d,?\d*) ?people? hospitalized/i
 RECOVERY_REGEX = /(\d,?\d*) ?reported? recover/i
+
 COUNTY_DATA_REGEX = /\[\"(\w+\W?\W?\w+ ?\w*)\",\"(\d+)\"/
 COUNTIES_REGEX = /"data":\[\[(.+\"Valencia\"\]\]\]),/
 TABLE_REGEX = /<tbody.+tbody>/
@@ -25,7 +27,7 @@ AGE_REGEX = /(\d+s|N\/A)/
 
 class Agent
   attr_accessor :body, :counties, :total_cases, :deaths,
-    :recoveries, :age_body, :ages
+    :recoveries, :age_body, :ages, :hospitalized
 
   def initialize(use_fixture=false)
     @body = get_body(use_fixture)
@@ -34,6 +36,7 @@ class Agent
     @total_cases = get_case_by_type(CASE_REGEX)
     @deaths = get_case_by_type(DEATH_REGEX)
     @recoveries = get_case_by_type(RECOVERY_REGEX)
+    @hospitalized = get_case_by_type(HOSPITALIZED_REGEX)
     @ages = get_ages
   end
 
@@ -77,13 +80,14 @@ class Agent
 
     rows.each do |tr|
       val = tr.at('./td[2]').text
-      age = AGE_REGEX.match(val)[1]
-      ix = AGE_SEL.index(age)
+      age = AGE_REGEX.match(val)
+      next if age.nil?
+
+      ix = AGE_SEL.index(age[1])
       age_array[ix] += 1
     end
     age_array
   end
-
 end
 
 def return_covid19_results
@@ -103,7 +107,8 @@ def save_data(agent)
   end
 
   CSV.open(DATA_CSV, 'a') do |csv|
-    csv << [DATE, TIME, agent.total_cases, agent.deaths, agent.recoveries]
+    csv << [DATE, TIME, agent.total_cases, agent.deaths,
+            agent.recoveries, agent.hospitalized]
   end
 end
 
