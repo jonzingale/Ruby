@@ -22,12 +22,15 @@
 
     const headers = ['total cases','deaths','recoveries']
 
+    function max_val(header) {
+      return Math.max(...column_data[header])
+    }
+
     headers.forEach(function(header, ci) {
       let timeSeries = column_data[header]
-      let max_val = Math.max(...column_data['total cases'])
 
       let yScale = d3.scaleLinear()
-        .domain([0, max_val])
+        .domain([0, max_val('total cases')])
         .range([120, 0])
 
       let pathData = lineGenerator(
@@ -56,24 +59,29 @@
 
       svg.append('text')
         .attr('class', 'label')
-        .text(header)
+        .text(header + `: ${max_val(header)}`)
         .attr("font-size", "25px")
         .attr('stroke', d3.schemeSet2[ci+1])
-        .attr("x", 10 + ci*150 )
+        .attr("x", 10 + ci*180 )
         .attr("y", 70)
     })
 
     // date labels
     var dates = column_data['date']
+    var thin_dates = []
+    var delta = Math.floor(dates.length/8)
+    let i = 0 ; for (i = 0; i < dates.length; i=i+delta) {
+      thin_dates.push(dates[i])
+    }
 
     var lScale = d3.scaleLinear()
-      .domain([0, dates.length + 2])
+      .domain([0, thin_dates.length + 2])
       .range([0, 900])
 
     d3.select('#covid19-totals').append('g')
       .attr('class', 'date-label')
       .selectAll('date-labels')
-      .data(dates).enter()
+      .data(thin_dates).enter()
       .append('text')
       .text(function(d) { return d })
       .attr("font-size", "10px")
