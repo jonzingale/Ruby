@@ -1,4 +1,0 @@
-#!/bin/bash
-cd ~/Desktop/crude/Ruby/covid19_nm/
-source ~/.rvm/scripts/rvm
-ruby covid_nm_scraper.rb
