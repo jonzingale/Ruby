@@ -7,7 +7,8 @@ require 'date'
 require 'byebug'
 
 NOW = Date.today.freeze
-OFFICE_URL = 'https://santafe.craigslist.org/d/office-commercial/search/off'
+OFFICE_URL = 'https://santafe.craigslist.org/d/office-commercial/search/off'.freeze
+
 BASE_URL = 'http://santafe.craigslist.org'.freeze
 HOOD_SEL = './/span[@class="result-hood"]'.freeze
 LISTING_STUB = 'http://santafe.craigslist.org/off/%s.html'.freeze
@@ -18,12 +19,12 @@ BODY_SEL = './/section[@id="postingbody"]'.freeze
 COORDS_SEL = './/div[@id="map"]'.freeze
 
 SANTAFE_REGEX = /santafe\.craigslist/
-BLACKLIST_LOC = /Arroyo Seco|La Cienega|roswell|embudo|Siringo|Zafarano|Carson New Mexico|Fort Wingate|south ?side|Rodeo|Berino|Mentmore|El Potrero|Rancho Viejo|el Prado|Cuba|Mora|Condo|CR \d+|La Mesilla|Sombrillo|Alcalde|Whites City|Calle Cuesta|San Mateo|Airport|Cerrillos|Sol y Lomas|Ojo Caliente|mobile home|newcomb|Ute Park|Llano Quemado|roswell|Arroyo Hondo|Espanola|Pojoaque|Velarde|Albuquerque|Las Vegas|artesia|Chama|Nambe|AIRPORT|abq|fnm|pub|los alamos|Glorieta|Truchas|Edgewood|Cochiti Lake|cvn|cos|Chimayo|El Prado|El Rancho|Bernalillo|Abiquiu/i
+BLACKLIST_LOC = /Arroyo Seco/i
 BLIGHTLIST = /boogers|therapy office/i
-BLACK_IDS = /7140589039/
-BODY_BLACKLIST = /three days per week|therapy office/i
-SQ_BLACKLIST = /sf modified gross/i
-BLACKLISTS = [BODY_BLACKLIST, BLIGHTLIST, SQ_BLACKLIST]
+BLACK_IDS = /7140589039|7140587638/
+BODY_BLACKLIST = /three days per week|therapy office|Lease for \$\d{4}\.00/i
+SQ_BLACKLIST = /sf modified gross|Offer Price/i
+BLACKLISTS = [BODY_BLACKLIST, BLIGHTLIST, SQ_BLACKLIST].freeze
 
 def open_listings(listings)
   listings.each do |listing|
@@ -37,9 +38,11 @@ def str_to_date(date)
 end
 
 def search(query, agent)
-  request_hash = {'max_price' => '500', 
-                  'searchNearby' => '0',
-                  'query' => query }
+  request_hash = {
+    'max_price' => '500', 
+    'searchNearby' => '0',
+    'query' => query
+  }
 
   agent.get(OFFICE_URL,request_hash)
 end
@@ -49,7 +52,7 @@ def inside?(listing, inside=true)
   if listing.has_coords?
     coords = listing.value['coords'].values
     place = Region.new(*coords)
-    inside = place.jordan(5) # within 5 miles only
+    inside = place.jordan(4) # within n miles only
   end
 
   inside
