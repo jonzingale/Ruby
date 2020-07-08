@@ -41,10 +41,7 @@
 			if @listing['coords'][:lat].nil?
 				loc = @listing['loc']
 				address = ADDRESS_REGEX.match(loc)
-				if address
-					coords = get_coords(address[0])
-					@listing['coords'] = coords
-				end
+				get_coords(address[0]) if address
 			end
 
 			# getting loc from summary
@@ -53,8 +50,7 @@
 				address = ADDRESS_REGEX.match(summary)
 				baddress = NOT_ADDRESS_REGEX.match(summary)
 				if address && !baddress
-					coords = get_coords(address[0])
-					@listing['coords'] = coords
+					get_coords(address[0])
 				end
 			end
 
@@ -68,11 +64,13 @@
 
 		def get_coords(address)
 			result = Geocoder.search("#{address[0]} santa fe, new mexico")
+			byebug if result
 
 			# likely want to put a rescue when the api fails
 			# something like {'lat' => nil,'lng' => nil}
 			# or don't replace what was there or something.
-			coords = result[0].data['geometry']['location']
+			 lat, lng = result[0].coordinates
+       @listing['coords'] = {"lat"=>lat, "lng"=>lng}
 		end
 
 	end

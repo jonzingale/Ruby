@@ -7,11 +7,11 @@ class Region
 	BUCKMAN  = [35.698446,-105.9832] # default
 	COORDS = [BUCKMAN,MY_HOUSE,ST_JOHNS].freeze
 
-	def initialize(lat,long) ; @point = [lat,long] ; end
+	def initialize(lat, long) ; @point = [lat, long] ; end
 
-	def jordan(miles) ; coord_dist(JACKRABBIT,@point) < miles ; end
+	def jordan(miles) ; coord_dist(JACKRABBIT, @point) < miles ; end
 
-	def coord_dist(here_coords,there_coords) # COORDS -> COORDS -> FLOAT
+	def coord_dist(here_coords, there_coords) # COORDS -> COORDS -> FLOAT
 		unless (places = [here_coords,there_coords]).any?(&:empty?)
 			lat1, lon1, lat2, lon2 = places.flatten
 			phi1, phi2 = [lat1, lat2].map{|d| d * Math::PI / 180 } # in radians
