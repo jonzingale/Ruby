@@ -19,7 +19,7 @@ COORDS_SEL = './/div[@id="map"]'.freeze
 
 SANTAFE_REGEX = /santafe\.craigslist/
 BLACKLIST_LOC = /Arroyo Seco|La Cienega|roswell|embudo|Siringo|Zafarano|Carson New Mexico|Fort Wingate|south ?side|Rodeo|Berino|Mentmore|El Potrero|Rancho Viejo|el Prado|Cuba|Mora|Condo|CR \d+|La Mesilla|Sombrillo|Alcalde|Whites City|Calle Cuesta|San Mateo|Airport|Cerrillos|Sol y Lomas|Ojo Caliente|mobile home|newcomb|Ute Park|Llano Quemado|roswell|Arroyo Hondo|Espanola|Pojoaque|Velarde|Albuquerque|Las Vegas|artesia|Chama|Nambe|AIRPORT|abq|fnm|pub|los alamos|Glorieta|Truchas|Edgewood|Cochiti Lake|cvn|cos|Chimayo|El Prado|El Rancho|Bernalillo|Abiquiu/i
-BLIGHTLIST = /boogers/i
+BLIGHTLIST = /boogers|therapy office/i
 BLACK_IDS = /7140589039/
 BODY_BLACKLIST = /three days per week|therapy office/i
 SQ_BLACKLIST = /sf modified gross/i
@@ -67,11 +67,11 @@ def process
 
   # cleans listings via location_blacklist on location,
   # keywords_blacklist on summary, and ids
-  listings = page.search(LISTINGS_SEL).reject do |ls| 
+  listings = page.search(LISTINGS_SEL).reject do |ls|
     hood = ls.at(HOOD_SEL)
     cond1 = BLACKLIST_LOC.match(ls.text)
     cond2 = BLIGHTLIST.match(ls.text)
-    cond3 = BLACK_IDS.match(ls.at('.//a')['data-id'])
+    cond3 = BLACK_IDS.match(ls.at('.//a')['href'])
     cond4 = BLACKLIST_LOC.match(hood.text) unless hood.nil?
     cond5 = !SANTAFE_REGEX.match(ls.at(".//a")['href'])
     cond1 || cond2 || cond3 || cond4 || cond5
