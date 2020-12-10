@@ -5,7 +5,7 @@ require 'byebug'
 # 2. visualize stability/change
 
 class Indria
-  attr_accessor :list
+  attr_accessor :list, :resource
   def initialize(resource=4, error=0.01)
     @symbols = 3
     @list = []
@@ -22,11 +22,12 @@ end
 class Abner
   attr_accessor :buckets, :bucketCounts, :bucketsCount
 
-  def initialize(resource=4, error=0.01)
+  def initialize(resource=4, indria_resource=4, error=0.01)
     @buckets = []
     @bucketCounts = []
     @bucketsCount = 0
     @resource = resource
+    @indria_resource = indria_resource
   end
 
   # compare against representative from each bucket
@@ -45,7 +46,6 @@ class Abner
         reps << bucket[rIdx]
       end
 
-      # mIdx = reps.find_index(fromIndria) # DOH, this replaced compare!
       mIdx = reps.find_index { |rep| compare(rep, fromIndria) }
 
       if mIdx
@@ -78,13 +78,11 @@ class Abner
   end
 
   def compare(rep, fromIndria)
-    # byebug if rep.nil?
     # perfect match, MUST BE SAME SIZE!
     # fromIndria.zip(rep).all? { |i, r| i == r }
 
-    # limited resources, let Indria write more than Abner verifies
-    bucketSize = rep.length # TODO: do this with integer references
-    rIds = (0...@resource).map { rand(bucketSize) } # NOTE: with replacement
+    # abner verifies only some of what indria offers
+    rIds = (0...@resource).map { rand(@indria_resource) } # NOTE: with replacement
     rIds.all? { |id| fromIndria[id] == rep[id] }
   end
 end
@@ -99,7 +97,7 @@ end
 
 def main
   indria = Indria.new(10) # more resource than abner
-  abner = Abner.new(4)
+  abner = Abner.new(4, indria.resource)
 
   n = 0 ; while (n < 7000)
     indria.write_list
