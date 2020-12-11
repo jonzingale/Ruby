@@ -121,7 +121,7 @@ def show_buckets(abner)
 end
 
 def main
-  indria = Indria.new(10) # more resource than abner
+  indria = Indria.new(10, 0.01) # more resource than abner, some error
   abner = Abner.new(4, indria.resource)
 
   n = 0 ; while (n < 7000)
