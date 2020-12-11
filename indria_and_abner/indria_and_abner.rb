@@ -1,28 +1,53 @@
 # require 'byebug'
 
 # TODO:
-# 1. implement error
-# 2. visualize stability/change
+# 1. visualize stability/change
+# 2. make the buckets of lists public for both Indria and Abner.
+# 3. give method exhibiting bootstrapping
+
+# The goal is to write a program where Indria transcribes lists she is given,
+# and Abner sorts these lists. Indria has limited resources, and so can only
+# write so much. Further she is error prone and so makes occasional mistakes
+# in her transcriptions. Abner, while not error prone, does have limited
+# resources and so makes choices as to what to compare between two lists.
+
+# The model is a bit more elaborate than is maybe necessary. Indria may only
+# need to be a random list generator, but whatever. In this elaborate case,
+# Indria *can* bootstrap the process by being given only a single thing (the
+# world) and from her error produce distinctions for Abner to classify.
 
 class Indria
   attr_accessor :list, :resource
-  def initialize(resource=4, error=0.01)
+  # resource is a limit on list lengths.
+  # error determines the accuracy of a list. (facilitates bootstrapping)
+  def initialize(resource=4, error=0.01, list=[])
+    @resource = resource
+    @error = error
     @symbols = 3
     @list = []
-    @resource = resource
-    write_list
+
+    # optional list param determines writing versus transcribing
+    list.empty? ? write_list : transcribe_list(list)
   end
 
   def write_list
     # consider copying something canonical with some error
-    @list = [*0...@resource].map { rand(@symbols) } # :: Int
+    @list = [*0...@resource].map { rand @symbols } # :: Int
+  end
+
+  def transcribe_list()
+    # transcribe list with some amount of error
+    @list = list.take(@resource).map do |l|
+      rand < @error ? (rand @symbols) : l
+    end
   end
 end
 
 class Abner
   attr_accessor :buckets, :bucketCounts, :bucketsCount
-
-  def initialize(resource=4, indria_resource=4, error=0.01)
+  # resource is a limit on list verification.
+  # indria_resource is a convenience for array selection.
+  def initialize(resource=4, indria_resource=4)
     @buckets = []
     @bucketCounts = []
     @bucketsCount = 0
@@ -82,7 +107,7 @@ class Abner
     # fromIndria.zip(rep).all? { |i, r| i == r }
 
     # abner verifies only some of what indria offers
-    rIds = (0...@resource).map { rand(@indria_resource) } # NOTE: with replacement
+    rIds = (0...@resource).map { rand @indria_resource } # NOTE: w/ replacement
     rIds.all? { |id| fromIndria[id] == rep[id] }
   end
 end
