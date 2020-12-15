@@ -116,6 +116,10 @@ def show_sorted_counts(abner)
   print "\n#{abner.bucketCounts.sort}\n"
 end
 
+def show_counts(abner)
+  print "\n#{abner.bucketCounts}\n"
+end
+
 def show_buckets(abner)
   abner.buckets.each { |b| print "#{b}\n" }
 end
@@ -128,10 +132,12 @@ def main
     indria.write_list
     abner.receive_list(indria.list) # compare against indria and classify.
     abner.internal_audit # compare against self, reclassify if need be.
+
+    show_counts(abner)
     n += 1
   end
   # show_buckets(abner)
-  show_sorted_counts(abner)
+  # show_sorted_counts(abner)
 end
 
 main
